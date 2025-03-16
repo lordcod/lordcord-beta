@@ -28,8 +28,14 @@ YANDEX_MUSIC_SEARCH_ARTIST = re.compile(
 class Voice(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        self.yandex_client = YaClient(environ.get(
-            'yandex_api_token'))
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        token = environ.get('yandex_api_token')
+        if token:
+            self.yandex_client = YaClient()
+        else:
+            self.bot.unload_extension('bot.cogs.music')
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, request: str):

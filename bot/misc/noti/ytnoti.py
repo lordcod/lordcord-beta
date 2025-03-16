@@ -48,7 +48,8 @@ class YtNoti:
     @running.setter
     def running(self, __value: bool) -> None:
         if not isinstance(__value, bool):
-            raise TypeError('The %s type is not supported' % (type(__value).__name__,))
+            raise TypeError('The %s type is not supported' %
+                            (type(__value).__name__,))
         self.__running = __value
 
     async def callback(self, video: Video) -> None:
@@ -63,7 +64,8 @@ class YtNoti:
                 if data['yt_id'] == video.channel.id:
                     channel = self.bot.get_channel(data['channel_id'])
                     payload = get_payload(guild=guild, video=video)
-                    mes_data = generate_message(lord_format(data.get('message', DEFAULT_YOUTUBE_MESSAGE), payload))
+                    mes_data = generate_message(lord_format(
+                        data.get('message', DEFAULT_YOUTUBE_MESSAGE), payload))
                     await channel.send(**mes_data)
 
     async def request(self, method: str, url: str, **kwargs):
@@ -75,11 +77,13 @@ class YtNoti:
                 else:
                     data = await response.read()
         except Exception as exc:
-            _log.error('It was not possible to get data from the api', exc_info=exc)
+            _log.error(
+                'It was not possible to get data from the api', exc_info=exc)
             return None
 
         if not response.ok:
-            _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
+            _log.error(
+                'It was not possible to get data from the api, status: %s, data: %s', response.status, data)
             return None
 
         return data
@@ -220,6 +224,11 @@ class YtNoti:
 
     async def parse_youtube(self) -> None:
         if self.__running:
+            return
+
+        if self.apikey is None:
+            _log.error(
+                "[YouTube Notification] It was not possible to get tokens for authorization")
             return
 
         _log.debug('Started youtube parsing')

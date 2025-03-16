@@ -130,7 +130,6 @@ class TwNotiAPI(NotificationApi):
 
 
 class TwNoti(Notification[TwNotiAPI], TwCache):
-
     def __init__(
         self,
         bot: LordBot,
@@ -138,7 +137,8 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
         client_secret: str = os.getenv('TWITCH_CLIENT_SECRET')
     ) -> None:
         TwCache.__init__(self)
-        Notification.__init__(self, bot=bot, api=TwNotiAPI(bot, self, client_id, client_secret))
+        Notification.__init__(self, bot=bot, api=TwNotiAPI(
+            bot, self, client_id, client_secret))
 
     async def callback_on_start(self, stream: Stream):
         _log.debug('%s started stream', stream.user_name)
@@ -155,8 +155,10 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
             for id, data in twitch_data.items():
                 if data['username'] == stream.user_name:
                     channel = self.bot.get_channel(data['channel_id'])
-                    payload = get_payload(guild=guild, stream=stream, user=user)
-                    mes_data = generate_message(lord_format(data.get('message', DEFAULT_TWITCH_MESSAGE), payload))
+                    payload = get_payload(
+                        guild=guild, stream=stream, user=user)
+                    mes_data = generate_message(lord_format(
+                        data.get('message', DEFAULT_TWITCH_MESSAGE), payload))
                     await channel.send(**mes_data)
 
     async def callback_on_stop(self, username: str): ...
@@ -174,7 +176,8 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
             return
 
         if self.api.client_id is None or self.api.client_secret is None:
-            _log.error("It was not possible to get tokens for authorization")
+            _log.error(
+                "[Twitch Notification] It was not possible to get tokens for authorization")
             return
 
         _log.debug('Started twitch parsing')
@@ -208,7 +211,8 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
                     self.twitch_streaming.remove(uid)
                     tasks.append(self.callback_on_stop(uid))
 
-                _log.trace('Data about the user %s has been received: %s %s', uid, with_started, data)
+                _log.trace(
+                    'Data about the user %s has been received: %s %s', uid, with_started, data)
             await asyncio.gather(*tasks)
 
         _log.debug('Parsing %s ending', type(self).__name__)

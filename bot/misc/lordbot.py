@@ -3,7 +3,6 @@ import asyncio
 from collections import deque
 import git
 import logging
-import sys
 import os
 import aiohttp
 import nextcord
@@ -75,6 +74,7 @@ class LordBot(commands.AutoShardedBot):
             status=nextcord.Status.idle,
             help_command=None,
             enable_debug_events=True,
+            proxy=os.getenv('PROXY'),
             rollout_associate_known=rollout_functions,
             rollout_delete_unknown=rollout_functions,
             rollout_register_new=rollout_functions,
