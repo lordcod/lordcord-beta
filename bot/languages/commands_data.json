@@ -1,0 +1,316 @@
+{
+    "categories_emoji": {
+        "major": "main",
+        "economy": "economy",
+        "moderation": "moderation",
+        "music": "music",
+        "interactions": "reactions"
+    },
+    "commands": [
+        {
+            "name": "balance",
+            "category": "economy",
+            "aliases": [
+                "bal"
+            ],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 3
+        },
+        {
+            "name": "leaderboard",
+            "category": "economy",
+            "aliases": [
+                "lb",
+                "leaders",
+                "top"
+            ],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "pay",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 2,
+            "count_examples": 2
+        },
+        {
+            "name": "daily",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "weekly",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "monthly",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "deposit",
+            "category": "economy",
+            "aliases": [
+                "dep"
+            ],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 2
+        },
+        {
+            "name": "withdraw",
+            "category": "economy",
+            "aliases": [
+                "wd"
+            ],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 2
+        },
+        {
+            "name": "gift",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 2,
+            "count_examples": 2
+        },
+        {
+            "name": "take",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 2,
+            "count_examples": 2
+        },
+        {
+            "name": "help",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 1,
+            "count_examples": 1
+        },
+        {
+            "name": "ping",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "captcha",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "play",
+            "category": "music",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 2
+        },
+        {
+            "name": "purge",
+            "category": "moderation",
+            "aliases": [
+                "clear",
+                "clean"
+            ],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 1
+        },
+        {
+            "name": "purge user",
+            "category": "moderation",
+            "aliases": [
+                "clear user",
+                "clean user"
+            ],
+            "allowed_disabled": true,
+            "count_args": 2,
+            "count_examples": 1
+        },
+        {
+            "name": "purge between",
+            "category": "moderation",
+            "aliases": [
+                "clear between",
+                "clean between"
+            ],
+            "allowed_disabled": true,
+            "count_args": 2,
+            "count_examples": 2
+        },
+        {
+            "name": "ban",
+            "category": "moderation",
+            "aliases": [
+                "tempban"
+            ],
+            "allowed_disabled": true,
+            "count_args": 3,
+            "count_examples": 2
+        },
+        {
+            "name": "ban list",
+            "category": "moderation",
+            "aliases": [
+                "tempban list"
+            ],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "temp-role",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 3,
+            "count_examples": 1
+        },
+        {
+            "name": "temp-role list",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 2
+        },
+        {
+            "name": "say",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 2
+        },
+        {
+            "name": "settings",
+            "category": "moderation",
+            "aliases": [
+                "set",
+                "setting"
+            ],
+            "allowed_disabled": false,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "giveaway",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "shop",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "avatar",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 2
+        },
+        {
+            "name": "move-to",
+            "category": "music",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 1
+        },
+        {
+            "name": "reminder",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 2,
+            "count_examples": 1
+        },
+        {
+            "name": "interactions",
+            "category": "interactions",
+            "aliases": [
+                "reacts",
+                "reactions"
+            ],
+            "allowed_disabled": true,
+            "count_args": 3,
+            "count_examples": 2
+        },
+        {
+            "name": "seek",
+            "category": "music",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
+            "name": "work",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "rob",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
+            "name": "roulette",
+            "category": "economy",
+            "aliases": [
+                "rou"
+            ],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
+            "name": "blackjack",
+            "category": "economy",
+            "aliases": [
+                "bj"
+            ],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 0
+        }
+    ]
+}
