@@ -29,7 +29,7 @@
 * [Телеграм канал (коментарии)](https://t.me/lordcord_community)
 
 
-[![Crowdin Локализация](https://badges.crowdin.net/lordcord/localized.svg)](https://crowdin.com/project/lordcord)
+[![Crowdin](https://badges.crowdin.net/lordcord/localized.svg)](https://crowdin.com/project/lordcord)
 
 
 # Описание бота
