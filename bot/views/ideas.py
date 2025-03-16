@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from ast import Tuple
 from dataclasses import dataclass
 import logging
 import nextcord
 import time
 
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union, Tuple
 
 import re
 import jmespath
@@ -23,7 +22,8 @@ from bot.resources.info import DEFAULT_IDEAS_ALLOW_IMAGE, DEFAULT_IDEAS_PAYLOAD,
 
 
 _log = logging.getLogger(__name__)
-REGEXP_URL = re.compile(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)")
+REGEXP_URL = re.compile(
+    r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)")
 MessageType = Literal['reject', 'deny', 'accept', 'approved']
 
 timeout_data: Dict[int, Dict[int, float]] = {}
@@ -74,7 +74,8 @@ def _get_message(type: MessageType, locale: str, payload: dict, reason: str, ide
         message_data = ideas_data.get(
             'messages', DEFAULT_IDEAS_MESSAGES).get(type+'_with_reason')
     else:
-        message_data = ideas_data.get('messages', DEFAULT_IDEAS_MESSAGES).get(type)
+        message_data = ideas_data.get(
+            'messages', DEFAULT_IDEAS_MESSAGES).get(type)
     return generate_message(lord_format(message_data,
                                         payload))
 
@@ -136,7 +137,8 @@ def refresh_button(button: nextcord.ui.Button, payload: dict) -> None:
 def refresh_button_with_payload(button: nextcord.ui.Button, button_payload: ButtonPayload, payload: dict) -> None:
     button_data = {}
     for key, value in button_payload.items():
-        button_data[key] = lord_format(value, payload) if isinstance(value, str) else value
+        button_data[key] = lord_format(
+            value, payload) if isinstance(value, str) else value
     refresh_button(button, button_data)
 
 
@@ -144,11 +146,14 @@ def refresh_view(view: Union[ReactionConfirmView.cls, ConfirmView.cls], locale: 
     DEFAULT_IDEAS_COMPONENTS = get_default_payload(locale)['components']
     components = ideas_data.get('components', DEFAULT_IDEAS_COMPONENTS)
 
-    refresh_button_with_payload(view.approve, components.get('approve'), payload)
+    refresh_button_with_payload(
+        view.approve, components.get('approve'), payload)
     refresh_button_with_payload(view.deny, components.get('deny'), payload)
     if isinstance(view, ReactionConfirmView.cls):
-        refresh_button_with_payload(view.promote, components.get('like'), payload)
-        refresh_button_with_payload(view.demote, components.get('dislike'), payload)
+        refresh_button_with_payload(
+            view.promote, components.get('like'), payload)
+        refresh_button_with_payload(
+            view.demote, components.get('dislike'), payload)
 
 
 class VotingModal(nextcord.ui.Modal):
@@ -156,7 +161,8 @@ class VotingModal(nextcord.ui.Modal):
     locale: str
 
     async def get_view(self, ideas_data: IdeasPayload, guild: nextcord.Guild):
-        type_reaction = ideas_data.get('reaction_system', ReactionSystemType.REACTIONS)
+        type_reaction = ideas_data.get(
+            'reaction_system', ReactionSystemType.REACTIONS)
         revoting = ideas_data.get('revoting', DEFAULT_IDEAS_REVOTING)
 
         if type_reaction == ReactionSystemType.REACTIONS:
@@ -210,7 +216,8 @@ class VotingModal(nextcord.ui.Modal):
 
         mdb = await localdb.get_table('ideas')
         idea_data = await mdb.get(interaction.message.id)
-        idea_content, idea_image, idea_author_id = idea_data.get('idea'), idea_data.get('image'), idea_data.get('user_id')
+        idea_content, idea_image, idea_author_id = idea_data.get(
+            'idea'), idea_data.get('image'), idea_data.get('user_id')
         idea_author = interaction.guild.get_member(idea_author_id)
 
         payload = get_payload_idea(idea_author, idea_content, idea_image,
@@ -265,14 +272,16 @@ class ConfirmModal(VotingModal):
         approved_channel_id = ideas_data.get('channel_approved_id')
         approved_channel = interaction.guild.get_channel(approved_channel_id)
 
-        accept_message = self.get_accept_message(payload, self.locale, reason, ideas_data)
+        accept_message = self.get_accept_message(
+            payload, self.locale, reason, ideas_data)
         view = await self.get_view(ideas_data, interaction.guild)
         await interaction.message.edit(**accept_message, view=view)
 
         if approved_channel is None:
             return
 
-        approved_message = self.get_approved_message(payload, self.locale, reason, ideas_data)
+        approved_message = self.get_approved_message(
+            payload, self.locale, reason, ideas_data)
         apprd_msg = await approved_channel.send(**approved_message)
 
         idea_data['approved_message_id'] = apprd_msg.id
@@ -319,14 +328,16 @@ class DenyModal(VotingModal):
         channel_denied_id = ideas_data.get('channel_denied_id')
         channel_denied = interaction.guild.get_channel(channel_denied_id)
 
-        deny_message = self.get_deny_message(payload, self.locale, reason, ideas_data)
+        deny_message = self.get_deny_message(
+            payload, self.locale, reason, ideas_data)
         view = await self.get_view(ideas_data, interaction.guild)
         await interaction.message.edit(**deny_message, view=view)
 
         if channel_denied is None:
             return
 
-        reject_message = self.get_reject_message(payload, self.locale,  reason, ideas_data)
+        reject_message = self.get_reject_message(
+            payload, self.locale,  reason, ideas_data)
         denrd_msg = await channel_denied.send(**reject_message)
 
         idea_data['denied_message_id'] = denrd_msg.id
@@ -459,7 +470,8 @@ class ReactionConfirmView(nextcord.ui.View):
         else:
             self.promoted_data.append(interaction.user.id)
 
-        payload = get_payload_idea(interaction.user, None, None, len(self.promoted_data), len(self.demoted_data))
+        payload = get_payload_idea(interaction.user, None, None, len(
+            self.promoted_data), len(self.demoted_data))
         self.change_votes(ideas_data, payload)
 
         await self.save_data(interaction.message.id)
@@ -482,7 +494,8 @@ class ReactionConfirmView(nextcord.ui.View):
         else:
             self.demoted_data.append(interaction.user.id)
 
-        payload = get_payload_idea(interaction.user, None, None, len(self.promoted_data), len(self.demoted_data))
+        payload = get_payload_idea(interaction.user, None, None, len(
+            self.promoted_data), len(self.demoted_data))
         self.change_votes(ideas_data, payload)
 
         await self.save_data(interaction.message.id)
@@ -587,7 +600,8 @@ class IdeaModal(nextcord.ui.Modal):
         payload = get_payload_idea(interaction.user, idea, image)
 
         DEFAULT_IDEAS_MESSAGES = get_default_payload(self.locale)['messages']
-        created_message_data = ideas_data.get('messages', DEFAULT_IDEAS_MESSAGES).get('created')
+        created_message_data = ideas_data.get(
+            'messages', DEFAULT_IDEAS_MESSAGES).get('created')
         created_message = generate_message(lord_format(created_message_data,
                                                        payload))
 
@@ -622,7 +636,8 @@ class IdeaView(nextcord.ui.View):
         DEFAULT_IDEAS_COMPONENTS = get_default_payload(locale)['components']
         components = ideas_data.get('components', DEFAULT_IDEAS_COMPONENTS)
 
-        refresh_button_with_payload(self.suggest, components.get('suggest'), get_payload(guild=guild))
+        refresh_button_with_payload(self.suggest, components.get(
+            'suggest'), get_payload(guild=guild))
 
     @nextcord.ui.button(
         label="Suggest an idea",

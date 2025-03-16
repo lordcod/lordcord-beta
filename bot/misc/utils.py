@@ -9,7 +9,7 @@ from nextcord.ext import commands
 import inspect
 import nextcord.types
 import nextcord.types.message
-import regex
+import re
 import string
 import random
 import aiohttp
@@ -52,7 +52,7 @@ T = TypeVar('T')
 C_co = TypeVar("C_co", bound=type, covariant=True)
 WelMes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
-REGEXP_FORMAT = regex.compile(r"(\{\s*([\.\|\s\-_a-zA-Z0-9]*)\s*\})")
+REGEXP_FORMAT = re.compile(r"(\{\s*([\.\|\s\-_a-zA-Z0-9]*)\s*\})")
 MISSING = nextcord.utils._MissingSentinel()
 
 
@@ -559,7 +559,8 @@ def get_emoji_as_color(system_emoji: int, name: str):
 
 @lru_cache()
 def get_parser_args():
-    parser = argparse.ArgumentParser(description='Starting a bot with arguments.', exit_on_error=False)
+    parser = argparse.ArgumentParser(
+        description='Starting a bot with arguments.', exit_on_error=False)
     parser.add_argument('--token')
     parser.add_argument('--log_level', choices=['DEBUG', 'INFO', 'ERROR'])
     parser.add_argument('--dev', action='store_true')
@@ -801,7 +802,7 @@ def is_default_emoji(text: str) -> bool:
 
 def is_custom_emoji(text: str) -> bool:
     text = text.strip()
-    if regex.fullmatch(r'<a?:.+?:\d{18,}>', text):
+    if re.fullmatch(r'<a?:.+?:\d{18,}>', text):
         return True
     return False
 
@@ -907,10 +908,10 @@ class TimeCalculator:
             pass
 
         if not (isinstance(argument, str)
-                and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
+                and re.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')
 
-        timedate: list[tuple[str, str]] = regex.findall(
+        timedate: list[tuple[str, str]] = re.findall(
             r'(\d+)([a-zA-Z\s]+)', argument)
         ftime = 0
 

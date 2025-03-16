@@ -1,5 +1,3 @@
-
-from httpx import delete
 import nextcord
 import jmespath
 from bot.databases import GuildDateBases
@@ -149,17 +147,20 @@ class ShopDropDown(nextcord.ui.RoleSelect):
             )
         elif role.is_premium_subscriber():
             await interaction.response.send_message(
-                content=i18n.t(locale, 'settings.roles.error.premium', role=role.mention),
+                content=i18n.t(
+                    locale, 'settings.roles.error.premium', role=role.mention),
                 ephemeral=True
             )
         elif role.is_integration() or role.is_bot_managed():
             await interaction.response.send_message(
-                content=i18n.t(locale, 'settings.roles.error.integration', role=role.mention),
+                content=i18n.t(
+                    locale, 'settings.roles.error.integration', role=role.mention),
                 ephemeral=True
             )
         elif not role.is_assignable():
             await interaction.response.send_message(
-                content=i18n.t(locale, 'settings.roles.error.assignable', role=role.mention, bot_role=interaction.guild.self_role.mention),
+                content=i18n.t(locale, 'settings.roles.error.assignable',
+                               role=role.mention, bot_role=interaction.guild.self_role.mention),
                 ephemeral=True
             )
         else:
@@ -188,7 +189,8 @@ class ShopView(DefaultSettingsView):
             role_limit = data.get('limit')-data.get('using_limit',
                                                     0) if data.get('limit') else '∞'
             self.embed = nextcord.Embed(
-                title=data.get('name') or i18n.t(locale, 'settings.economy.shop.title')+f" #{shop_info.index(data)+1}",
+                title=data.get('name') or i18n.t(
+                    locale, 'settings.economy.shop.title')+f" #{shop_info.index(data)+1}",
                 description=i18n.t(locale, 'settings.economy.shop.role_description',
                                    description=role_description,
                                    role_id=data.get('role_id'),

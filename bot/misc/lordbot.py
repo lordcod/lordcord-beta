@@ -7,7 +7,7 @@ import sys
 import os
 import aiohttp
 import nextcord
-import regex
+import re
 from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict, Any
 
 from nextcord.ext import commands
@@ -29,7 +29,7 @@ _log = logging.getLogger(__name__)
 def get_shard_list(shard_ids: str):
     res = []
     for shard in shard_ids.split(","):
-        if data := regex.fullmatch(r"(\d+)-(\d+)", shard):
+        if data := re.fullmatch(r"(\d+)-(\d+)", shard):
             res.extend(range(int(data.group(1)),
                              int(data.group(2))))
         else:
