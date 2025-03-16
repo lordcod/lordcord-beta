@@ -1,3 +1,6 @@
+Всем привет, я разрабатывал бота в discord в течение 2-ух лет, и сейчас как известно discord в России заблокирован, так что теперь бот в открытом доступе.
+
+
 
 [![Crowdin Локализация](https://badges.crowdin.net/lordcord/localized.svg)](https://crowdin.com/project/lordcord)
 
