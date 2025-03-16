@@ -1,7 +1,6 @@
 from os import environ
 import logging
 import re
-import time
 from nextcord.ext import commands
 from yandex_music_api import Client as YaClient
 from yandex_music_api.exceptions import NotFound as YandexNotFound
@@ -48,7 +47,8 @@ class Voice(commands.Cog):
             channel = ctx.message.author.voice.channel
             permission = channel.permissions_for(ctx.guild.me)
             if not (permission.connect and permission.speak and permission.priority_speaker):
-                raise commands.MissingPermissions(['connect', 'speak', 'priority_speaker'])
+                raise commands.MissingPermissions(
+                    ['connect', 'speak', 'priority_speaker'])
             voice = await channel.connect()
             if voice.channel in ctx.guild.stage_channels:
                 await ctx.guild.me.edit(suppress=False)
