@@ -203,13 +203,10 @@ class CommandEvent(commands.Cog):
                    interaction.application_command, exc_info=exception)
 
     async def on_command_error(self, ctx: commands.Context, error: Exception):
-        if self.bot.release_bot:
-            await CallbackCommandError.process(ctx, error)
-            return
-
         emoji_url = nextcord.PartialEmoji.from_str(Emoji.cross).url
         embed = nextcord.Embed(
-            description='```' + '\n'.join(traceback.format_exception(error)) + '```',
+            description='```' +
+            '\n'.join(traceback.format_exception(error)) + '```',
             color=nextcord.Colour.brand_red()
         )
         embed.set_author(

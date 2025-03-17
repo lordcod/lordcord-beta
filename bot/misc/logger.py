@@ -23,7 +23,7 @@ DEFAULT_HTTP_LOGS = (
     'bot'
 )
 DEFAULT_LOGS = {
-    'nextcord': logging.INFO,
+    'nextcord': logging.DEBUG,
     'pyngrok': logging.NOTSET,
     'git': logging.INFO,
     'httpx': logging.INFO,
@@ -106,15 +106,18 @@ async def post_mes(webhook_url: str, text: str) -> None:
                         break
 
                     if response.status == 429:
-                        seconds = int(response.headers.get('X-RateLimit-Reset-After', 0))
-                        __debug_log(logging.WARNING, 'Sending the log was delayed for %d seconds', seconds)
+                        seconds = int(response.headers.get(
+                            'X-RateLimit-Reset-After', 0))
+                        __debug_log(
+                            logging.WARNING, 'Sending the log was delayed for %d seconds', seconds)
                         await asyncio.sleep(seconds)
                         continue
 
                     try:
                         response.raise_for_status()
                     except Exception as exc:
-                        __debug_log(logging.ERROR, "The log could not be sent", exc_info=exc)
+                        __debug_log(logging.ERROR,
+                                    "The log could not be sent", exc_info=exc)
 
 
 class StandartFormatter(logging.Formatter):
