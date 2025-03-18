@@ -9,7 +9,7 @@ from typing import Dict, Optional
 import aiocache
 from aiocache.base import SENTINEL
 import redis
-from bot.databases.misc.adapter_dict import FullJson
+from bot.databases.misc import adapter
 from redis.asyncio import ConnectionPool, StrictRedis
 
 _log = logging.getLogger(__name__)
@@ -99,7 +99,7 @@ async def _update_db(tablename) -> None:
                ', '.join(current_updated_task.keys()), tablename)
 
     for key, data in current_updated_task.copy().items():
-        data = FullJson.dumps(data)
+        data = adapter.dumps(data)
         current_updated_task[key] = data
 
     if not current_updated_task:
@@ -120,7 +120,8 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
     last_exc: Exception = None
 
     for i in range(5):
-        _log.trace('[%d] A request for fetched database %s was received', i, table_name)
+        _log.trace(
+            '[%d] A request for fetched database %s was received', i, table_name)
         try:
             data = await cache.get(table_name)
         except redis.AuthenticationError:
@@ -133,7 +134,7 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         else:
             if data is None:
                 data = {}
-            data = FullJson().loads(data)
+            data = adapter.loads(data)
             _log.trace('Fetched databases %s: %s', table_name, data)
             break
         await asyncio.sleep(1)

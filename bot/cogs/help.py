@@ -80,7 +80,8 @@ class Help(commands.Cog):
             for cmd in coms:
                 text += f"`{cmd.get('name')}` "
 
-            category_emoji = get_emoji(help_info.categories_emoji.get(category))
+            category_emoji = get_emoji(
+                help_info.categories_emoji.get(category))
             category_name = i18n.t(locale, f'commands.category.{category}')
             embed.add_field(
                 name=f'{category_emoji} {category_name}',
@@ -99,13 +100,16 @@ class Help(commands.Cog):
         color = await gdb.get('color')
         get_emoji = await get_emoji_wrap(gdb)
         aliases = command_data.get('aliases')
-        category_emoji = get_emoji(help_info.categories_emoji.get(command_data.get('category')))
-        category_name = i18n.t(locale, f"commands.category.{command_data.get('category')}")
+        category_emoji = get_emoji(
+            help_info.categories_emoji.get(command_data.get('category')))
+        category_name = i18n.t(
+            locale, f"commands.category.{command_data.get('category')}")
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.command-embed.title",
                          name=command_data.get('name')),
-            description=i18n.t(locale, f"commands.command.{command_data.get('name')}.description"),
+            description=i18n.t(
+                locale, f"commands.command.{command_data.get('name')}.description"),
             color=color
         )
         embed.set_footer(
@@ -123,8 +127,10 @@ class Help(commands.Cog):
             inline=False
         )
         for i in range(command_data.get('count_examples')):
-            using = i18n.t(locale, f"commands.command.{command_data.get('name')}.examples.{i}.use")
-            description = i18n.t(locale, f"commands.command.{command_data.get('name')}.examples.{i}.desc")
+            using = i18n.t(
+                locale, f"commands.command.{command_data.get('name')}.examples.{i}.use")
+            description = i18n.t(
+                locale, f"commands.command.{command_data.get('name')}.examples.{i}.desc")
             embed.add_field(
                 name=i18n.t(
                     locale, 'help.command-embed.example', number=i+1),

@@ -31,7 +31,7 @@ def attach_button(emoji: str, row: int) -> None:
 class MusicQueueDropDown(nextcord.ui.StringSelect):
     def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get_hash('language')
+        locale = gdb.get_cache('language')
 
         self.guild_id = guild_id
         self.queue = queue
@@ -42,7 +42,8 @@ class MusicQueueDropDown(nextcord.ui.StringSelect):
     def update_queue(self):
         guild_queue = self.queue[self.guild_id]
         if len(guild_queue) > 25 and self.player.index >= 4:
-            iterator = list(enumerate(guild_queue[self.player.index-4:self.player.index+21]))[::-1]
+            iterator = list(
+                enumerate(guild_queue[self.player.index-4:self.player.index+21]))[::-1]
         else:
             iterator = list(enumerate(guild_queue[:25]))
 
@@ -120,7 +121,8 @@ class MusicView(nextcord.ui.View):
     async def parse_buttons(self):
         await self.create_buttons()
         get_emoji = await get_emoji_wrap(self.guild_id)
-        with_empty = not (self.player.voice.is_playing() or self.player.voice.is_paused())
+        with_empty = not (self.player.voice.is_playing()
+                          or self.player.voice.is_paused())
 
         if self.player.voice.is_playing():
             self.pause_play.emoji = get_emoji('pause')
@@ -165,7 +167,8 @@ class MusicView(nextcord.ui.View):
 
     @attach_button(emoji='undo', row=1)
     async def undo(self, interaction: nextcord.Interaction):
-        self.player.played_coro = self.player.play(time.time()-self.player.started_at-15)
+        self.player.played_coro = self.player.play(
+            time.time()-self.player.started_at-15)
         self.player.voice.stop()
 
     @attach_button(emoji='previous', row=1)
@@ -190,7 +193,8 @@ class MusicView(nextcord.ui.View):
 
     @attach_button(emoji='redo', row=1)
     async def redo(self, interaction: nextcord.Interaction):
-        self.player.played_coro = self.player.play(time.time()-self.player.started_at+15)
+        self.player.played_coro = self.player.play(
+            time.time()-self.player.started_at+15)
         self.player.voice.stop()
 
     @attach_button(emoji='stop', row=2)

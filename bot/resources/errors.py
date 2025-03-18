@@ -86,7 +86,7 @@ class CallbackCommandError:
     def __init__(self, ctx: commands.Context) -> None:
         self.ctx = ctx
         self.gdb = GuildDateBases(ctx.guild.id)
-        self.locale = self.gdb.get_hash('language', 'en')
+        self.locale = self.gdb.get('language', 'en')
 
     @classmethod
     async def process(cls, ctx: commands.Context, error):

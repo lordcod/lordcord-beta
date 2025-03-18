@@ -10,10 +10,10 @@ import re
 from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict, Any
 
 from nextcord.ext import commands
+from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
-from bot.databases import db
-from bot.databases.db import DataBase, establish_connection
+from bot.databases import models
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
@@ -100,13 +100,10 @@ class LordBot(commands.AutoShardedBot):
         self.twnoti = TwitchNotification(self)
         self.ytnoti = YoutubeNotification(self)
 
-        self.__with_ready__ = self.loop.create_future()
-        self.__with_ready_events__ = []
-
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
+        self.add_listener(self.listen_on_connect, 'on_connect')
         self.add_listener(self.apisite._ApiSite__run, 'on_ready')
-        self.add_listener(self.listen_on_ready, 'on_ready')
         self.add_listener(self.twnoti.parse, 'on_ready')
         self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
 
@@ -232,7 +229,7 @@ class LordBot(commands.AutoShardedBot):
                 _log.warning('Failed api update')
                 return False
 
-    async def listen_on_ready(self) -> None:
+    async def listen_on_connect(self) -> None:
         if not self.release_bot:
             _log.debug("A test bot has been launched")
         _log.debug('Listen on ready')
@@ -241,31 +238,16 @@ class LordBot(commands.AutoShardedBot):
             await self.update_api_config()
 
         try:
-            self.engine = engine = await DataBase.create_engine(os.getenv('POSTGRESQL_DNS'))
+            await Tortoise.init(
+                db_url="sqlite://db/.sqlite3",
+                modules={'models': ['bot.databases.models']},
+            )
+            await Tortoise.generate_schemas()
         except Exception as exc:
             _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()
             await self.session.close()
             return
 
-        establish_connection(engine)
-
-        for t in db._tables:
-            t.set_engine(engine)
-            await t.create()
-
-        if not self.__with_ready__.done():
-            self.__with_ready__.set_result(None)
-
-        if not self.release_bot:
-            _log.debug('Load started events %d',
-                       len(self.__with_ready_events__))
-
-        for event_data in self.__with_ready_events__:
-            self.dispatch(event_data[0], *event_data[1], **event_data[2])
-
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
-        if not self.__with_ready__.done() and event_name.lower() != 'ready':
-            self.__with_ready_events__.append((event_name, args, kwargs))
-            return
         return super().dispatch(event_name, *args, **kwargs)

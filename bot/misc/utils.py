@@ -42,6 +42,8 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
+from bot.resources.info import DEFAULT_BOT_COLOR
+
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
     from bot.misc.noti.twnoti import Stream as TwStream, User as TwUser
@@ -163,7 +165,7 @@ class GuildPayload(TempletePayload):
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
 
-        self.color: int = gdb.get_hash('color')
+        self.color: int = gdb.get_cache('color')
         self.id: int = guild.id
         self.name: str = guild.name
         self.memberCount: int = guild.member_count

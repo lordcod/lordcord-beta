@@ -28,7 +28,9 @@ DEFAULT_LOGS = {
     'git': logging.INFO,
     'httpx': logging.INFO,
     'aiocache': logging.ERROR,
-    'colormath': logging.INFO
+    'colormath': logging.INFO,
+    'aiosqlite': logging.INFO,
+    'tortoise': logging.INFO,
 }
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)

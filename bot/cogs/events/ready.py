@@ -41,11 +41,6 @@ class ReadyEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        try:
-            await asyncio.wait_for(self.bot.__with_ready__, timeout=30)
-        except asyncio.TimeoutError:
-            return
-
         await asyncio.gather(
             self.add_views(),
             self.get_emojis(),

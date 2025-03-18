@@ -8,12 +8,12 @@ SITE = 'https://lordcord.fun'
 
 DEFAULT_MAPPING_LANGUAGE = {'en': 'en-US', 'es': 'es-ES'}
 
-DEFAULT_BOT_COLOR = ColorType.sliv
+DEFAULT_BOT_COLOR = int(ColorType.sliv)
 
 DEFAULT_PREFIX = 'l.'
 DEFAULT_COLOR = 2829617
 DEFAULT_LANGUAGE = 'en'
-DEFAULT_EMOJI = Emoji.diamod
+DEFAULT_EMOJI = str(Emoji.diamod)
 DEFAULT_ECONOMY_THEFT = {
     'cooldown': 86400,
     'jail': True,
@@ -39,7 +39,6 @@ DEFAULT_ECONOMY_SETTINGS = {
     },
     'theft': DEFAULT_ECONOMY_THEFT
 }
-DEFAULT_ECONOMY_SETTINGS_JSON = orjson.dumps(DEFAULT_ECONOMY_SETTINGS).decode()
 DEFAULT_GUILD_DATA = {
     'language': 'en',
     'prefix': 'l.',
@@ -470,7 +469,8 @@ _FIELDS_REASON_RU = [
 DEFAULT_IDEAS_MESSAGES_RU['accept_with_reason'] = DEFAULT_IDEAS_MESSAGES_RU['accept'].copy()
 DEFAULT_IDEAS_MESSAGES_RU['accept_with_reason']["fields"] = _FIELDS_REASON_RU
 
-DEFAULT_IDEAS_MESSAGES_RU['deny_with_reason'] = DEFAULT_IDEAS_MESSAGES_RU['deny'].copy()
+DEFAULT_IDEAS_MESSAGES_RU['deny_with_reason'] = DEFAULT_IDEAS_MESSAGES_RU['deny'].copy(
+)
 DEFAULT_IDEAS_MESSAGES_RU['deny_with_reason']["fields"] = _FIELDS_REASON_RU
 
 DEFAULT_IDEAS_MESSAGES_RU['approved'] = DEFAULT_IDEAS_MESSAGES_RU['accept']

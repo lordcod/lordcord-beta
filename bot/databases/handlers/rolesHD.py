@@ -2,11 +2,8 @@ from __future__ import annotations
 import nextcord
 from typing import Optional
 
-from bot.databases.misc.simple_task import to_task
-from ..db_engine import DataBase
+from ..models import RoleModel
 from ..misc.error_handler import on_error
-
-engine: DataBase = None
 
 
 class RoleDateBases:
@@ -20,73 +17,56 @@ class RoleDateBases:
 
     @on_error()
     async def get_all(self):
-        data = await engine.fetchall('SELECT guild_id, member_id, role_id, time FROM roles')
-        return data
+        data = await RoleModel.all()
+        return [(rm.guild_id, rm.member_id, rm.role_id, rm.time) for rm in data]
 
     @on_error()
     async def get_as_guild(self):
-        data = await engine.fetchall(
-            ('SELECT member_id, role_id, time '
-             'FROM roles WHERE guild_id = %s AND (system IS NULL OR system = FALSE)'),
-            [self.guild_id])
-
-        return data
+        data = await RoleModel.filter(guild_id=self.guild_id, system=False)
+        return [(rm.member_id, rm.role_id, rm.time) for rm in data]
 
     @on_error()
     async def get_as_member(self):
-        data = await engine.fetchall(
-            ('SELECT member_id, role_id, time FROM roles '
-             'WHERE guild_id = %s AND member_id = %s AND (system IS NULL OR system = FALSE)'),
-            (self.guild_id, self.member_id)
-        )
-
-        return data
+        data = await RoleModel.filter(guild_id=self.guild_id, member_id=self.member_id, system=False)
+        return [(rm.member_id, rm.role_id, rm.time) for rm in data]
 
     @on_error()
     async def get_as_role(self, role_id: int):
-        data = await engine.fetchone(
-            ('SELECT time FROM roles '
-             'WHERE guild_id = %s AND member_id = %s AND role_id = %s AND (system IS NULL OR system = FALSE)'),
-            (self.guild_id, self.member_id, role_id)
-        )
-
-        return data
+        data = await RoleModel.filter(guild_id=self.guild_id, member_id=self.member_id, role_id=role_id, system=False)
+        return [rm.time for rm in data]
 
     @on_error()
     async def get_system(self):
-        data = await engine.fetchall(
-            ('SELECT member_id, role_id, time FROM roles '
-             'WHERE guild_id = %s AND member_id = %s AND system = TRUE'),
-            (self.guild_id, self.member_id)
-        )
-
-        return data
+        data = await RoleModel.filter(guild_id=self.guild_id, member_id=self.member_id,  system=True)
+        return [(rm.member_id, rm.role_id, rm.time) for rm in data]
 
     @on_error()
     async def insert(self, role_id: int, time: int):
-        await engine.execute(
-            ('INSERT INTO roles '
-             '(guild_id, member_id, role_id, time) '
-             'VALUES (%s, %s, %s, %s)'),
-            (self.guild_id, self.member_id, role_id, time)
+        await RoleModel.create(
+            guild_id=self.guild_id,
+            member_id=self.member_id,
+            role_id=role_id,
+            time=time
         )
 
     @on_error()
     async def update(self, role_id: int, time: int):
-        await engine.execute(
-            ('UPDATE roles '
-             'SET time = %s '
-             'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
-            (time, self.guild_id, self.member_id, role_id)
+        rm = await RoleModel.get(
+            guild_id=self.guild_id,
+            member_id=self.member_id,
+            role_id=role_id
         )
+        rm.time = time
+        await rm.save()
 
     @on_error()
     async def delete(self, role_id: int):
-        await engine.execute(
-            ('DELETE FROM roles '
-             'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
-            (self.guild_id, self.member_id, role_id)
+        rm = await RoleModel.get(
+            guild_id=self.guild_id,
+            member_id=self.member_id,
+            role_id=role_id
         )
+        await rm.delete()
 
     @on_error()
     async def remove(self, role_id):

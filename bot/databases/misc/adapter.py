@@ -1,9 +1,7 @@
 import contextlib
 from enum import StrEnum
 import orjson
-from typing import Any,  Union, overload, TypeVar
-import psycopg2
-from psycopg2._psycopg import ISQLQuote, QuotedString
+from typing import Any,  Union, TypeVar
 import psycopg2._psycopg
 
 from bot.databases.misc.error_handler import on_error
@@ -14,75 +12,6 @@ T = TypeVar('T')
 class NumberFormatType(StrEnum):
     FLOAT = 'FLOAT'
     INT = 'INTEGER'
-
-
-class QuotedJson():
-    def __init__(self, adapted):
-        self.adapted = adapted
-        self._conn = None
-
-    def __conform__(self, proto):
-        if proto is ISQLQuote:
-            return self
-
-    def prepare(self, conn):
-        self._conn = conn
-
-    def getquoted(self):
-        s = self.adapted
-        qs = QuotedString(s)
-        if self._conn is not None:
-            qs.prepare(self._conn)
-        try:
-            return qs.getquoted()
-        except Exception:
-            pass
-
-    def __str__(self):
-        return self.getquoted().decode('ascii', 'replace')
-
-
-class FullJson:
-    def __init__(self, overnumber: bool = False) -> None:
-        self.overnumber = overnumber
-        self.encoding = 'utf-8'
-
-    @overload
-    def loads(self, data: Union[bytes, bytearray, memoryview, str]) -> dict:
-        pass
-
-    @overload
-    def loads(self, data: T) -> T:
-        pass
-
-    @overload
-    @staticmethod
-    def loads(data: Union[bytes, bytearray, memoryview, str]) -> dict:
-        pass
-
-    @overload
-    @staticmethod
-    def loads(data: T) -> T:
-        pass
-
-    def loads(*args):
-        if len(args) == 1:
-            dict_var = args[0]
-            overnumber = False
-        elif len(args) == 2:
-            self = args[0]
-            dict_var = args[1]
-            overnumber = self.overnumber
-
-        data = Json.loads(dict_var)
-        data = NumberFormating.loads(data, overnumber)
-        return data
-
-    @staticmethod
-    def dumps(dict_var):
-        data = NumberFormating.dumps(dict_var)
-        data = Json.dumps(data)
-        return data
 
 
 class Json:
@@ -157,19 +86,13 @@ class NumberFormating:
         return new_data
 
 
-def adapt_dict(dict_var):
+def dumps(dict_var):
     data = NumberFormating.dumps(dict_var)
     data = Json.dumps(data)
-    qj = QuotedJson(data)
-    return qj
-
-
-def decode_dict(dict_var):
-    data = Json.loads(dict_var)
-    data = NumberFormating.loads(data)
     return data
 
 
-def adapt_array(list_var):
-    data = psycopg2._psycopg.List(list_var)
+def loads(dict_var):
+    data = Json.loads(dict_var)
+    data = NumberFormating.loads(data)
     return data

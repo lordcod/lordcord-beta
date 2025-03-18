@@ -1,9 +1,8 @@
 from __future__ import annotations
 from typing import Optional, TypeVar, overload
-from ..db_engine import DataBase
+from ..models import GuildModel
 
 T = TypeVar('T')
-engine: DataBase = None
 
 
 class CommandDB:
@@ -17,25 +16,13 @@ class CommandDB:
     async def get(self, command: str, default: T) -> T: ...
 
     async def get(self, command: str, default: T = None) -> dict | T:
-        data = await engine.fetchvalue(
-            "SELECT command_permissions FROM guilds WHERE id = %s",
-            (self.guild_id,)
-        )
-        if data is None:
+        gm = await GuildModel.get(id=self.guild_id)
+        data = gm.command_permissions
+        if not data:
             return default
         return data.get(command, default)
 
     async def update(self, key: str, value: dict) -> None:
-        data = await engine.fetchvalue(
-            "SELECT command_permissions FROM guilds WHERE id = %s",
-            (self.guild_id,)
-        )
-        data[key] = value
-        await engine.execute(
-            """
-                UPDATE guilds 
-                SET command_permissions = %s
-                WHERE id = %s
-            """,
-            (data, self.guild_id, )
-        )
+        gm = await GuildModel.get(id=self.guild_id)
+        gm.command_permissions[key] = value
+        gm.save()

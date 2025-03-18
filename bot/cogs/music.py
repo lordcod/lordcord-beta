@@ -33,8 +33,9 @@ class Voice(commands.Cog):
     async def on_ready(self):
         token = environ.get('yandex_api_token')
         if token:
-            self.yandex_client = YaClient()
+            self.yandex_client = YaClient(token)
         else:
+            _log.warning('Music cog disable')
             self.bot.unload_extension('bot.cogs.music')
 
     @commands.command()
