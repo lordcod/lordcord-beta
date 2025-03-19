@@ -37,7 +37,8 @@ class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
 
-        super().__init__(placeholder=i18n.t(locale, "settings.role-reaction.item.role-set-dropdown"), options=options, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale,
+                                            "settings.role-reaction.item.role-set-dropdown"), options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         role_id = int(self.values[0])
@@ -72,17 +73,21 @@ class RoleReactionItemDropDown(nextcord.ui.RoleSelect):
             )
         elif role.is_premium_subscriber():
             await interaction.response.send_message(
-                content=i18n.t(locale, 'settings.roles.error.premium', role=role.mention),
+                content=i18n.t(
+                    locale, 'settings.roles.error.premium', role=role.mention),
                 ephemeral=True
             )
         elif role.is_integration() or role.is_bot_managed():
             await interaction.response.send_message(
-                content=i18n.t(locale, 'settings.roles.error.integration', role=role.mention),
+                content=i18n.t(
+                    locale, 'settings.roles.error.integration', role=role.mention),
                 ephemeral=True
             )
         elif not role.is_assignable():
+            bot_role = interaction.guild.self_role or interaction.client.user
             await interaction.response.send_message(
-                content=i18n.t(locale, 'settings.roles.error.assignable', role=role.mention, bot_role=interaction.guild.self_role.mention),
+                content=i18n.t(locale, 'settings.roles.error.assignable',
+                               role=role.mention, bot_role=bot_role.mention),
                 ephemeral=True
             )
         else:
@@ -109,7 +114,8 @@ class RoleReactionItemView(DefaultSettingsView):
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.role-reaction.global.title'),
-            description=i18n.t(locale, 'settings.role-reaction.global.description'),
+            description=i18n.t(
+                locale, 'settings.role-reaction.global.description'),
             color=color
         )
         if role_reaction['reactions']:

@@ -110,6 +110,13 @@ class Basic(commands.Cog):
     @nextcord.slash_command(
         name="activiti",
         description="Create an activity",
+        integration_types=[
+            nextcord.IntegrationType.guild_install,
+        ],
+        contexts=[
+            nextcord.InteractionContextType.guild,
+        ],
+        force_global=True
     )
     @application_checks.guild_only()
     async def activiti(

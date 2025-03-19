@@ -82,7 +82,8 @@ class Moderations(commands.Cog):
 
         bot_perms = channel.permissions_for(guild.me)
         if not (bot_perms.send_messages and bot_perms.manage_messages and bot_perms.read_messages and bot_perms.embed_links):
-            raise commands.BotMissingPermissions(['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
+            raise commands.BotMissingPermissions(
+                ['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
 
         message = str(message)
 
@@ -107,7 +108,8 @@ class Moderations(commands.Cog):
 
         bot_perms = channel.permissions_for(guild.me)
         if not (bot_perms.send_messages and bot_perms.manage_messages and bot_perms.read_messages and bot_perms.embed_links):
-            raise commands.BotMissingPermissions(['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
+            raise commands.BotMissingPermissions(
+                ['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
 
         files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
                                        for attach in ctx.message.attachments])
@@ -126,8 +128,17 @@ class Moderations(commands.Cog):
     @nextcord.slash_command(
         name="delete-category",
         description=i18n.get('commands.slash.deletecategory.description'),
-        description_localizations=i18n.get_dict('commands.slash.deletecategory.description', DEFAULT_MAPPING_LANGUAGE),
-        default_member_permissions=48
+        description_localizations=i18n.get_dict(
+            'commands.slash.deletecategory.description',
+            DEFAULT_MAPPING_LANGUAGE),
+        default_member_permissions=48,
+        integration_types=[
+            nextcord.IntegrationType.guild_install,
+        ],
+        contexts=[
+            nextcord.InteractionContextType.guild,
+        ],
+        force_global=True
     )
     @application_checks.bot_has_permissions(manage_channels=True)
     async def deletecategory(
@@ -135,9 +146,12 @@ class Moderations(commands.Cog):
         interaction: nextcord.Interaction,
         category: nextcord.CategoryChannel = nextcord.SlashOption(
             name=i18n.get('commands.slash.deletecategory.arguments.0.name'),
-            description=i18n.get('commands.slash.deletecategory.arguments.0.description'),
-            name_localizations=i18n.get_dict('commands.slash.deletecategory.arguments.0.name', DEFAULT_MAPPING_LANGUAGE),
-            description_localizations=i18n.get_dict('commands.slash.deletecategory.arguments.0.description', DEFAULT_MAPPING_LANGUAGE),
+            description=i18n.get(
+                'commands.slash.deletecategory.arguments.0.description'),
+            name_localizations=i18n.get_dict(
+                'commands.slash.deletecategory.arguments.0.name', DEFAULT_MAPPING_LANGUAGE),
+            description_localizations=i18n.get_dict(
+                'commands.slash.deletecategory.arguments.0.description', DEFAULT_MAPPING_LANGUAGE),
         )
     ):
         view = await DelCatView(interaction.user, category)
@@ -164,7 +178,8 @@ class Moderations(commands.Cog):
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'tempban.title'),
-            description=i18n.t(locale, 'tempban.description', member=member.name, member_id=member.id, author=ctx.author, author_id=ctx.author.id),
+            description=i18n.t(locale, 'tempban.description', member=member.name,
+                               member_id=member.id, author=ctx.author, author_id=ctx.author.id),
             color=color
         )
         if ftime is not None:
@@ -303,7 +318,14 @@ class Moderations(commands.Cog):
 
     @nextcord.slash_command(
         name='clone',
-        default_member_permissions=268435456
+        default_member_permissions=268435456,
+        integration_types=[
+            nextcord.IntegrationType.guild_install,
+        ],
+        contexts=[
+            nextcord.InteractionContextType.guild,
+        ],
+        force_global=True
     )
     async def cmd_clone(
         self,
@@ -314,7 +336,8 @@ class Moderations(commands.Cog):
     @cmd_clone.subcommand(
         name='role',
         description=i18n.get('commands.slash.clone_role.description'),
-        description_localizations=i18n.get_dict('commands.slash.clone_role.description', DEFAULT_MAPPING_LANGUAGE),
+        description_localizations=i18n.get_dict(
+            'commands.slash.clone_role.description', DEFAULT_MAPPING_LANGUAGE),
     )
     @application_checks.bot_has_permissions(manage_roles=True)
     async def clone_role(
@@ -322,15 +345,21 @@ class Moderations(commands.Cog):
         interaction: nextcord.Interaction,
         role: nextcord.Role = nextcord.SlashOption(
             name=i18n.get('commands.slash.clone_role.arguments.0.name'),
-            description=i18n.get('commands.slash.clone_role.arguments.0.description'),
-            name_localizations=i18n.get_dict('commands.slash.clone_role.arguments.0.name', DEFAULT_MAPPING_LANGUAGE),
-            description_localizations=i18n.get_dict('commands.slash.clone_role.arguments.0.description', DEFAULT_MAPPING_LANGUAGE),
+            description=i18n.get(
+                'commands.slash.clone_role.arguments.0.description'),
+            name_localizations=i18n.get_dict(
+                'commands.slash.clone_role.arguments.0.name', DEFAULT_MAPPING_LANGUAGE),
+            description_localizations=i18n.get_dict(
+                'commands.slash.clone_role.arguments.0.description', DEFAULT_MAPPING_LANGUAGE),
         ),
         name: str = nextcord.SlashOption(
             name=i18n.get('commands.slash.clone_role.arguments.1.name'),
-            description=i18n.get('commands.slash.clone_role.arguments.1.description'),
-            name_localizations=i18n.get_dict('commands.slash.clone_role.arguments.1.name', DEFAULT_MAPPING_LANGUAGE),
-            description_localizations=i18n.get_dict('commands.slash.clone_role.arguments.1.description', DEFAULT_MAPPING_LANGUAGE),
+            description=i18n.get(
+                'commands.slash.clone_role.arguments.1.description'),
+            name_localizations=i18n.get_dict(
+                'commands.slash.clone_role.arguments.1.name', DEFAULT_MAPPING_LANGUAGE),
+            description_localizations=i18n.get_dict(
+                'commands.slash.clone_role.arguments.1.description', DEFAULT_MAPPING_LANGUAGE),
             required=False
         )
     ) -> None:
@@ -364,7 +393,8 @@ class Moderations(commands.Cog):
         deleted = []
         count = 0
         strategy = ctx.channel.delete_messages
-        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60)
+                           * 1000.0 - 1420070400000) << 22
         ctx.channel.purge
         async for message in iterator:
             if count == 100:

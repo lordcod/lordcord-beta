@@ -38,7 +38,7 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
 
         self.channel = channel
         if channel:
-            messages = await channel.history(limit=15).flatten()
+            messages = [msg async for msg in channel.history(limit=15)]
         else:
             messages = []
 
@@ -56,7 +56,8 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.selector.message'), options=options, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale,
+                                            'settings.role-reaction.selector.message'), options=options, disabled=disabled)
 
     @staticmethod
     def get_content(mes: nextcord.Message) -> Optional[str]:
@@ -91,7 +92,8 @@ class RoleReactionSelectorView(DefaultSettingsView):
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.role-reaction.global.title'),
-            description=i18n.t(locale, 'settings.role-reaction.global.description'),
+            description=i18n.t(
+                locale, 'settings.role-reaction.global.description'),
             color=color
         )
 

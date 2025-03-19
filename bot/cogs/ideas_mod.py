@@ -19,7 +19,7 @@ class IdeasModeration(commands.Cog):
     async def cog_check(self, ctx: commands.Context) -> bool:
         gdb = GuildDateBases(ctx.guild.id)
         ideas: IdeasPayload = await gdb.get('ideas')
-        mod_roles = ideas.get('moderation_role_ids')
+        mod_roles = ideas.get('moderation_role_ids', {})
 
         if not set(ctx.author._roles) & set(mod_roles) or ctx.author.guild_permissions.administrator:
             raise commands.MissingPermissions('manage_roles')
@@ -47,7 +47,8 @@ class IdeasModeration(commands.Cog):
                     'ideas.mod.ban.already.description',
                     member=member,
                     moderator=moderator,
-                    reason=data_ban.reason or i18n.t(locale, 'ideas.mod.permission.unspecified')
+                    reason=data_ban.reason or i18n.t(
+                        locale, 'ideas.mod.permission.unspecified')
                 ),
                 color=color
             )
@@ -82,7 +83,8 @@ class IdeasModeration(commands.Cog):
         if not data_ban:
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'ideas.mod.unban.title'),
-                description=i18n.t(locale, 'ideas.mod.unban.already.description', member=member.mention),
+                description=i18n.t(
+                    locale, 'ideas.mod.unban.already.description', member=member.mention),
                 color=color
             )
             await ctx.send(embed=embed)
@@ -118,9 +120,11 @@ class IdeasModeration(commands.Cog):
                     'ideas.mod.mute.already.description',
                     member=member,
                     timestamp=data_mute.timestamp,
-                    display_time=display_time(data_mute.timestamp-time.time(), locale),
+                    display_time=display_time(
+                        data_mute.timestamp-time.time(), locale),
                     moderator=moderator,
-                    reason=data_mute.reason or i18n.t(locale, 'ideas.mod.permission.unspecified')
+                    reason=data_mute.reason or i18n.t(
+                        locale, 'ideas.mod.permission.unspecified')
                 ),
                 color=color
             )
@@ -140,7 +144,8 @@ class IdeasModeration(commands.Cog):
                 timestamp=timestamp,
                 display_time=display_time(timestamp, locale),
                 moderator=ctx.author,
-                reason=reason or i18n.t(locale, 'ideas.mod.permission.unspecified')
+                reason=reason or i18n.t(
+                    locale, 'ideas.mod.permission.unspecified')
             ),
             color=color
         )

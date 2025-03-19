@@ -19,7 +19,8 @@ class RoleReactionItemModal(nextcord.ui.Modal):
 
         super().__init__(i18n.t(locale, 'settings.set-reaction.modal.emoji'), timeout=60)
 
-        self.emoji = nextcord.ui.TextInput(i18n.t(locale, 'settings.set-reaction.modal.emoji'))
+        self.emoji = nextcord.ui.TextInput(
+            i18n.t(locale, 'settings.set-reaction.modal.emoji'))
         self.add_item(self.emoji)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -41,7 +42,8 @@ class ReactionUsingModal(nextcord.ui.View):
         locale = await gdb.get('language')
         self.future = future
         super().__init__(timeout=60)
-        self.use_modal.label = i18n.t(locale, 'settings.set-reaction.button.use-modal')
+        self.use_modal.label = i18n.t(
+            locale, 'settings.set-reaction.button.use-modal')
 
     @nextcord.ui.button(label="Use modal", style=nextcord.ButtonStyle.blurple)
     async def use_modal(self,
@@ -56,6 +58,7 @@ async def fetch_reaction(
     message: Optional[nextcord.Message] = None,
     content: Optional[str] = MISSING,
     content_i18n: Optional[str] = MISSING,
+    required: bool = True
 ) -> str:
     if content is not MISSING and content_i18n is not MISSING:
         raise TypeError("Content and i18n no join")
@@ -94,11 +97,13 @@ async def fetch_reaction(
         await done.delete()
     else:
         value = done
-    await message.delete()
 
     allowed_emoji = list(map(str, interaction._state.emojis))
-    if is_custom_emoji(value) and value not in allowed_emoji:
-        await message.edit(i18n.t(locale, 'settings.set-reaction.error.located'), view=None)
+    if required and is_custom_emoji(value) and value not in allowed_emoji:
+        await message.edit(i18n.t(locale, 'settings.set-reaction.error.located'),
+                           view=None)
         return
+    else:
+        await message.delete()
 
     return value
