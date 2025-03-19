@@ -40,20 +40,14 @@ class Teams(commands.Cog):
 
     @commands.command()
     async def shutdown(self, ctx: commands.Context):
-        await self.bot._LordBot__session.close()
         await localdb._update_db(__name__)
         await localdb.cache.close(close_connection_pool=True)
-
-        conn = self.bot.engine._DataBase__connection
-        if conn and not conn.closed:
-            conn.close()
-
         await ctx.send("The bot has activated the completion process!")
         await self.bot.close()
 
-    @commands.command(aliases=['sudo'])
+    @commands.command()
     @commands.guild_only()
-    async def subo(
+    async def sudo(
         self, ctx: commands.Context, member: nextcord.Member, *, command: str
     ):
         ctx.message.author = member
