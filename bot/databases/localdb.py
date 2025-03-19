@@ -134,7 +134,9 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         else:
             if data is None:
                 data = {}
-            data = adapter.loads(data)
+            else:
+                data = adapter.loads(data)
+
             _log.trace('Fetched databases %s: %s', table_name, data)
             break
         await asyncio.sleep(1)

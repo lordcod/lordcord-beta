@@ -49,6 +49,7 @@ class ReadyEvent(commands.Cog):
             self.process_temp_bans(),
             self.process_giveaways(),
             self.process_guild_delete_tasks(),
+            return_exceptions=True
         )
 
         _log.info(f"The bot is registered as {self.bot.user}")

@@ -23,7 +23,7 @@ DEFAULT_HTTP_LOGS = (
     'bot'
 )
 DEFAULT_LOGS = {
-    'nextcord': logging.DEBUG,
+    'nextcord': logging.INFO,
     'pyngrok': logging.NOTSET,
     'git': logging.INFO,
     'httpx': logging.INFO,
@@ -85,17 +85,6 @@ def formatter_discord_message(message, use_color=True):
     return message
 
 
-def __debug_log(level: int, msg: object, *args, **kwargs) -> None:
-    from bot.main import bot
-
-    if bot.release_bot:
-        return
-
-    _log = logging.getLogger(__name__)
-    _log.removeHandler(_log.discord_handler)
-    _log._log(level, msg, *args, **kwargs)
-
-
 async def post_mes(webhook_url: str, text: str) -> None:
     async with task_lock:
         for _ in range(3):
@@ -110,7 +99,7 @@ async def post_mes(webhook_url: str, text: str) -> None:
                     if response.status == 429:
                         seconds = int(response.headers.get(
                             'X-RateLimit-Reset-After', 0))
-                        __debug_log(
+                        logging.debug(
                             logging.WARNING, 'Sending the log was delayed for %d seconds', seconds)
                         await asyncio.sleep(seconds)
                         continue
@@ -118,8 +107,8 @@ async def post_mes(webhook_url: str, text: str) -> None:
                     try:
                         response.raise_for_status()
                     except Exception as exc:
-                        __debug_log(logging.ERROR,
-                                    "The log could not be sent", exc_info=exc)
+                        logging.debug(logging.ERROR,
+                                      "The log could not be sent", exc_info=exc)
 
 
 class StandartFormatter(logging.Formatter):
@@ -196,13 +185,6 @@ class LordLogger(logging.Logger):
         if name.startswith(DEFAULT_HTTP_LOGS):
             self.addHandler(self.discord_handler)
 
-        file_formatter = ColoredFormatter(
-            self.NO_COLOR_FORMAT, use_color=False)
-        self.file_handler = logging.FileHandler('logs/errors.log', mode='w+')
-        self.file_handler.setFormatter(file_formatter)
-        self.file_handler.setLevel(DEFAULT_FILE_LOG)
-        self.addHandler(self.file_handler)
-
     def _findCaller(self, stack_info=False, stacklevel=1):
         """
         Find the stack frame of the caller so that we can note the source
@@ -216,13 +198,7 @@ class LordLogger(logging.Logger):
         while stacklevel > 0:
             next_f = f.f_back
             if next_f is None:
-                # We've got options here.
-                # If we want to use the last (deepest) frame:
                 break
-                # If we want to mimic the warnings module:
-                # return ("sys", 1, "(unknown function)", None)
-                # If we want to be pedantic:
-                # raise ValueError("call stack is not deep enough")
             f = next_f
             if not _is_internal_frame(f):
                 stacklevel -= 1

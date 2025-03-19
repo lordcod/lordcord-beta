@@ -1,3 +1,4 @@
+import asyncio
 import nextcord
 from bot.misc import env
 from bot.misc.lordbot import LordBot
@@ -7,7 +8,10 @@ import os
 from bot.misc.utils import get_parser_args
 
 
-bot = LordBot(rollout_functions=False)
+bot = LordBot(
+    loop=asyncio.get_event_loop(),
+    chunk_guilds_at_startup=False
+)
 
 
 def load_dir(dirpath: str) -> None:

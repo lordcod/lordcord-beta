@@ -1,10 +1,12 @@
 import asyncio
 import time
-from typing import Literal
+from typing import Literal, Optional
 import nextcord
 from nextcord.ext import commands
 
 from bot.databases import localdb
+from bot.databases.handlers.economyHD import EconomyMemberDB
+from bot.databases.models import EconomicModel
 from bot.misc.lordbot import LordBot
 from bot.misc.moderation import spam
 from bot.resources import errors
@@ -163,13 +165,12 @@ class Teams(commands.Cog):
         self.bot.load_i18n_config()
 
     @commands.command()
-    async def get_apps(self, ctx: commands.Context, page: int = 0):
-        await ctx.send(
-            '\n'.join([
-                f'{bot.mention} - [reinvite](https://discord.com/oauth2/authorize?client_id={bot.id}&scope=bot+applications.commands)'
-                for bot in ctx.guild.bots
-            ][page*10:page*10+10]) or '...'
-        )
+    async def clear_rewards(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
+        if member is None:
+            member = ctx.author
+
+        emdb = EconomyMemberDB(member.guild.id, member.id)
+        await emdb.update_dict(daily=0, weekly=0, monthly=0)
 
 
 def setup(bot):

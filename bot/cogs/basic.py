@@ -23,7 +23,6 @@ from typing import Callable, Optional
 translator = googletrans.Translator()
 
 _log = logging.getLogger(__name__)
-_log.addHandler(logging.FileHandler('logs/presence.log', 'a+'))
 
 
 class Basic(commands.Cog):

@@ -2,9 +2,6 @@ import contextlib
 from enum import StrEnum
 import orjson
 from typing import Any,  Union, TypeVar
-import psycopg2._psycopg
-
-from bot.databases.misc.error_handler import on_error
 
 T = TypeVar('T')
 
@@ -12,24 +9,6 @@ T = TypeVar('T')
 class NumberFormatType(StrEnum):
     FLOAT = 'FLOAT'
     INT = 'INTEGER'
-
-
-class Json:
-    @staticmethod
-    def loads(data) -> dict:
-        if not isinstance(data, (bytes, bytearray, memoryview, str)):
-            return data
-        try:
-            return orjson.loads(data)
-        except orjson.JSONDecodeError:
-            return data
-
-    @staticmethod
-    def dumps(data):
-        try:
-            return orjson.dumps(data).decode()
-        except orjson.JSONEncodeError:
-            return data
 
 
 class NumberFormating:
@@ -64,7 +43,6 @@ class NumberFormating:
                 return value
 
     @staticmethod
-    @on_error()
     def loads(data: Any, over: bool = False):
         if not isinstance(data, dict):
             return data
@@ -75,7 +53,6 @@ class NumberFormating:
         return new_data
 
     @staticmethod
-    @on_error()
     def dumps(data: Any):
         if not isinstance(data, dict):
             return data
@@ -86,13 +63,23 @@ class NumberFormating:
         return new_data
 
 
-def dumps(dict_var):
-    data = NumberFormating.dumps(dict_var)
-    data = Json.dumps(data)
-    return data
+def dumps(dict_var, ignore: bool = False):
+    try:
+        data = NumberFormating.dumps(dict_var)
+        data = orjson.dumps(data).decode()
+        return data
+    except Exception:
+        if ignore:
+            return dict_var
+        raise
 
 
-def loads(dict_var):
-    data = Json.loads(dict_var)
-    data = NumberFormating.loads(data)
-    return data
+def loads(dict_var, ignore: bool = False):
+    try:
+        data = orjson.loads(dict_var)
+        data = NumberFormating.loads(data)
+        return data
+    except Exception:
+        if ignore:
+            return dict_var
+        raise

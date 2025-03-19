@@ -130,8 +130,10 @@ class StateLeaderboardView(PartialLeaderboardView.cls):
     def embed(self) -> nextcord.Embed:
         name = i18n.t(self.locale, f'leaderboard.{self.state}.name')
         embed = nextcord.Embed(
-            title=i18n.t(self.locale, 'leaderboard.state.embed.title', name=name),
-            description=i18n.t(self.locale, 'leaderboard.state.embed.description', member=self.member, user_index=self.user_index),
+            title=i18n.t(
+                self.locale, 'leaderboard.state.embed.title', name=name),
+            description=i18n.t(self.locale, 'leaderboard.state.embed.description',
+                               member=self.member, user_index=self.user_index),
             color=self.color
         )
         embed.set_thumbnail(PEDESTAL_IMAGE_URL)
@@ -148,7 +150,8 @@ class StateLeaderboardView(PartialLeaderboardView.cls):
             index = leaderboard_indexs.index(member_id)+1
             award = get_award(index)
             parsed_value = self.parse_value(value)
-            results.append(i18n.t(self.locale, 'leaderboard.state.embed.field.value', award=award, parsed_value=parsed_value, member=member))
+            results.append(i18n.t(self.locale, 'leaderboard.state.embed.field.value',
+                           award=award, parsed_value=parsed_value, member=member))
         embed.add_field(
             name='',
             value=''.join(results)
@@ -178,7 +181,8 @@ class LeaderboardTypes:
 
         clear_empty_leaderboard_economy(self.guild, leaderboard)
         fission_leaderboards = parse_fission(leaderboard, 6)
-        leaderboard_indexs = [self.member_id for (self.member_id, *_) in leaderboard]
+        leaderboard_indexs = [self.member_id for (
+            self.member_id, *_) in leaderboard]
 
         view = await EconomyLeaderboardView(
             self.member,
@@ -200,6 +204,9 @@ class LeaderboardTypes:
         gdb = GuildDateBases(self.guild.id)
         state_db = await gdb.get(state_parameters[state])
 
+        state_db = dict(sorted(state_db.items(),
+                               key=lambda item: item[1],
+                               reverse=True))
         clear_empty_leaderboard(self.guild, state_db)
         fission_leaderboards = parse_fission(state_db.items(), 6)
         leaderboard_indexs = list(state_db.keys())

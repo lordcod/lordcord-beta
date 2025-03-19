@@ -7,20 +7,19 @@ import os
 import aiohttp
 import nextcord
 import re
+from aiohttp_socks import ProxyConnector
 from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict, Any
 
 from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
-from bot.databases import models
-from bot.misc.api_site import ApiSite
+from bot.misc.site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
 from bot.misc.noti import TwitchNotification, YoutubeNotification
-
 
 _log = logging.getLogger(__name__)
 
@@ -49,37 +48,39 @@ class LordBot(commands.AutoShardedBot):
         self,
         *,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        rollout_functions: bool = True,
-        allow_bot_command: Optional[bool] = None,
-        release_bot: Optional[bool] = None
+        chunk_guilds_at_startup: bool = True,
+        bot_command: Optional[bool] = None,
+        release: Optional[bool] = None
     ) -> None:
-        if allow_bot_command is None:
-            allow_bot_command = not release_bot
+        if bot_command is None:
+            allow_bot_command = not release
 
-        if release_bot or get_parser_args().get('api'):
+        if release or get_parser_args().get('api'):
             self.API_URL = 'https://api.lordcord.fun'
         else:
             self.API_URL = 'http://localhost:5000'
 
-        self.release_bot = release_bot
+        self.release = release
         self.allow_bot_command = allow_bot_command
 
         intents = nextcord.Intents.all()
         intents.presences = False
 
+        proxy_url = os.getenv('PROXY')
+        if proxy_url:
+            connector = ProxyConnector.from_url(proxy_url, loop=loop)
+        else:
+            connector = None
+
         super().__init__(
             loop=loop,
             command_prefix=self.get_command_prefixs,
             intents=intents,
-            chunk_guilds_at_startup=False,
             status=nextcord.Status.idle,
+            chunk_guilds_at_startup=chunk_guilds_at_startup,
             help_command=None,
-            enable_debug_events=True,
-            proxy=os.getenv('PROXY'),
-            rollout_associate_known=rollout_functions,
-            rollout_delete_unknown=rollout_functions,
-            rollout_register_new=rollout_functions,
-            rollout_update_known=rollout_functions
+            enable_debug_events=False,
+            connector=connector
         )
 
         _messages = deque(
@@ -104,9 +105,9 @@ class LordBot(commands.AutoShardedBot):
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
         self.add_listener(self.listen_on_connect, 'on_connect')
-        self.add_listener(self.apisite._ApiSite__run, 'on_ready')
-        self.add_listener(self.twnoti.parse, 'on_ready')
-        self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
+        self.loop.create_task(self.apisite._ApiSite__run())
+        self.loop.create_task(self.twnoti.parse())
+        self.loop.create_task(self.ytnoti.parse_youtube())
 
     def get_git_info(self):
         repo = git.Repo(search_parent_directories=True)
@@ -231,11 +232,11 @@ class LordBot(commands.AutoShardedBot):
                 return False
 
     async def listen_on_connect(self) -> None:
-        if not self.release_bot:
+        if not self.release:
             _log.debug("A test bot has been launched")
         _log.debug('Listen on ready')
 
-        if self.release_bot:
+        if self.release:
             await self.update_api_config()
 
         try:

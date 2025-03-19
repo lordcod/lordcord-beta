@@ -9,7 +9,6 @@ from aiohttp import ContentTypeError
 import orjson
 import asyncio
 from uvicorn import Config, Server
-from pyngrok import ngrok, conf
 from fastapi import FastAPI, APIRouter, Request, Response
 
 
@@ -18,8 +17,6 @@ if TYPE_CHECKING:
 
 
 _log = logging.getLogger(__name__)
-pyngrok_config = conf.PyngrokConfig(log_event_callback=lambda log: None,
-                                    max_logs=10)
 
 
 class ApiSite:
@@ -35,9 +32,6 @@ class ApiSite:
         self.bot = bot
         self.handlers = handlers
         self._cache: Dict[str, int] = {}
-
-    async def on_ready(self):
-        _log.info('ApiSite is ready, public url: %s, password: %s', self.callback_url, self.password)
 
     def is_running(self) -> bool:
         return self.__running
@@ -63,15 +57,15 @@ class ApiSite:
 
     def _setup(self, endpoint: str, port: int):
         self.endpoint = endpoint
-        self.password = ''.join([random.choice(string.hexdigits) for _ in range(25)])
-        self.callback_url = ngrok.connect(str(port), pyngrok_config=pyngrok_config).public_url
+        self.password = ''.join(
+            [random.choice(string.hexdigits) for _ in range(25)])
 
         self.app = FastAPI(debug=True)
         for router in self._get_routers():
             self.app.include_router(router)
-        self.app.add_event_handler("startup", lambda: asyncio.create_task(self.on_ready()))
 
-        config = Config(self.app, "0.0.0.0", port, log_config=None, log_level=logging.CRITICAL)
+        config = Config(self.app, "0.0.0.0", port,
+                        log_config=None, log_level=logging.CRITICAL)
         server = Server(config)
         return server
 
@@ -84,7 +78,8 @@ class ApiSite:
         routers.append(router)
 
         router = APIRouter()
-        router.add_api_route(self.endpoint+'update/', self._post_update, methods=["POST"])
+        router.add_api_route(self.endpoint+'update/',
+                             self._post_update, methods=["POST"])
         routers.append(router)
 
         return routers
@@ -115,16 +110,6 @@ class ApiSite:
         except KeyError:
             return Response(status_code=400)
         else:
-            limit = func.__limit__
-
-            if limit is not None and self._cache.get(endpoint, 0)+limit > time.time():
-                return Response(
-                    status_code=429,
-                    headers={
-                        'X-After-Request': str(self._cache.get(endpoint, 0)+limit-time.time())
-                    }
-                )
-
             self._cache[endpoint] = time.time()
             result = await func(self.bot, data)
             return Response(

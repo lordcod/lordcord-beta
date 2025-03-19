@@ -181,7 +181,8 @@ class Economy(commands.Cog):
 
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'economy.reward.success.title'),
-                description=i18n.t(locale, 'economy.reward.success.description', award=award, emoji=currency_emoji, wait_long=wait_long),
+                description=i18n.t(locale, 'economy.reward.success.description',
+                                   award=award, emoji=currency_emoji, wait_long=wait_long),
                 color=color
             )
             await account.set(ctx.command.name, wait_long)
@@ -190,7 +191,8 @@ class Economy(commands.Cog):
         else:
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'economy.reward.error.early.title'),
-                description=i18n.t(locale, 'economy.reward.error.description.title', time=reward_time),
+                description=i18n.t(
+                    locale, 'economy.reward.error.description.title', time=reward_time),
                 color=color
             )
 
@@ -235,14 +237,16 @@ class Economy(commands.Cog):
             )
             embed.add_field(
                 name="",
-                value=i18n.t(locale, 'economy.work.success.description', time=loctime+work_info['cooldown'])
+                value=i18n.t(locale, 'economy.work.success.description',
+                             time=loctime+work_info['cooldown'])
             )
             await account.set('work', loctime)
             await account.increment('balance', amount)
         else:
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'economy.work.error.early.title'),
-                description=i18n.t(locale, 'economy.work.error.early.description', time=work+work_info['cooldown']),
+                description=i18n.t(
+                    locale, 'economy.work.error.early.description', time=work+work_info['cooldown']),
                 color=color
             )
         await ctx.send(embed=embed)
@@ -272,9 +276,11 @@ class Economy(commands.Cog):
         rewards = ['daily', 'weekly', 'monthly']
         for rw in rewards:
             if await account.get(rw, 0) < loctime:
-                description += i18n.t(locale, 'economy.balance.reward.'+rw, prefix=prefix)
+                description += i18n.t(locale,
+                                      'economy.balance.reward.'+rw, prefix=prefix)
         if description:
-            description = i18n.t(locale, 'economy.balance.reward.available', description=description)
+            description = i18n.t(
+                locale, 'economy.balance.reward.available', description=description)
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.balance.name'),
@@ -329,7 +335,8 @@ class Economy(commands.Cog):
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.pay.success.title'),
-            description=i18n.t(locale, 'economy.pay.success.description', author=ctx.author.name, member=member.name, amount=amount, emoji=currency_emoji),
+            description=i18n.t(locale, 'economy.pay.success.description', author=ctx.author.name,
+                               member=member.name, amount=amount, emoji=currency_emoji),
             color=color,
         )
         embed.set_thumbnail(ctx.author.display_avatar)
@@ -368,7 +375,8 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.deposit.success.title'),
             color=color,
-            description=i18n.t(locale, 'economy.deposit.success.description', amount=amount, emoji=currency_emoji)
+            description=i18n.t(
+                locale, 'economy.deposit.success.description', amount=amount, emoji=currency_emoji)
         )
         embed.set_thumbnail(ctx.author.display_avatar)
         await ctx.send(embed=embed)
@@ -400,7 +408,8 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.withdraw.success.title'),
             color=color,
-            description=i18n.t(locale, 'economy.withdraw.success.description', amount=amount, emoji=currency_emoji)
+            description=i18n.t(
+                locale, 'economy.withdraw.success.description', amount=amount, emoji=currency_emoji)
         )
         embed.set_thumbnail(ctx.author.display_avatar)
         await ctx.send(embed=embed)
@@ -507,7 +516,8 @@ class Economy(commands.Cog):
         if thief_rob+theft_data['cooldown'] > time.time():
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'economy.rob.title'),
-                description=i18n.t(locale, '', member=ctx.author, time=thief_rob+theft_data['cooldown']),
+                description=i18n.t(locale, '', member=ctx.author,
+                                   time=thief_rob+theft_data['cooldown']),
                 color=color
             )
             embed.set_thumbnail(ctx.author.display_avatar)
@@ -676,9 +686,11 @@ class Economy(commands.Cog):
                     if roulette_item["random_condition"](_arg, ran):
                         results.append(i18n.t(locale, 'economy.roulette.game.result.win',
                                               member=_member.name,
-                                              amount=_amount*roulette_item['multiplier'],
+                                              amount=_amount *
+                                              roulette_item['multiplier'],
                                               emoji=currency_emoji))
-                        wins.append((_member.name, _amount*roulette_item['multiplier']))
+                        wins.append(
+                            (_member.name, _amount*roulette_item['multiplier']))
                         await account.increment(
                             "balance", _amount * roulette_item["multiplier"])
                         await logstool.Logs(ctx.guild).add_currency(_member,
@@ -702,10 +714,12 @@ class Economy(commands.Cog):
                                          amount=sum([w[1] for w in wins]),
                                          emoji=currency_emoji)
         else:
-            description += '\n\n'+i18n.t(locale, 'economy.roulette.game.result.wins.failed')
+            description += '\n\n' + \
+                i18n.t(locale, 'economy.roulette.game.result.wins.failed')
 
         embed = nextcord.Embed(
-            title=i18n.t(locale, 'economy.roulette.game.result.ball', win_color=win_color, ran=ran),
+            title=i18n.t(locale, 'economy.roulette.game.result.ball',
+                         win_color=win_color, ran=ran),
             description=description,
             color=color
         )

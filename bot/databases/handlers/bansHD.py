@@ -4,7 +4,6 @@ import nextcord
 from nextcord.state import ConnectionState
 
 from ..models import BanModel
-from ..misc.error_handler import on_error
 
 
 class BanDateBases:
@@ -16,36 +15,30 @@ class BanDateBases:
         self.guild_id = guild_id
         self.member_id = member_id
 
-    @on_error()
     async def get_all(self):
         data = await BanModel.all()
         return [(bm.guild_id, bm.member_id, bm.time) for bm in data]
 
-    @on_error()
     async def get_as_guild(self):
         data = await BanModel.filter(guild_id=self.guild_id)
         return [(bm.member_id, bm.time) for bm in data]
 
-    @on_error()
     async def get_as_member(self):
         data = await BanModel.filter(guild_id=self.guild_id,
                                      member_id=self.member_id)
         return [bm.time for bm in data]
 
-    @on_error()
     async def insert(self, time: int):
         await BanModel.create(guild_id=self.guild_id,
                               member_id=self.member_id,
                               time=time)
 
-    @on_error()
     async def update(self, new_time: int):
         bm = await BanModel.get(guild_id=self.guild_id,
                                 member_id=self.member_id)
         bm.time = new_time
         await bm.save()
 
-    @on_error()
     async def delete(self):
         bm = await BanModel.get(guild_id=self.guild_id,
                                 member_id=self.member_id)
