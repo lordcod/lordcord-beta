@@ -7,7 +7,7 @@ import os
 from bot.misc.utils import get_parser_args
 
 
-bot = LordBot()
+bot = LordBot(rollout_functions=False)
 
 
 def load_dir(dirpath: str) -> None:

@@ -34,11 +34,11 @@ class GuildDateBases:
     @check_registration
     async def get(self, service: str, default: Any = None) -> Any:
         data = getattr(self.guild, service, default)
-        cache[self.guild][service] = data
+        cache[self.guild_id][service] = data
         return data
 
     def get_cache(self, service: str, default: Any = None) -> Any:
-        return cache[self.guild].get(service, default)
+        return cache[self.guild_id].get(service, default)
 
     @check_registration
     @on_error()

@@ -42,7 +42,7 @@ class LordBot(commands.AutoShardedBot):
         release_date: int
         release_tag: str
         API_URL: str
-        engine: DataBase
+
     invites_data: Dict[int, List[nextcord.Invite]] = {}
 
     def __init__(
@@ -71,6 +71,7 @@ class LordBot(commands.AutoShardedBot):
             loop=loop,
             command_prefix=self.get_command_prefixs,
             intents=intents,
+            chunk_guilds_at_startup=False,
             status=nextcord.Status.idle,
             help_command=None,
             enable_debug_events=True,
