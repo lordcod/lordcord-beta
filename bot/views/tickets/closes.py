@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Optional
 import nextcord
 from bot.databases.varstructs import TicketsButtonsPayload
-from bot.misc import tickettools
 from bot.misc.utils import AsyncSterilization
 
 
@@ -23,6 +22,8 @@ class CloseTicketView(nextcord.ui.View):
     async def close_button(self,
                            button: nextcord.ui.Button,
                            interaction: nextcord.Interaction):
+        from bot.misc.tickettools import ModuleTicket
+
         await interaction.response.defer()
-        ticket = await tickettools.ModuleTicket.from_channel_id(interaction.user, interaction.channel)
+        ticket = await ModuleTicket.from_channel_id(interaction.user, interaction.channel)
         await ticket.close()

@@ -4,7 +4,6 @@ from bot.databases.varstructs import CategoryPayload, TicketsButtonsPayload, Tic
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, generate_message, lord_format, get_payload
 from typing import List, Optional
-from bot.misc import tickettools
 from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
 
 
@@ -98,10 +97,12 @@ class FAQCreateDropDown(FAQDropDown.cls):
         ))
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        from bot.misc.tickettools import ModuleTicket
+
         if self.values[0] != 'create_ticket':
             await super().callback(interaction)
             return
-        await tickettools.ModuleTicket(interaction.user, interaction.message.id).create_after_faq(interaction)
+        await ModuleTicket(interaction.user, interaction.message.id).create_after_faq(interaction)
 
 
 @AsyncSterilization
@@ -119,7 +120,9 @@ class FAQButtonCreate(nextcord.ui.Button):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        await tickettools.ModuleTicket(interaction.user, interaction.message.id).create_after_faq(interaction)
+        from bot.misc.tickettools import ModuleTicket
+
+        await ModuleTicket(interaction.user, interaction.message.id).create_after_faq(interaction)
 
 
 @AsyncSterilization
@@ -137,13 +140,15 @@ class ButtonCategoryCreate(nextcord.ui.Button):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        from bot.misc.tickettools import ModuleTicket
+
         index = int(interaction.data['custom_id'].removeprefix(
             'tickets:faq:view:create:category:'))
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets', {})
         categories_data = tickets.get(interaction.message.id).get('categories')
         category = categories_data[index]
-        await tickettools.ModuleTicket(interaction.user, interaction.message.id).create_after_category(interaction, category)
+        await ModuleTicket(interaction.user, interaction.message.id).create_after_category(interaction, category)
 
 
 @AsyncSterilization

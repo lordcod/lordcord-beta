@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 import nextcord
 from bot.databases.varstructs import TicketsButtonsPayload
-from bot.misc import tickettools
-from bot.misc.utils import AsyncSterilization
 
-if TYPE_CHECKING:
-    from bot.misc.tickettools import ModuleTicket
+from bot.misc.utils import AsyncSterilization
 
 
 @AsyncSterilization
@@ -31,14 +28,18 @@ class ControllerTicketView(nextcord.ui.View):
     async def delete_button(self,
                             button: nextcord.ui.Button,
                             interaction: nextcord.Interaction):
+        from bot.misc.tickettools import ModuleTicket
+
         await interaction.response.defer()
-        ticket = await tickettools.ModuleTicket.from_channel_id(interaction.user, interaction.channel)
+        ticket = await ModuleTicket.from_channel_id(interaction.user, interaction.channel)
         await ticket.delete()
 
     @nextcord.ui.button(custom_id="ticket:reopen")
     async def reopen_button(self,
                             button: nextcord.ui.Button,
                             interaction: nextcord.Interaction):
+        from bot.misc.tickettools import ModuleTicket
+
         await interaction.response.defer()
-        ticket = await tickettools.ModuleTicket.from_channel_id(interaction.user, interaction.channel)
+        ticket = await ModuleTicket.from_channel_id(interaction.user, interaction.channel)
         await ticket.reopen(interaction.message)
