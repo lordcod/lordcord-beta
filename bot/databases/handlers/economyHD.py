@@ -1,7 +1,6 @@
 from __future__ import annotations
 import functools
 import logging
-from tkinter import NO
 from typing import Any, Optional
 
 
