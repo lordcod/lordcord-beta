@@ -1,0 +1,11 @@
+__pycache__/
+.vscode/
+.env
+.venv/
+*.log
+*.db
+tests
+emojis.json
+assets/
+temp.txt
+temp/
