@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Optional
 import nextcord
 
-from bot.misc.tempvoice import TempVoiceModule
+from bot.misc.plugins.tempvoice import TempVoiceModule
 from bot.misc.utils import get_emoji_as_color
 from bot.views.settings import tempvoice
 from bot.views.settings._view import DefaultSettingsView

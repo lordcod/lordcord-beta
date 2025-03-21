@@ -16,7 +16,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from bot.misc.logstool import LogType
+    from bot.misc.plugins.logstool import LogType
 
 
 class GiveawayData(TypedDict):

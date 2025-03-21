@@ -58,20 +58,6 @@ class Teams(commands.Cog):
         self.bot.load_extension(f"bot.cogs.{name}")
         await ctx.send(f"Service **{name}** successfully enabled")
 
-    @commands.command(aliases=['api_config'])
-    async def get_api_config(self, ctx: commands.Context):
-        api = self.bot.apisite
-        if not api.is_running():
-            return
-
-        await ctx.send('ApiSite is worked\n'
-                       f'Public url: {api.callback_url}\n'
-                       f'Password: {api.password}')
-
-    @commands.command()
-    async def update_api_config(self, ctx: commands.Context):
-        await self.bot.update_api_config()
-
     @commands.command(aliases=['unload_cog'])
     async def unload_extension(self, ctx: commands.Context, name):
         if name == "teams":

@@ -1,7 +1,7 @@
 from typing import List, Optional
 import nextcord
 
-from bot.misc.tickettools import ModuleTicket
+from bot.misc.plugins.tickettools import ModuleTicket
 from bot.misc.utils import AsyncSterilization
 from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU
 

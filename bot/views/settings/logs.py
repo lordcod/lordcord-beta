@@ -5,14 +5,14 @@ from bot.databases.varstructs import LogsPayload
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 import nextcord
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import AsyncSterilization
 
 from bot.resources.ether import Emoji
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
-from bot.misc.logstool import LogType
+from bot.misc.plugins.logstool import LogType
 
 
 logs_items: List[LogType] = [

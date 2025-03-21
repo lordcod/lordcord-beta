@@ -6,12 +6,12 @@ import time
 from typing import TYPE_CHECKING, Optional
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
-from bot.misc import giveaway as misc_giveaway
+from bot.misc.plugins import giveaway as misc_giveaway
 from bot.misc.utils import AsyncSterilization, translate_to_timestamp
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
-    from bot.misc.giveaway import GiveawayConfig, Giveaway
+    from bot.misc.plugins.giveaway import GiveawayConfig, Giveaway
 
 
 @AsyncSterilization
@@ -187,11 +187,14 @@ class GiveawaySettingsView(nextcord.ui.View):
         self.embed.add_field(
             name=i18n.t(locale, "giveaway.settings.init.info.title"),
             value=i18n.t(locale, "giveaway.settings.init.info.decription",
-                         prize=self.giveaway_config.prize if self.giveaway_config.prize else i18n.t(locale, 'giveaway.settings.init.info.dnr'),
+                         prize=self.giveaway_config.prize if self.giveaway_config.prize else i18n.t(
+                             locale, 'giveaway.settings.init.info.dnr'),
                          quantity=self.giveaway_config.quantity if self.giveaway_config.quantity else 1,
-                         channel=self.giveaway_config.channel.mention if self.giveaway_config.channel else i18n.t(locale, 'giveaway.settings.init.info.dnr'),
+                         channel=self.giveaway_config.channel.mention if self.giveaway_config.channel else i18n.t(
+                             locale, 'giveaway.settings.init.info.dnr'),
                          sponsor=self.giveaway_config.sponsor.mention if self.giveaway_config.sponsor else member.mention,
-                         date_end=f'<t:{self.giveaway_config.date_end :.0f}:f>' if self.giveaway_config.date_end else i18n.t(locale, 'giveaway.settings.init.info.dnr')
+                         date_end=f'<t:{self.giveaway_config.date_end :.0f}:f>' if self.giveaway_config.date_end else i18n.t(
+                             locale, 'giveaway.settings.init.info.dnr')
                          ),
         )
 
@@ -202,9 +205,11 @@ class GiveawaySettingsView(nextcord.ui.View):
         if self.giveaway_config.date_end:
             self.date_end.style = nextcord.ButtonStyle.blurple
 
-        self.create.label = i18n.t(locale, "giveaway.settings.init.create.title")
+        self.create.label = i18n.t(
+            locale, "giveaway.settings.init.create.title")
         self.prize.label = i18n.t(locale, "giveaway.settings.prize.label")
-        self.description.label = i18n.t(locale, "giveaway.settings.description.title")
+        self.description.label = i18n.t(
+            locale, "giveaway.settings.description.title")
         self.date_end.label = i18n.t(locale, "giveaway.settings.dateend.title")
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
@@ -222,7 +227,8 @@ class GiveawaySettingsView(nextcord.ui.View):
             return
         if not self.giveaway_config.sponsor:
             self.giveaway_config.sponsor = interaction.user
-        asyncio.create_task(interaction.delete_original_message(), name=f'giveaway:delete:{interaction.message.id}')
+        asyncio.create_task(interaction.delete_original_message(
+        ), name=f'giveaway:delete:{interaction.message.id}')
         giveaway = await misc_giveaway.Giveaway.create_as_config(interaction.guild, self.giveaway_config)
         await giveaway.fetch_giveaway_data()
         interaction.client.lord_handler_timer.create(

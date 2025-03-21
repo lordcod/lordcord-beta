@@ -15,7 +15,7 @@ from typing import Callable, Dict, List, Optional, Tuple, TypedDict, Union, Lite
 
 from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.languages import i18n
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.views.economy_shop import EconomyShopView
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import TranslatorFlags, clamp, randfloat

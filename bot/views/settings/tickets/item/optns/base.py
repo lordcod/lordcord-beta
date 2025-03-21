@@ -4,7 +4,7 @@ from typing import Any, Optional, overload
 import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsItemPayload, TicketsPayload
-from bot.misc.tickettools import ModuleTicket
+from bot.misc.plugins.tickettools import ModuleTicket
 from bot.misc.utils import AsyncSterilization, get_emoji_as_color
 from bot.views.settings._view import DefaultSettingsView
 from bot.views.settings.tickets.item import view as item_view
@@ -38,10 +38,12 @@ class OptionItem(ABC):
         return ticket_data
 
     @overload
-    async def edit_ticket_data(self, guild: nextcord.Guild, ticket_data: TicketsItemPayload) -> None: ...
+    async def edit_ticket_data(
+        self, guild: nextcord.Guild, ticket_data: TicketsItemPayload) -> None: ...
 
     @overload
-    async def edit_ticket_data(self, ticket_data: TicketsItemPayload) -> None: ...
+    async def edit_ticket_data(
+        self, ticket_data: TicketsItemPayload) -> None: ...
 
     async def edit_ticket_data(self, *args) -> None:
         if len(args) == 1:

@@ -9,7 +9,7 @@ from bot.views.settings.tickets.item.view import TicketsItemView
 from .selector import TicketsSelectorView
 
 
-from bot.misc.tickettools import ModuleTicket
+from bot.misc.plugins.tickettools import ModuleTicket
 from .._view import DefaultSettingsView
 
 from bot.databases import GuildDateBases

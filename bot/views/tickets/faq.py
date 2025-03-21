@@ -97,7 +97,7 @@ class FAQCreateDropDown(FAQDropDown.cls):
         ))
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        from bot.misc.tickettools import ModuleTicket
+        from bot.misc.plugins.tickettools import ModuleTicket
 
         if self.values[0] != 'create_ticket':
             await super().callback(interaction)
@@ -120,7 +120,7 @@ class FAQButtonCreate(nextcord.ui.Button):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        from bot.misc.tickettools import ModuleTicket
+        from bot.misc.plugins.tickettools import ModuleTicket
 
         await ModuleTicket(interaction.user, interaction.message.id).create_after_faq(interaction)
 
@@ -140,7 +140,7 @@ class ButtonCategoryCreate(nextcord.ui.Button):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        from bot.misc.tickettools import ModuleTicket
+        from bot.misc.plugins.tickettools import ModuleTicket
 
         index = int(interaction.data['custom_id'].removeprefix(
             'tickets:faq:view:create:category:'))

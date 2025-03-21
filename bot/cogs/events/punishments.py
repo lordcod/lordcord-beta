@@ -3,7 +3,7 @@ import nextcord
 from nextcord.ext import commands
 from typing import Optional
 
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
 
 

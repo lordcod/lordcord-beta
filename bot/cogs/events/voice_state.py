@@ -6,10 +6,10 @@ from nextcord.ext import commands
 
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.music import current_players
-from bot.misc.tempvoice import TempVoiceModule
+from bot.misc.plugins.tempvoice import TempVoiceModule
 
 
 class VoiceStateEvent(commands.Cog):
@@ -25,22 +25,26 @@ class VoiceStateEvent(commands.Cog):
             tasks.extend((
                 self.connect_to_voice(member),
                 self.check_bot_player_conn(after.channel),
-                logstool.Logs(member.guild).connect_voice(member, after.channel)
+                logstool.Logs(member.guild).connect_voice(
+                    member, after.channel)
             ))
         if before.channel is not None and after.channel is None:
             tasks.extend((
                 self.disconnect_from_voice(member),
                 self.check_bot_player(member, before.channel),
-                logstool.Logs(member.guild).disconnect_voice(member, before.channel)
+                logstool.Logs(member.guild).disconnect_voice(
+                    member, before.channel)
             ))
         if before.channel != after.channel:
-            tasks.append(TempVoiceModule(member).process(before.channel, after.channel))
+            tasks.append(TempVoiceModule(member).process(
+                before.channel, after.channel))
         if (
             before.channel is not None
             and after.channel is not None
             and before.channel != after.channel
         ):
-            tasks.append(logstool.Logs(member.guild).move_voice(member, before.channel, after.channel))
+            tasks.append(logstool.Logs(member.guild).move_voice(
+                member, before.channel, after.channel))
 
         await asyncio.gather(*tasks)
 

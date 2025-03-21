@@ -1,7 +1,7 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
 
 

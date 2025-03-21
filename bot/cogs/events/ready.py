@@ -7,7 +7,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
 from bot.languages.help import get_command
 from bot.databases import RoleDateBases, BanDateBases
-from bot.misc.giveaway import Giveaway
+from bot.misc.plugins.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import AsyncSterilization
 from bot.resources import ether

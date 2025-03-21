@@ -7,10 +7,10 @@ import math
 from nextcord.ext import commands
 
 from bot.databases import GuildDateBases, localdb
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.moderation.spam import parse_message
-from bot.misc.tickettools import ModuleTicket
+from bot.misc.plugins.tickettools import ModuleTicket
 from bot.misc.utils import is_emoji
 from bot.languages import i18n
 from bot.views.translate import AutoTranslateView
@@ -134,7 +134,8 @@ class MessageEvent(commands.Cog):
     async def give_message_score(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
         guild_state = await gdb.get('message_state', {})
-        guild_state[message.author.id] = guild_state.get(message.author.id, 0) + 1
+        guild_state[message.author.id] = guild_state.get(
+            message.author.id, 0) + 1
         await gdb.set('message_state', guild_state)
 
         state = await localdb.get_table('messages')
@@ -156,7 +157,8 @@ class MessageEvent(commands.Cog):
 
         gdb = GuildDateBases(message.guild.id)
         guild_state = await gdb.get('score_state', {})
-        guild_state[message.author.id] = guild_state.get(message.author.id, 0) + score
+        guild_state[message.author.id] = guild_state.get(
+            message.author.id, 0) + score
         await gdb.set('score_state', guild_state)
 
         state = await localdb.get_table('score')

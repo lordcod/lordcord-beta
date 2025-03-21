@@ -8,7 +8,8 @@ from bot.databases.varstructs import CategoryPayload, TicketsItemPayload, Ticket
 from typing import Dict,  List, Literal, Optional, Self, Tuple
 
 from bot.languages import i18n
-from bot.misc import logstool, utils
+from bot.misc import utils
+from bot.misc.plugins import logstool
 from bot.misc.utils import generate_message, get_payload, lord_format
 from bot.misc.lordbot import LordBot
 from bot.resources.ether import Emoji

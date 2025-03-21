@@ -8,14 +8,12 @@ import aiohttp
 import nextcord
 import re
 from aiohttp_socks import ProxyConnector
-from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict, Any
+from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict
 
 from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
-from bot.misc.site import ApiSite
-from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
@@ -97,7 +95,6 @@ class LordBot(commands.AutoShardedBot):
             name=f'{DEFAULT_PREFIX}help | {self.release_tag}')
 
         self.__session = None
-        self.apisite = ApiSite(self, handlers)
 
         self.twnoti = TwitchNotification(self)
         self.ytnoti = YoutubeNotification(self)
@@ -105,7 +102,6 @@ class LordBot(commands.AutoShardedBot):
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
         self.add_listener(self.listen_on_connect, 'on_connect')
-        self.loop.create_task(self.apisite._ApiSite__run())
         self.loop.create_task(self.twnoti.parse())
         self.loop.create_task(self.ytnoti.parse_youtube())
 
@@ -138,7 +134,15 @@ class LordBot(commands.AutoShardedBot):
     @property
     def session(self) -> aiohttp.ClientSession:
         if self.__session is None or self.__session.closed:
-            self.__session = aiohttp.ClientSession()
+            try:
+                session = self.http._HTTPClient__session
+                if session is None or session.closed:
+                    raise ValueError
+            except Exception:
+                self.__session = aiohttp.ClientSession()
+            else:
+                self.__session = session
+
         return self.__session
 
     async def process_commands(self, message: nextcord.Message) -> None:
@@ -212,32 +216,10 @@ class LordBot(commands.AutoShardedBot):
 
         setattr(self, name, coro)
 
-    async def update_api_config(self) -> bool:
-        api = self.apisite
-        url = self.API_URL + '/api-config'
-        headers = {
-            'Authorization': os.environ.get('API_SECRET_TOKEN')
-        }
-        data = {
-            'url': api.callback_url,
-            'password': api.password
-        }
-
-        async with self.session.post(url, json=data, headers=headers) as response:
-            if response.status == 204:
-                _log.debug('Successful api update')
-                return True
-            else:
-                _log.warning('Failed api update')
-                return False
-
     async def listen_on_connect(self) -> None:
         if not self.release:
             _log.debug("A test bot has been launched")
-        _log.debug('Listen on ready')
-
-        if self.release:
-            await self.update_api_config()
+        _log.debug('Listen on connect')
 
         try:
             await Tortoise.init(
@@ -250,6 +232,5 @@ class LordBot(commands.AutoShardedBot):
             await self.close()
             await self.session.close()
             return
-
-    def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
-        return super().dispatch(event_name, *args, **kwargs)
+        else:
+            _log.debug('Database is ready')

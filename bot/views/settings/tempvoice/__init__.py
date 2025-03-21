@@ -1,6 +1,6 @@
 import nextcord
 
-from bot.misc.tempvoice import TempVoiceModule
+from bot.misc.plugins.tempvoice import TempVoiceModule
 from bot.misc.utils import AsyncSterilization
 from bot.views.settings.tempvoice import options_voice
 from bot.views.settings.tempvoice.select_voice import TempVoiceSelectorView

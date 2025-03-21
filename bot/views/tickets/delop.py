@@ -28,7 +28,7 @@ class ControllerTicketView(nextcord.ui.View):
     async def delete_button(self,
                             button: nextcord.ui.Button,
                             interaction: nextcord.Interaction):
-        from bot.misc.tickettools import ModuleTicket
+        from bot.misc.plugins.tickettools import ModuleTicket
 
         await interaction.response.defer()
         ticket = await ModuleTicket.from_channel_id(interaction.user, interaction.channel)
@@ -38,7 +38,7 @@ class ControllerTicketView(nextcord.ui.View):
     async def reopen_button(self,
                             button: nextcord.ui.Button,
                             interaction: nextcord.Interaction):
-        from bot.misc.tickettools import ModuleTicket
+        from bot.misc.plugins.tickettools import ModuleTicket
 
         await interaction.response.defer()
         ticket = await ModuleTicket.from_channel_id(interaction.user, interaction.channel)

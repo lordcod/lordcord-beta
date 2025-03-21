@@ -6,7 +6,7 @@ import nextcord
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
-from bot.misc import tempvoice
+from bot.misc.plugins import tempvoice
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 from .information import advance_dd_voice_items, simple_dd_voice_items
 from .functions import TempVoiceFunctioins

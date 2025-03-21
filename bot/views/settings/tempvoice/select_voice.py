@@ -1,7 +1,7 @@
 from typing import Optional
 import nextcord
 
-from bot.misc.tempvoice import TempVoiceModule
+from bot.misc.plugins.tempvoice import TempVoiceModule
 from bot.misc.utils import AsyncSterilization
 
 
@@ -28,7 +28,8 @@ class TempVoiceSelectorChannelDropDown(nextcord.ui.ChannelSelect):
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.channel'), channel_types=[nextcord.ChannelType.voice])
+        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.channel'),
+                         channel_types=[nextcord.ChannelType.voice])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -57,7 +58,8 @@ class TempVoiceSelectorChannelPanelDropDown(nextcord.ui.ChannelSelect):
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.panel'), channel_types=[nextcord.ChannelType.text, nextcord.ChannelType.news])
+        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.panel'),
+                         channel_types=[nextcord.ChannelType.text, nextcord.ChannelType.news])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -86,7 +88,8 @@ class TempVoiceSelectorCategoryDropDown(nextcord.ui.ChannelSelect):
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.category'), channel_types=[nextcord.ChannelType.category])
+        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.category'),
+                         channel_types=[nextcord.ChannelType.category])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         category = self.values[0]

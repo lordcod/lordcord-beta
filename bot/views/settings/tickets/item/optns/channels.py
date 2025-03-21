@@ -2,7 +2,7 @@ import contextlib
 import nextcord
 
 from bot.databases.varstructs import TicketsPayload
-from bot.misc.tickettools import ModuleTicket
+from bot.misc.plugins.tickettools import ModuleTicket
 from bot.misc.utils import AsyncSterilization, replace_dict_key
 from bot.views.settings.tickets.item.optns.base import ViewOptionItem
 

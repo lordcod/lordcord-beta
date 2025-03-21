@@ -10,7 +10,7 @@ from typing import Dict, List, Literal, Optional, Union, Tuple
 import re
 import jmespath
 import nextcord.state
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import AsyncSterilization, IdeaPayload, generate_message, get_payload, lord_format
 

@@ -1,7 +1,7 @@
 import nextcord
 
 from bot.databases.handlers.economyHD import EconomyMemberDB
-from bot.misc import logstool
+from bot.misc.plugins import logstool
 from bot.misc.utils import BlackjackGame
 
 

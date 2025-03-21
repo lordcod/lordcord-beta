@@ -8,7 +8,7 @@ from bot.databases.varstructs import TicketsButtonsPayload
 from bot.misc.utils import AsyncSterilization
 
 if TYPE_CHECKING:
-    from bot.misc.tickettools import ModuleTicket
+    from bot.misc.plugins.tickettools import ModuleTicket
 
 
 @AsyncSterilization
