@@ -14,6 +14,7 @@ from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
+from bot.misc.sites.vk_site import VkSite
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
@@ -77,7 +78,7 @@ class LordBot(commands.AutoShardedBot):
             status=nextcord.Status.idle,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             help_command=None,
-            enable_debug_events=False,
+            enable_debug_events=True,
             connector=connector
         )
 
@@ -96,12 +97,14 @@ class LordBot(commands.AutoShardedBot):
 
         self.__session = None
 
+        self.vk_site = VkSite(self)
         self.twnoti = TwitchNotification(self)
         self.ytnoti = YoutubeNotification(self)
 
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
         self.add_listener(self.listen_on_connect, 'on_connect')
+        self.loop.create_task(self.vk_site.run())
         self.loop.create_task(self.twnoti.parse())
         self.loop.create_task(self.ytnoti.parse_youtube())
 
@@ -133,15 +136,12 @@ class LordBot(commands.AutoShardedBot):
 
     @property
     def session(self) -> aiohttp.ClientSession:
+        session = self.http._HTTPClient__session
+        if session is None or session.closed:
+            return session
+
         if self.__session is None or self.__session.closed:
-            try:
-                session = self.http._HTTPClient__session
-                if session is None or session.closed:
-                    raise ValueError
-            except Exception:
-                self.__session = aiohttp.ClientSession()
-            else:
-                self.__session = session
+            self.__session = aiohttp.ClientSession()
 
         return self.__session
 

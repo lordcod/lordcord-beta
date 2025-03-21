@@ -4,10 +4,12 @@
 # https://api.vk.com/method/groups.setCallbackSettings?access_token=vk1.a.Ujsd2axSnz9XOONfahSCaDJSi0KtOYqzhaFMzh5cwJTSoOM4fkefK6iszZ-Wk7Z315geA3JnKLVZq3IapedPO52NNqIzwaSd7URRZ59rpGEhpaYCpTG_QiWYcnwkFmPPAkqOgxGvJmMfNTQAYEJNDe77A6tbaa5nVbrNQ6iHjDQ_QYWEpjhBY3aJnjdjt8HDIN0v2jgzgTanl3QbFqHUyw&v=5.101&group_id=222485128&server_id=7&api_version=5.101&wall_post_new=1&wall_repost=1&callback=__jp3
 
 
+import random
 from typing import Optional, Union
 from aiohttp import ClientSession, ClientResponse
+from string import hexdigits
 
-SALT = '4051975f'
+SALT = ''.join([random.choice(hexdigits) for _ in range(15)])
 
 
 class VkApiAuthException(Exception):
@@ -36,10 +38,6 @@ class VkApiAuth:
     ):
         self.client_id = client_id
         self.redirect_uri = redirect_uri
-
-        if session is None:
-            # session = ClientSession()
-            pass
         self.session = session
 
     def generate_code_challange(self, code: Union[str, bytes]):
@@ -97,7 +95,7 @@ class VkApiAuth:
         }
         async with self.session.post(url, data=data) as response:
             response.raise_for_status()
-            data = response.json()
+            data = await response.json()
 
             if 'error' in data:
                 raise VkApiAuthException(
@@ -110,4 +108,4 @@ if __name__ == '__main__':
         51922313,
         'https://lordcord.xyz/vk-callback'
     )
-    print(vk_api_auth.get_auth_group_link(222485128))
+    print(vk_api_auth.get_auth_link('random-state'))

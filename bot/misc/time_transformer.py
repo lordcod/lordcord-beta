@@ -1,5 +1,8 @@
 
 
+from typing import Optional
+
+
 class DatePluralRussia:
     @staticmethod
     def plural(numbers: int, forms: list[str]) -> str:
@@ -72,7 +75,9 @@ def time_convert(timestamp: (int | float)) -> dict[str, int]:
     }
 
 
-def display_time(number: int, lang: str = "en", max_items: int = 3, with_rounding: bool = False) -> str:
+def display_time(number: Optional[int], lang: str = "en", max_items: int = 3, with_rounding: bool = False) -> str:
+    if number is None:
+        number = 0
     if number == 0:
         return distributing.get(lang, distributing['en'])(0, 'seconds')
     if number % 10 != 0:

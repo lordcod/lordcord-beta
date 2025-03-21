@@ -62,10 +62,13 @@ class VkSite:
     async def _get(self, request: Request):
         params = request.query_params
 
+        if vk_api_auth.session is None:
+            vk_api_auth.session = self.bot.session
+
         if not set(['code', 'state', 'device_id']) - set(params.keys()):
-            data = vk_api_auth.verifi(params.get('state'),
-                                      params.get('device_id'),
-                                      params.get('code'))
+            data = await vk_api_auth.verifi(params.get('state'),
+                                            params.get('device_id'),
+                                            params.get('code'))
 
             if 'error' in data:
                 return data['error_description']
