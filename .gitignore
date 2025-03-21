@@ -9,3 +9,8 @@ emojis.json
 assets/
 temp.txt
 temp/
+
+
+.sqlite3
+.sqlite3-sch
+.sqlite3-wal
