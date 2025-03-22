@@ -10,6 +10,9 @@ assets/
 temp.txt
 temp/
 
+node_modules
+package-lock.json
+package.json
 
 .sqlite3
 .sqlite3-shm

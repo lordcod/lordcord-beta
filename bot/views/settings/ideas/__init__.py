@@ -13,7 +13,6 @@ from bot.databases import GuildDateBases
 from bot.views import settings_menu
 from bot.views.ideas import IdeaView, get_default_payload
 from bot.languages import i18n
-from bot.misc.time_transformer import display_time
 
 
 @AsyncSterilization
@@ -79,7 +78,6 @@ class IdeasView(DefaultSettingsView):
         if enabled:
             self.remove_item(self.enable)
         else:
-            idd.disabled = True
             self.remove_item(self.disable)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
@@ -111,7 +109,8 @@ class IdeasView(DefaultSettingsView):
             )
             return
 
-        suggestion_message_data = ideas.get('messages', get_default_payload(locale)['messages']).get('suggestion')
+        suggestion_message_data = ideas.get('messages', get_default_payload(locale)[
+                                            'messages']).get('suggestion')
         suggestion_message = generate_message(lord_format(suggestion_message_data,
                                                           get_payload(guild=interaction.guild)))
 

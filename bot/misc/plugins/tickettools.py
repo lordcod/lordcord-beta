@@ -56,8 +56,6 @@ def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: i
 
 
 class ModuleTicket:
-    # TODO: Add logs
-
     locale: Optional[str] = None
     settings_message = None
     selected_category: Optional[CategoryPayload] = None
@@ -73,12 +71,14 @@ class ModuleTicket:
     ) -> None:
         guild = member.guild
         client: LordBot = guild._state._get_client()
+
         self.member = member
         self.guild = guild
+        self.message_id = message_id
+
         self.gdb = GuildDateBases(guild.id)
         self.lord_handler = client.lord_handler_timer
         self.loop = guild._state.loop
-        self.message_id = message_id
 
     async def get_locale(self) -> str:
         if self.locale is not None:
@@ -90,11 +90,14 @@ class ModuleTicket:
     async def from_channel_id(cls, member: nextcord.Member, channel: nextcord.TextChannel) -> Self:
         tickets_data = await localdb.get_table('tickets')
         ticket_data = await tickets_data.get(channel.id)
+
         message_id = ticket_data['ticket_id']
         self = cls(member, message_id)
         self.ticket_channel = channel
+
         guild_data = await self.fetch_ticket_data()
         self.update_from_ticket_data(guild_data)
+
         return self
 
     @staticmethod
@@ -238,6 +241,7 @@ class ModuleTicket:
         self.selected_category = data['category']
         self.input_answer = data['inputs']
         self.status = TicketStatus(data['status'])
+        self.messages = data.get('messages', [])
         try:
             self.ticket_count = data['count']
         except KeyError:
@@ -245,7 +249,6 @@ class ModuleTicket:
                 'total': data['index'],
                 'active': data['index']
             }
-        self.messages = data.get('messages', [])
 
     async def get_permissions(self, permission_data: Dict[int, Tuple[int, int]]):
         ticket_data = await self.fetch_guild_ticket()
