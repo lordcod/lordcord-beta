@@ -361,11 +361,23 @@ DEFAULT_IDEAS_MESSAGES['approved_with_reason'] = DEFAULT_IDEAS_MESSAGES['accept_
 DEFAULT_IDEAS_MESSAGES['reject'] = DEFAULT_IDEAS_MESSAGES['deny']
 DEFAULT_IDEAS_MESSAGES['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_with_reason']
 
+DEFAULT_IDEAS_NAMES = {
+    'category': 'IDEAS',
+    'suggest': '🧐・suggest-an-idea',
+    'offers': '💡・offers',
+    'approved': '👌・approved',
+    'rejected': '🤨・rejected',
+}
+
 DEFAULT_THREAD_NAME = 'Discussion of the idea from {member.username}'
 DEFAULT_IDEAS_REVOTING = True
 DEFAULT_IDEAS_ALLOW_IMAGE = True
+DEFAULT_IDEAS_MIN_LENGTH = 10
+
 
 DEFAULT_IDEAS_PAYLOAD: IdeasPayload = {
+    'min_length': DEFAULT_IDEAS_MIN_LENGTH,
+    'names': DEFAULT_IDEAS_NAMES,
     'messages': DEFAULT_IDEAS_MESSAGES,
     'thread_name': DEFAULT_THREAD_NAME,
     'revoting': DEFAULT_IDEAS_REVOTING,
@@ -481,7 +493,17 @@ DEFAULT_IDEAS_MESSAGES_RU['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_w
 
 DEFAULT_THREAD_NAME_RU = 'Обсуждение идеи от {member.username}'
 
+DEFAULT_IDEAS_NAMES_RU = {
+    'category': 'ИДЕИ',
+    'suggest': '🧐・предложить-идею',
+    'offers': '💡・предложения ',
+    'approved': '👌・одобренные ',
+    'rejected': '🤨・отказанные',
+}
+
 DEFAULT_IDEAS_PAYLOAD_RU: IdeasPayload = {
+    'min_length': DEFAULT_IDEAS_MIN_LENGTH,
+    'names': DEFAULT_IDEAS_NAMES_RU,
     'messages': DEFAULT_IDEAS_MESSAGES_RU,
     'thread_name': DEFAULT_THREAD_NAME_RU,
     'revoting': DEFAULT_IDEAS_REVOTING,

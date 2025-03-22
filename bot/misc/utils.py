@@ -42,8 +42,6 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
-from bot.resources.info import DEFAULT_BOT_COLOR
-
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
     from bot.misc.noti.twnoti import Stream as TwStream, User as TwUser

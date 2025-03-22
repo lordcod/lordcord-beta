@@ -117,6 +117,9 @@ class LordBot(commands.AutoShardedBot):
         self.release_tag = tags_dt[max(tags_dt)].name
 
     def load_i18n_dir(self, dirname: str) -> None:
+        if not os.path.exists(dirname):
+            return
+
         for filename in os.listdir(dirname):
             path = os.path.join(dirname, filename)
             if os.path.isdir(path):
@@ -128,7 +131,7 @@ class LordBot(commands.AutoShardedBot):
 
     def load_i18n_config(self) -> None:
         i18n.config['locale'] = 'en'
-        i18n.from_file("./bot/languages/localization_any.json")
+        i18n.from_file("./bot/languages/localization.json")
 
         temps_dir = './bot/languages/temp'
         self.load_i18n_dir(temps_dir)
@@ -137,7 +140,7 @@ class LordBot(commands.AutoShardedBot):
     @property
     def session(self) -> aiohttp.ClientSession:
         session = self.http._HTTPClient__session
-        if session is None or session.closed:
+        if session is not None and not session.closed:
             return session
 
         if self.__session is None or self.__session.closed:

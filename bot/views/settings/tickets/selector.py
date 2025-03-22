@@ -40,7 +40,6 @@ class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
             self.selected_category
         )
         await interaction.response.edit_message(embed=view.embed, view=view)
-        return await super().callback(interaction)
 
 
 @AsyncSterilization

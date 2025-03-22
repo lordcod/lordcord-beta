@@ -18,7 +18,13 @@ from bot.databases.varstructs import (ButtonPayload, IdeasPayload, IdeasReaction
                                       IdeasReactionSystem as ReactionSystemType, IdeasSuggestSystem)
 from bot.databases import localdb, GuildDateBases
 from bot.languages import i18n
-from bot.resources.info import DEFAULT_IDEAS_ALLOW_IMAGE, DEFAULT_IDEAS_PAYLOAD, DEFAULT_IDEAS_PAYLOAD_RU, DEFAULT_IDEAS_REVOTING
+from bot.resources.info import (
+    DEFAULT_IDEAS_ALLOW_IMAGE,
+    DEFAULT_IDEAS_MIN_LENGTH,
+    DEFAULT_IDEAS_PAYLOAD,
+    DEFAULT_IDEAS_PAYLOAD_RU,
+    DEFAULT_IDEAS_REVOTING
+)
 
 
 _log = logging.getLogger(__name__)
@@ -60,20 +66,17 @@ class MuteData:
 
 def get_default_payload(locale: str) -> IdeasPayload:
     if locale == 'ru':
-        return DEFAULT_IDEAS_PAYLOAD_RU
-    return DEFAULT_IDEAS_PAYLOAD
+        return DEFAULT_IDEAS_PAYLOAD_RU.copy()
+    return DEFAULT_IDEAS_PAYLOAD.copy()
 
 
 def _get_message(type: MessageType, locale: str, payload: dict, reason: str, ideas_data: IdeasPayload):
     DEFAULT_IDEAS_MESSAGES = get_default_payload(locale)['messages']
-    if (
+    if not (
         reason
-            and ideas_data.get(
-                'messages', DEFAULT_IDEAS_MESSAGES).get(type+'_with_reason')
+            and (message_data := ideas_data.get(
+                'messages', DEFAULT_IDEAS_MESSAGES).get(type+'_with_reason'))
     ):
-        message_data = ideas_data.get(
-            'messages', DEFAULT_IDEAS_MESSAGES).get(type+'_with_reason')
-    else:
         message_data = ideas_data.get(
             'messages', DEFAULT_IDEAS_MESSAGES).get(type)
     return generate_message(lord_format(message_data,
@@ -171,12 +174,14 @@ class VotingModal(nextcord.ui.Modal):
             view = await ReactionConfirmView(guild)
             view.promote.disabled = True
             view.demote.disabled = True
+
         if revoting:
             button = view.approve if self.voting_type == 'accept' else view.deny
             button.disabled = True
         else:
             view.approve.disabled = True
             view.deny.disabled = True
+
         return view
 
     @staticmethod
@@ -534,7 +539,7 @@ class IdeaModal(nextcord.ui.Modal):
             label=i18n.t(locale, 'ideas.idea-modal.label'),
             style=nextcord.TextInputStyle.paragraph,
             placeholder=i18n.t(locale, 'ideas.idea-modal.placeholder'),
-            min_length=10,
+            min_length=ideas_data.get('min_length', DEFAULT_IDEAS_MIN_LENGTH),
             max_length=1500
         )
         self.add_item(self.idea)
@@ -576,8 +581,10 @@ class IdeaModal(nextcord.ui.Modal):
 
     @staticmethod
     async def create_thread(locale: str, message: nextcord.Message, ideas_data: IdeasPayload, payload: dict) -> None:
-        if ideas_data.get('thread_open'):
-            DEFAULT_THREAD_NAME = get_default_payload(locale)['thread_name']
+        if not ideas_data.get('thread_open'):
+            return
+
+        DEFAULT_THREAD_NAME = get_default_payload(locale)['thread_name']
         thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
         await message.create_thread(name=lord_format(thread_name,
                                                      payload))

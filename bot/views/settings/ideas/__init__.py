@@ -1,18 +1,21 @@
+import contextlib
 import nextcord
 
-from bot.misc.utils import AsyncSterilization, generate_message, get_payload, lord_format
+from bot.misc.utils import AsyncSterilization
 
-from bot.resources.info import DEFAULT_IDEAS_MESSAGES
+from bot.resources.info import DEFAULT_IDEAS_NAMES, DEFAULT_IDEAS_NAMES_RU, DEFAULT_IDEAS_PAYLOAD, DEFAULT_IDEAS_PAYLOAD_RU
 from bot.views.settings._view import DefaultSettingsView
 from bot.views.settings.ideas.distribution.base import FunctionOptionItem, ViewOptionItem
 from bot.views.settings.ideas.embeds import get_embed
+from bot.misc.utils import AsyncSterilization, generate_message, get_payload, lord_format
+from bot.views.ideas import IdeaView, get_default_payload
 from .distribution import distrubuters
 
 from bot.databases.varstructs import IdeasPayload
 from bot.databases import GuildDateBases
 from bot.views import settings_menu
-from bot.views.ideas import IdeaView, get_default_payload
 from bot.languages import i18n
+from .selector import IdeasSelectorView
 
 
 @AsyncSterilization
@@ -61,91 +64,146 @@ class IdeasView(DefaultSettingsView):
     async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         locale: str = await gdb.get('language')
+        color = await gdb.get('color')
         ideas: IdeasPayload = await gdb.get('ideas', {})
         enabled = ideas.get('enabled')
 
-        self.embed = await get_embed(guild)
-
         super().__init__()
 
-        idd = await IdeasDropDown(guild)
-        self.add_item(idd)
+        if ideas.get('channel_offers_id'):
+            self.embed = await get_embed(guild)
+
+            self.remove_item(self.create)
+            self.remove_item(self.select)
+
+            idd = await IdeasDropDown(guild)
+            self.add_item(idd)
+
+            if enabled:
+                self.switch.style = nextcord.ButtonStyle.red
+                self.switch.label = i18n.t(locale, 'settings.button.disable')
+            else:
+                self.switch.style = nextcord.ButtonStyle.green
+                self.switch.label = i18n.t(locale, 'settings.button.enable')
+        else:
+            self.embed = nextcord.Embed(
+                title=i18n.t(locale, 'settings.ideas.init.title'),
+                description=i18n.t(locale, 'settings.ideas.init.description'),
+                color=color
+            )
+
+            self.remove_item(self.delete)
+            self.remove_item(self.switch)
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.enable.label = i18n.t(locale, 'settings.button.enable')
-        self.disable.label = i18n.t(locale, 'settings.button.disable')
-
-        if enabled:
-            self.remove_item(self.enable)
-        else:
-            self.remove_item(self.disable)
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
+        self.create.label = i18n.t(locale, 'settings.button.create')
+        self.select.label = i18n.t(locale, 'settings.button.select')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
         view = await settings_menu.SettingsView(interaction.user)
-
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Enable', style=nextcord.ButtonStyle.blurple)
-    async def enable(self,
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
+    async def delete(self,
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        locale = await gdb.get('language')
-        ideas: IdeasPayload = await gdb.get('ideas')
+        ideas: IdeasPayload = await gdb.get('ideas', {})
 
-        channel_suggest_id = ideas.get("channel_suggest_id")
-        channel_offers_id = ideas.get("channel_offers_id")
+        channels = ['channel_suggest_id', 'channel_approved_id',
+                    'channel_denied_id', 'channel_offers_id']
+        for chnl in channels:
+            channel = interaction.guild.get_channel(ideas.get(chnl))
+            if channel is None:
+                continue
 
-        channel_suggest = interaction.guild.get_channel(channel_suggest_id)
-        channel_offers = interaction.guild.get_channel(channel_offers_id)
+            with contextlib.suppress(nextcord.HTTPException):
+                await channel.delete()
 
-        if not (channel_suggest and channel_offers):
-            await interaction.response.send_message(
-                i18n.t(locale, 'settings.ideas.init.error.enable'),
-                ephemeral=True
-            )
-            return
-
-        suggestion_message_data = ideas.get('messages', get_default_payload(locale)[
-                                            'messages']).get('suggestion')
-        suggestion_message = generate_message(lord_format(suggestion_message_data,
-                                                          get_payload(guild=interaction.guild)))
-
-        view = await IdeaView(interaction.guild)
-        message_suggest = await channel_suggest.send(**suggestion_message, view=view)
-
-        ideas['message_suggest_id'] = message_suggest.id
-        ideas['enabled'] = True
-        await gdb.set('ideas', ideas)
+        await gdb.set('ideas', {})
 
         view = await IdeasView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Disable', style=nextcord.ButtonStyle.red)
-    async def disable(self,
-                      button: nextcord.ui.Button,
-                      interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Switch')
+    async def switch(self,
+                     button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        ideas: IdeasPayload = await gdb.get('ideas')
+        await gdb.set_on_json('ideas', 'enabled', not await gdb.get('enabled'))
 
-        channel_suggest_id = ideas.get("channel_suggest_id")
-        channel_suggest = interaction.guild.get_channel(channel_suggest_id)
-        message_suggest_id = ideas.get("message_suggest_id")
+        view = await IdeasView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
-        if channel_suggest and message_suggest_id:
-            message_suggest = channel_suggest.get_partial_message(
-                message_suggest_id)
-            try:
-                await message_suggest.delete()
-            except nextcord.errors.HTTPException:
-                pass
+    @nextcord.ui.button(label='Create', style=nextcord.ButtonStyle.blurple)
+    async def create(self,
+                     button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
+        await interaction.response.defer()
 
-        ideas['enabled'] = False
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
+        ideas = DEFAULT_IDEAS_PAYLOAD_RU if locale == 'ru' else DEFAULT_IDEAS_PAYLOAD
+        names = ideas.get('names')
 
+        category = await interaction.guild.create_category(names.get('category'))
+
+        suggestion_channel = await interaction.guild.create_text_channel(
+            name=names.get('suggest'),
+            category=category,
+            overwrites={
+                interaction.guild.default_role: nextcord.PermissionOverwrite(view_channel=True,
+                                                                             read_message_history=True,
+                                                                             send_messages=False)
+            }
+        )
+
+        view = await IdeaView(interaction.guild)
+        suggestion_message_data = ideas.get('messages').get('suggestion')
+        suggestion_message = generate_message(lord_format(suggestion_message_data,
+                                                          get_payload(guild=interaction.guild)))
+        message_suggest = await suggestion_channel.send(**suggestion_message, view=view)
+        message_suggest_id = message_suggest.id
+
+        offers_channel = await interaction.guild.create_text_channel(
+            name=names.get('offers'),
+            category=category,
+            overwrites={
+                interaction.guild.default_role: nextcord.PermissionOverwrite(view_channel=True,
+                                                                             read_message_history=True,
+                                                                             send_messages=False)
+            }
+        )
+
+        approved_channel = await interaction.guild.create_text_channel(
+            name=names.get('approved'),
+            category=category,
+            overwrites={
+                interaction.guild.default_role: nextcord.PermissionOverwrite(view_channel=True,
+                                                                             read_message_history=True,
+                                                                             send_messages=False)
+            }
+        )
+
+        ideas.update({
+            'enabled': True,
+            'channel_offers_id': offers_channel.id,
+            'channel_approved_id': approved_channel.id,
+            'channel_suggest_id': suggestion_channel.id,
+            'message_suggest_id': message_suggest_id
+        })
         await gdb.set('ideas', ideas)
 
         view = await IdeasView(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Select', style=nextcord.ButtonStyle.success)
+    async def select(self,
+                     button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
+        view = await IdeasSelectorView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

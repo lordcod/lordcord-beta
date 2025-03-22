@@ -9,6 +9,7 @@ emojis.json
 assets/
 temp.txt
 temp/
+auto/
 
 node_modules
 package-lock.json

@@ -29,13 +29,15 @@ class InteractionsEvent(commands.Cog):
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'interaction.error.expired.title'),
-            description=i18n.t(locale, 'interaction.error.expired.description'),
+            description=i18n.t(
+                locale, 'interaction.error.expired.description'),
             color=color
         )
         if set(interaction.data['custom_id']) - set(hexdigits):
             embed.add_field(
-                '',
-                i18n.t(locale, 'interaction.error.expired.support',  DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER)
+                name='',
+                value=i18n.t(locale, 'interaction.error.expired.support',
+                             DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER)
             )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 

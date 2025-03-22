@@ -5,7 +5,6 @@ from logging import _srcfile
 import os
 import sys
 import traceback
-import aiohttp
 import asyncio
 
 
@@ -86,29 +85,22 @@ def formatter_discord_message(message, use_color=True):
 
 
 async def post_mes(webhook_url: str, text: str) -> None:
+    from bot.main import bot
     async with task_lock:
-        for _ in range(3):
-            async with aiohttp.ClientSession() as session:
-                data = {
-                    'content': '```ansi\n' + text + '```'
-                }
-                async with session.post(webhook_url, data=data) as response:
-                    if response.ok:
-                        break
+        data = {
+            'content': '```ansi\n' + text + '```'
+        }
+        async with bot.session.post(webhook_url, data=data) as response:
+            if response.ok:
+                return
 
-                    if response.status == 429:
-                        seconds = int(response.headers.get(
-                            'X-RateLimit-Reset-After', 0))
-                        logging.debug(
-                            logging.WARNING, 'Sending the log was delayed for %d seconds', seconds)
-                        await asyncio.sleep(seconds)
-                        continue
-
-                    try:
-                        response.raise_for_status()
-                    except Exception as exc:
-                        logging.debug(logging.ERROR,
-                                      "The log could not be sent", exc_info=exc)
+            if response.status == 429:
+                seconds = int(response.headers.get(
+                    'X-RateLimit-Reset-After', 0))
+                logging.warning(
+                    'Sending the log was delayed for %d seconds', seconds)
+                await asyncio.sleep(seconds)
+                post_mes(webhook_url, text)
 
 
 class StandartFormatter(logging.Formatter):
@@ -172,6 +164,7 @@ class LordLogger(logging.Logger):
                 level = dfl_level
 
         logging.Logger.__init__(self, name, level)
+        [self.removeHandler(hand) for hand in self.handlers]
 
         color_formatter = ColoredFormatter(self.COLOR_FORMAT)
         self.console = logging.StreamHandler()

@@ -11,11 +11,11 @@ from bot.misc.lordbot import LordBot
 from bot.misc.ratelimit import Cooldown
 from bot.resources import errors
 from bot.databases import CommandDB
+from bot.views.delete_message import DeleteMessageView
 from bot.resources.errors import (AuthorizationError, CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
                                   CommandOnCooldown)
-from bot.resources.ether import Emoji
 from bot.resources.info import DISCORD_SUPPORT_SERVER
 
 _log = logging.getLogger(__name__)

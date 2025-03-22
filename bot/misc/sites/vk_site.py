@@ -36,7 +36,7 @@ class VkSite:
         app = self._setup()
 
         config = uvicorn.Config(app, host='0.0.0.0',
-                                port=5000, log_level="info")
+                                port=5000, log_level="info", log_config={'verison': 1})
         server = uvicorn.Server(config)
         await server.serve()
 

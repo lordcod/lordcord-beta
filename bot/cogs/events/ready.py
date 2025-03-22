@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Dict
 from nextcord.ext import commands
 import orjson
@@ -12,6 +13,7 @@ from bot.misc.lordbot import LordBot
 from bot.misc.utils import AsyncSterilization
 from bot.resources import ether
 from bot.resources.ether import ColorType
+from bot.views.delete_message import DeleteMessageView
 from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
@@ -41,7 +43,7 @@ class ReadyEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await asyncio.gather(
+        results = await asyncio.gather(
             self.add_views(),
             self.get_emojis(),
             self.find_not_data_commands(),
@@ -49,14 +51,20 @@ class ReadyEvent(commands.Cog):
             self.process_temp_bans(),
             self.process_giveaways(),
             self.process_guild_delete_tasks(),
+            self.process_auto_load_commands_data(),
             return_exceptions=True
         )
+        for i, res in enumerate(results, start=1):
+            if isinstance(res, Exception):
+                _log.debug(
+                    '[%d][%s] Launching the bot was error: %s', i, type(res), res)
 
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def add_views(self):
         views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
-                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView, AdvancedTempVoiceView]
+                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView,
+                 AdvancedTempVoiceView, DeleteMessageView]
         for view in views:
             if isinstance(view, AsyncSterilization):
                 rs = await view()
@@ -104,6 +112,51 @@ class ReadyEvent(commands.Cog):
         if cmd_wnf:
             _log.info(
                 f"Was not found command information: {', '.join(cmd_wnf)}")
+
+    async def process_auto_load_commands_data(self):
+        from bot.languages.help import get_command
+        if not os.path.exists('auto'):
+            os.mkdir('auto')
+
+        commands = []
+        for cmd in self.bot.commands:
+            cmd_data = get_command(cmd.name)
+            if cmd_data is None:
+                cmd_data = {}
+
+            if cmd_data.get('category') == 'interactions':
+                continue
+
+            cmd_params = len(cmd.params or [])-2
+            if cmd_data.get('count_args', cmd_params) != cmd_params:
+                _log.debug(
+                    '[%s] %d/%d The number of arguments in the command does not match the documentation',
+                    cmd.name,
+                    cmd_data.get('count_args', cmd_params),
+                    cmd_params
+                )
+
+            cmd_aliases = list(cmd.aliases or [])
+            if len(cmd_aliases) != len(cmd_data.get('aliases', cmd_aliases)):
+                _log.debug(
+                    '[%s] The number of aliases in the command does not match the documentation', cmd.name)
+
+            data = {
+                'name': cmd.name,
+                'category': cmd_data.get('category', cmd.cog_name),
+                'aliases': cmd_aliases,
+                'allowed_disabled': cmd_data.get('allowed_disabled', not cmd.enabled),
+                'count_args': cmd_params,
+                'count_examples': cmd_data.get('count_examples', 0)
+            }
+            commands.append(data)
+
+        commands.sort(key=lambda item: item['category'])
+
+        with open('auto/commands.json', 'wb+') as file:
+            file.write(orjson.dumps(commands))
+
+        _log.debug('Loaded commands data')
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()

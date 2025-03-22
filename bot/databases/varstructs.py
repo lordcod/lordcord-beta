@@ -74,6 +74,14 @@ class IdeasSuggestSystem(IntEnum):
     EVERYTHING = 2
 
 
+class IdeasNames(TypedDict, total=False):
+    category: str
+    suggest: str
+    offers: str
+    approved: str
+    rejected: str
+
+
 class IdeasPayload(TypedDict, total=False):
     enabled: bool
     channel_suggest_id: int
@@ -86,6 +94,7 @@ class IdeasPayload(TypedDict, total=False):
     reaction_system: IdeasReactionSystem
     suggest_system: IdeasSuggestSystem
     revoting: bool
+    names: IdeasNames
     thread_name: str
     thread_open: bool
     thread_delete: bool
@@ -93,6 +102,7 @@ class IdeasPayload(TypedDict, total=False):
     messages: IdeasMessagesPayload
     reactions: Optional[IdeasReactionsPayload]
     components: IdeasComponentsPayload
+    min_length: int
     # User id,  moderator_id, reason
     ban_users: List[Tuple[int, int, str]]
     # User id, moderator_id, Timestamp, reason

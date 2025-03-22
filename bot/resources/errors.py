@@ -12,6 +12,7 @@ from bot.languages.help import CommandOption, get_command
 from typing import Any, Callable, Coroutine, List, TypeVar, Union, get_args, get_origin
 
 from bot.resources.info import DISCORD_SUPPORT_SERVER
+from bot.views.delete_message import DeleteMessageView
 
 _log = logging.getLogger(__name__)
 ExceptionT = TypeVar("ExceptionT", bound=BaseException)
@@ -252,9 +253,11 @@ class CallbackCommandError:
         _log.error(
             "Ignoring exception in command %s", self.ctx.command, exc_info=error)
 
-        await self.ctx.author.send(
+        view = DeleteMessageView(self.locale)
+        await self.ctx.send(
             i18n.t(self.locale, 'interaction.error.command',
                    DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+            view=view,
             flags=nextcord.MessageFlags(
                 suppress_embeds=True, suppress_notifications=True)
         )
