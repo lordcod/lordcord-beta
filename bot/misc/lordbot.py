@@ -65,15 +65,14 @@ class LordBot(commands.AutoShardedBot):
         intents = nextcord.Intents.all()
         intents.presences = False
 
-        proxy_url = os.getenv('PROXY')
-        if proxy_url:
+        if proxy_url := os.getenv('PROXY'):
             connector = ProxyConnector.from_url(proxy_url, loop=loop)
         else:
             connector = None
+        print(proxy_url, connector)
 
         super().__init__(
             loop=loop,
-            command_prefix=self.get_command_prefixs,
             intents=intents,
             status=nextcord.Status.idle,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
@@ -176,17 +175,15 @@ class LordBot(commands.AutoShardedBot):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
 
-    @staticmethod
-    async def get_command_prefixs(
-        bot: commands.Bot,
-        msg: nextcord.Message
-    ) -> List[str]:
+    async def get_prefix(self, msg: nextcord.Message):
         "Returns a list of prefixes that can be used when using bot commands"
+        mentions_prefix = [f"<@{self.user.id}> ", f"<@!{self.user.id}> "]
         if msg.guild is None:
-            return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
+            return [DEFAULT_PREFIX, *mentions_prefix]
+
         gdb = GuildDateBases(msg.guild.id)
         prefix = await gdb.get('prefix', DEFAULT_PREFIX)
-        return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
+        return [prefix, *mentions_prefix]
 
     def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
         """A decorator that registers an event to listen to.

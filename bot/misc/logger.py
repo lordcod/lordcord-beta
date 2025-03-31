@@ -86,6 +86,8 @@ def formatter_discord_message(message, use_color=True):
 
 async def post_mes(webhook_url: str, text: str) -> None:
     from bot.main import bot
+    _log = logging.getLogger('beta.bot.misc.webhook')
+
     async with task_lock:
         data = {
             'content': '```ansi\n' + text + '```'
@@ -93,6 +95,11 @@ async def post_mes(webhook_url: str, text: str) -> None:
         async with bot.session.post(webhook_url, data=data) as response:
             if response.ok:
                 return
+
+            try:
+                response.raise_for_status()
+            except Exception:
+                _log.exception('Error send webhook message')
 
             if response.status == 429:
                 seconds = int(response.headers.get(
