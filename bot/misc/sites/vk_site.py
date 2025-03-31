@@ -5,16 +5,18 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 import uvicorn
 from bot.misc.api.vk_api_auth import VkApiAuth
+from os import getenv
+from fastapi.templating import Jinja2Templates
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
 SALT = '4051975f'
-app = FastAPI()
 vk_api_auth = VkApiAuth(
-    51922313,
-    'https://lordcord.xyz/vk-callback'
+    int(getenv('VK_CLIENT_ID')),
+    getenv('VK_CALLBACK_URL')
 )
+templates = Jinja2Templates(directory="templates")
 
 
 class VkSite:
@@ -35,9 +37,14 @@ class VkSite:
         self.__running = True
         app = self._setup()
 
-        config = uvicorn.Config(app, host='0.0.0.0',
-                                port=5000, log_level="info",
-                                log_config={'version': 1})
+        config = uvicorn.Config(
+            app,
+            host='0.0.0.0',
+            port=5000,
+            log_level=None,
+            access_log=None,
+            log_config=None,
+        )
         server = uvicorn.Server(config)
         await server.serve()
 
@@ -45,22 +52,29 @@ class VkSite:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.run())
 
-    def _setup(self):
+    def _setup(self) -> APIRouter:
         self.app = FastAPI(debug=True)
-        for router in self._get_routers():
-            self.app.include_router(router)
+
+        self.app.add_api_route(
+            '/vk-callback',
+            self._get_vk_callback,
+            response_class=HTMLResponse
+        )
+        self.app.add_api_route(
+            '/',
+            self._get_invite,
+            response_class=RedirectResponse
+        )
+
         return self.app
 
-    def _get_routers(self) -> APIRouter:
-        routers = []
+    def _get_invite(self, request: Request):
+        if id := request.query_params.get('group'):
+            return self.vk_api_auth.get_auth_group_link(id)
+        else:
+            return self.vk_api_auth.get_auth_link('test')
 
-        router = APIRouter()
-        router.add_api_route(
-            '/', self._get, methods=["HEAD", "GET"], status_code=204)
-        routers.append(router)
-        return routers
-
-    async def _get(self, request: Request):
+    async def _get_vk_callback(self, request: Request):
         params = request.query_params
 
         if vk_api_auth.session is None:
@@ -75,16 +89,20 @@ class VkSite:
                 return data['error_description']
 
             self.bot.dispatch('vk_user', data)
-            return RedirectResponse('/')
+            return RedirectResponse('/accept')
 
         for key in params.keys():
             if key.startswith('access_token_'):
                 self.bot.dispatch('vk_club',
                                   int(key.removeprefix('access_token_')),
                                   params.get(key))
-                return RedirectResponse('/')
+                return RedirectResponse('/accept')
 
-        return HTMLResponse(open('assets/vksite_response.html', 'rb').read())
+        return templates.TemplateResponse(
+            request=request,
+            name="response.html",
+            context={"url": '/vk-callback'}
+        )
 
 
 if __name__ == '__main__':

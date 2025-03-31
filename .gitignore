@@ -10,6 +10,7 @@ assets/
 temp.txt
 temp/
 auto/
+keys/
 
 node_modules
 package-lock.json

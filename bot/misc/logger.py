@@ -30,6 +30,7 @@ DEFAULT_LOGS = {
     'colormath': logging.INFO,
     'aiosqlite': logging.INFO,
     'tortoise': logging.INFO,
+    'uvicorn': logging.INFO,
 }
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
