@@ -69,7 +69,7 @@ class LordBot(commands.AutoShardedBot):
             connector = ProxyConnector.from_url(proxy_url, loop=loop)
         else:
             connector = None
-        print(proxy_url, connector)
+        _log.trace('Proxy %s, %s', proxy_url, connector)
 
         super().__init__(
             loop=loop,

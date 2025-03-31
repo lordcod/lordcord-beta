@@ -63,13 +63,10 @@ class IWMDropDown(nextcord.ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
-        image: str
         if value == "my-image":
             modal = await MyIWMModal(interaction.guild_id)
             await interaction.response.send_modal(modal)
             return
-
-        await interaction.response.defer(with_message=True)
 
         image = utils.welcome_message_items[value][1]
         await self.gdb.set_on_json('greeting_message', 'image', image)
