@@ -6,7 +6,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.lordbot import LordBot
-from bot.misc.noti.ytypes import Channel
+from bot.misc.noti.youtube.types import Channel
 from bot.misc.utils import AsyncSterilization, generate_message
 from bot.resources.info import DEFAULT_YOUTUBE_MESSAGE
 from bot.views.settings import notification
@@ -211,10 +211,10 @@ class YoutubeItemView(nextcord.ui.View):
             cid = data['yt_id']
             bot: LordBot = guild._state._get_client()
 
-            if cid in bot.ytnoti.user_info:
-                userinfo = bot.ytnoti.user_info[cid]
+            if cid in bot.ytnoti.cache.user_info:
+                userinfo = bot.ytnoti.cache.user_info[cid]
             else:
-                response = await bot.ytnoti.get_channel_ids([cid])
+                response = await bot.ytnoti.api.get_channel_ids([cid])
                 if len(response) > 0:
                     userinfo = response[0]
 

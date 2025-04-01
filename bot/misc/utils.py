@@ -44,8 +44,8 @@ from colormath.color_diff import delta_e_cie2000
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
-    from bot.misc.noti.twnoti import Stream as TwStream, User as TwUser
-    from bot.misc.noti.ytnoti import Video as YtVideo
+    from bot.misc.noti.twitch.noti import Stream as TwStream, User as TwUser
+    from bot.misc.noti.youtube.noti import Video as YtVideo
 
 _log = logging.getLogger(__name__)
 T = TypeVar('T')

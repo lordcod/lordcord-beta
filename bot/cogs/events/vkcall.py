@@ -23,8 +23,6 @@ class VkCallEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_vk_club(self, id: int, token: str):
-        _log.trace("Id %s, Token %s", id, token)
-
         vk = VkApi(self.bot, token)
 
         code = (await vk.method('groups.getCallbackConfirmationCode',

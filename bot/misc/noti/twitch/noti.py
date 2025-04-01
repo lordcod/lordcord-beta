@@ -14,9 +14,9 @@ from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
 
 try:
-    from .twtypes import Stream, User
+    from .types import Stream, User
 except ImportError:
-    from twtypes import Stream, User
+    from bot.misc.noti.twitch.types import Stream, User
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
@@ -54,6 +54,7 @@ class TwCache:
 class TwNotiAPI(NotificationApi):
     twitch_api_access_token: Optional[str] = None
     twitch_api_access_token_end: Optional[int] = None
+
     if TYPE_CHECKING:
         cache: TwCache
         client_id: str
