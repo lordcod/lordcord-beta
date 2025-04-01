@@ -1,129 +1,131 @@
 from __future__ import annotations
-
-import logging
-import random
-import string
-import time
-from typing import TYPE_CHECKING, Dict
-from aiohttp import ContentTypeError
-import orjson
 import asyncio
-from uvicorn import Config, Server
-from fastapi import FastAPI, APIRouter, Request, Response
-
+from typing import TYPE_CHECKING
+from fastapi import APIRouter, FastAPI, Request
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+import uvicorn
+from bot.misc.api.vk_api_auth import VkApiAuth
+from os import getenv
+from fastapi.templating import Jinja2Templates
+from bot.databases.localdb import get_table
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
+SALT = '4051975f'
+vk_api_auth = VkApiAuth(
+    int(getenv('VK_CLIENT_ID')),
+    getenv('API_URL')+'/vk-callback'
+)
+templates = Jinja2Templates(directory="templates")
 
-_log = logging.getLogger(__name__)
 
-
-class ApiSite:
-    endpoint: str
-    password: str
-    callback_url: str
-    app: FastAPI
-    __running: bool = False
-
-    def __init__(self,
-                 bot: LordBot,
-                 handlers: list) -> None:
+class VkSite:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        self.handlers = handlers
-        self._cache: Dict[str, int] = {}
+        self.vk_api_auth = vk_api_auth
+        self.__running = False
 
     def is_running(self) -> bool:
         return self.__running
 
-    async def __run(self,
-                    *,
-                    endpoint: str = '/',
-                    port: int = 8000) -> None:
+    async def run(self,
+                  *,
+                  port: int = 5000) -> None:
         if self.__running:
             return
 
         self.__running = True
-        server = self._setup(endpoint=endpoint, port=port)
-        try:
-            server.config.setup_event_loop()
-            await server.serve()
-        except KeyboardInterrupt:
-            await server.shutdown()
+        app = self._setup()
 
-    def run(self):
+        config = uvicorn.Config(
+            app,
+            host='0.0.0.0',
+            port=port,
+            log_level=None,
+            access_log=None,
+            log_config=None,
+        )
+        server = uvicorn.Server(config)
+        await server.serve()
+
+    def run_sync(self):
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.__run())
+        loop.run_until_complete(self.run())
 
-    def _setup(self, endpoint: str, port: int):
-        self.endpoint = endpoint
-        self.password = ''.join(
-            [random.choice(string.hexdigits) for _ in range(25)])
-
+    def _setup(self) -> APIRouter:
         self.app = FastAPI(debug=True)
-        for router in self._get_routers():
-            self.app.include_router(router)
 
-        config = Config(self.app, "0.0.0.0", port,
-                        log_config=None, log_level=logging.CRITICAL)
-        server = Server(config)
-        return server
+        self.app.add_api_route(
+            '/vk-callback',
+            self._get_vk_callback,
+            response_class=HTMLResponse
+        )
+        self.app.add_api_route(
+            '/vk-callback',
+            self._post_vk_callback,
+            methods=['POST'],
+            response_class=PlainTextResponse
+        )
+        self.app.add_api_route(
+            '/',
+            self._get_invite,
+            response_class=RedirectResponse
+        )
 
-    def _get_routers(self) -> APIRouter:
-        routers = []
+        return self.app
 
-        router = APIRouter()
-        router.add_api_route(self.endpoint, self._get, methods=["HEAD", "GET"])
-        router.add_api_route(self.endpoint, self._post, methods=["POST"])
-        routers.append(router)
+    async def _post_vk_callback(self, request: Request):
+        data = await request.json()
 
-        router = APIRouter()
-        router.add_api_route(self.endpoint+'update/',
-                             self._post_update, methods=["POST"])
-        routers.append(router)
+        if data['type'] == 'confirmation':
+            callback_code_db = await get_table('vk_callback_code')
+            code = await callback_code_db.get(data['group_id'])
+            return code
 
-        return routers
+        self.bot.dispatch('vk_post', data)
 
-    async def _post_update(self, request: Request):
-        result = await self.bot.update_api_config()
-        if result:
-            return Response(status_code=204)
+        return 'ok'
+
+    async def _get_invite(self, request: Request):
+        if id := request.query_params.get('group'):
+            return self.vk_api_auth.get_auth_group_link(id)
         else:
-            return Response(status_code=500)
+            return self.vk_api_auth.get_auth_link('test')
 
-    async def _get(self, request: Request):
-        return Response(status_code=204)
+    async def _get_vk_callback(self, request: Request):
+        params = request.query_params
 
-    async def _post(self, request: Request):
-        if not self._is_authorization(request):
-            return Response(status_code=401)
+        if vk_api_auth.session is None:
+            vk_api_auth.session = self.bot.session
 
-        try:
-            json = await request.json()
+        if not set(['code', 'state', 'device_id']) - set(params.keys()):
+            data = await vk_api_auth.verifi(params.get('state'),
+                                            params.get('device_id'),
+                                            params.get('code'))
 
-            endpoint = json['endpoint']
-            data = json['data']
+            if 'error' in data:
+                return data['error_description']
 
-            func = self.handlers[endpoint]
-        except ContentTypeError:
-            return Response(status_code=400)
-        except KeyError:
-            return Response(status_code=400)
-        else:
-            self._cache[endpoint] = time.time()
-            result = await func(self.bot, data)
-            return Response(
-                orjson.dumps(result),
-                headers={
-                    'Content-Type': 'application/json'
-                }
-            )
+            self.bot.dispatch('vk_user', data)
+            return RedirectResponse('/accept')
 
-    def _is_authorization(self, request: Request) -> bool:
-        password = request.headers.get('Authorization')
-        return self.password == password
+        for key in params.keys():
+            if key.startswith('access_token_'):
+                self.bot.dispatch('vk_club',
+                                  int(key.removeprefix('access_token_')),
+                                  params.get(key))
+                return RedirectResponse('/accept')
+
+        return templates.TemplateResponse(
+            request=request,
+            name="response.html",
+            context={"url": '/vk-callback'}
+        )
 
 
 if __name__ == '__main__':
-    api = ApiSite('Any', [])
-    api.run()
+    class Bot:
+        def dispatch(self, *args):
+            print(args)
+    VkSite(Bot()).run_sync()

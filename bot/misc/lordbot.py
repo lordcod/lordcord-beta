@@ -14,7 +14,7 @@ from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
-from bot.misc.sites.vk_site import VkSite
+from bot.misc.sites.site import VkSite
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
