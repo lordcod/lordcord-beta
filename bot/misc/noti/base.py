@@ -37,7 +37,8 @@ class NotificationApi:
                 _log.debug('Temporary error in the request', exc_info=exc)
                 exception = exc
             except Exception as exc:
-                _log.error('It was not possible to get data from the api', exc_info=exc)
+                _log.error(
+                    'It was not possible to get data from the api', exc_info=exc)
                 exception = exc
 
             if response.ok:
@@ -46,7 +47,8 @@ class NotificationApi:
                 try:
                     response.raise_for_status()
                 except Exception as exc:
-                    _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data, exc_info=exc)
+                    _log.error('It was not possible to get data from the api, status: %s, data: %s',
+                               response.status, data, exc_info=exc)
                     exception = exc
 
             await asyncio.sleep(30)
@@ -83,7 +85,8 @@ class Notification(Generic[T]):
     @running.setter
     def running(self, __value: bool) -> None:
         if not isinstance(__value, bool):
-            raise TypeError('The %s type is not supported' % (type(__value).__name__,))
+            raise TypeError('The %s type is not supported' %
+                            (type(__value).__name__,))
         self._running = __value
 
     async def parse(self) -> None:

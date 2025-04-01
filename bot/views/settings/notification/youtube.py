@@ -162,7 +162,7 @@ class YoutubeItemModal(nextcord.ui.Modal):
 
         username = self.username.value
 
-        channels = await interaction.client.ytnoti.get_channel_ids_additionally(username)
+        channels = await interaction.client.ytnoti.api.search_channel_ids(username)
         if not channels:
             await interaction.followup.send(i18n.t(locale, 'settings.notifi.youtube.modal.error'))
             return

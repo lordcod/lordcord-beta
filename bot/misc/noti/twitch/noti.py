@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple
 from aiohttp.web_exceptions import HTTPUnauthorized
 
 from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases.models import GuildModel, Q
 from bot.misc.noti.base import Notification, NotificationApi
 from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
@@ -182,6 +183,11 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
             return
 
         _log.debug('Started twitch parsing')
+
+        gms = await GuildModel.filter(~Q(twitch_notification={}))
+        for gm in gms:
+            for data in gm.twitch_notification.values():
+                await self.add_channel(gm.id, data['username'])
 
         for uid in self.usernames:
             with_started, _ = await self.api.is_streaming(uid)

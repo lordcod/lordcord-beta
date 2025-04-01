@@ -103,9 +103,8 @@ class LordBot(commands.AutoShardedBot):
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
         self.add_listener(self.listen_on_connect, 'on_connect')
+        self.add_listener(self.listen_on_ready, 'on_ready')
         self.loop.create_task(self.vk_site.run())
-        self.loop.create_task(self.twnoti.parse())
-        self.loop.create_task(self.ytnoti.parse_youtube())
 
     def get_git_info(self):
         repo = git.Repo(search_parent_directories=True)
@@ -215,6 +214,10 @@ class LordBot(commands.AutoShardedBot):
         name = name or coro.__name__
 
         setattr(self, name, coro)
+
+    async def listen_on_ready(self) -> None:
+        self.loop.create_task(self.twnoti.parse())
+        self.loop.create_task(self.ytnoti.parse())
 
     async def listen_on_connect(self) -> None:
         if not self.release:

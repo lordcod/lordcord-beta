@@ -10,7 +10,7 @@ from bot.misc.utils import get_parser_args
 
 bot = LordBot(
     loop=asyncio.get_event_loop(),
-    chunk_guilds_at_startup=True
+    chunk_guilds_at_startup=False
 )
 
 

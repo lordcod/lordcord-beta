@@ -1,7 +1,10 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import nextcord
-import orjson
-from bot.databases.varstructs import IdeasComponentsPayload, IdeasMessagesPayload, IdeasPayload, IdeasReactionsPayload, TicketsItemPayload
 from bot.resources.ether import ColorType, Emoji
+
+if TYPE_CHECKING:
+    from bot.databases.varstructs import IdeasMessagesPayload, IdeasPayload,  TicketsItemPayload
 
 DISCORD_SUPPORT_SERVER = 'https://discord.com/invite/np6RhahkZH'
 SITE = 'https://lordcord.fun'

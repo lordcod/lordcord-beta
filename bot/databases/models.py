@@ -1,13 +1,15 @@
+import os
 from tortoise.models import Model
+from tortoise.expressions import Q
 from tortoise import fields, Tortoise, run_async
 import sys
 
-sys.path.append(r'C:\Users\2008d\Downloads\lordbot-0.7.6-beta')
+sys.path.append(os.getcwd())
 
 
 if True:
     from bot.resources import info
-    from .misc import adapter
+    from bot.databases.misc import adapter
 
 
 class JSONField(fields.JSONField):
@@ -102,6 +104,9 @@ if __name__ == '__main__':
             db_url="sqlite://db/.sqlite3",
             modules={'models': ['__main__']},
         )
+        # for gm in await GuildModel.all():
+        #     if gm.youtube_notification is not None:
+        #         print()
         await Tortoise.generate_schemas()
 
     run_async(main())

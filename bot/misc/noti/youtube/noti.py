@@ -10,6 +10,7 @@ import xmltodict
 from datetime import datetime
 
 from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases.models import GuildModel, Q
 from bot.misc.noti.base import Notification, NotificationApi
 from bot.misc.noti.twitch.noti import TwCache
 from bot.misc.utils import get_payload, generate_message, lord_format
@@ -214,10 +215,15 @@ class YtNoti(Notification[YtNotiApi]):
                     await channel.send(**mes_data)
 
     async def parse(self) -> None:
-        if self.__running:
+        if self.running:
             return
 
         _log.debug('Started youtube parsing')
+
+        gms = await GuildModel.filter(~Q(youtube_notification={}))
+        for gm in gms:
+            for data in gm.youtube_notification.values():
+                await self.add_channel(gm.id, data['yt_id'])
 
         for cid in self.cache.channel_ids:
             videos = await self.api.get_video_history(cid)
@@ -235,6 +241,7 @@ class YtNoti(Notification[YtNotiApi]):
             for cid in self.cache.channel_ids:
                 try:
                     videos = await self.api.get_video_history(cid)
+                    _log.trace('Getting videos %s', videos)
                 except Exception as exp:
                     _log.error('An error was received when executing the request (%s)',
                                cid,
@@ -244,6 +251,9 @@ class YtNoti(Notification[YtNotiApi]):
                 vhd, diff = self.cache.video_history.get_diff(videos)
                 self.cache.video_history.extend(diff)
                 gvhd.extend(vhd)
+
+                _log.trace(
+                    'Data about the user %s has been received: %s', cid, diff)
 
             await asyncio.gather(*[self.callback(v) for v in gvhd])
 

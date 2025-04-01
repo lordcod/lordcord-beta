@@ -91,7 +91,7 @@ async def post_mes(webhook_url: str, text: str) -> None:
 
     async with task_lock:
         data = {
-            'content': '```ansi\n' + text + '```'
+            'content': '```ansi\n' + text[:1900] + '```'
         }
         async with bot.session.post(webhook_url, data=data) as response:
             if response.ok:
@@ -100,7 +100,8 @@ async def post_mes(webhook_url: str, text: str) -> None:
             try:
                 response.raise_for_status()
             except Exception:
-                _log.exception('Error send webhook message')
+                _log.exception('Error send webhook message: %s',
+                               await response.json())
 
             if response.status == 429:
                 seconds = int(response.headers.get(
