@@ -6,9 +6,9 @@ import os
 import sys
 import traceback
 import asyncio
-
-
-log_webhook = os.environ.get('log_webhook')
+from os import getenv
+from dotenv import load_dotenv
+load_dotenv()
 
 
 TRACE = logging.DEBUG - 5
@@ -88,7 +88,6 @@ def formatter_discord_message(message, use_color=True):
 async def post_mes(webhook_url: str, text: str) -> None:
     from bot.main import bot
     _log = logging.getLogger('beta.'+__name__)
-    _log.trace('Receive request send message')
 
     async with task_lock:
         data = {
@@ -185,7 +184,7 @@ class LordLogger(logging.Logger):
         self.addHandler(self.console)
 
         color_formatter = DiscordColoredFormatter(self.COLOR_FORMAT)
-        self.discord_handler = DiscordHandler(log_webhook)
+        self.discord_handler = DiscordHandler(getenv('log_webhook'))
         self.discord_handler.setFormatter(color_formatter)
         self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
         if name.startswith(DEFAULT_HTTP_LOGS):
