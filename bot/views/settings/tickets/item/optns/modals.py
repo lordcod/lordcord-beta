@@ -102,17 +102,11 @@ class TicketFormsModal(nextcord.ui.Modal):
         else:
             item = {}
 
-        data = dict(
+        item.update(dict(
             label=self.label.value,
             placeholder=self.placeholder.value,
             default_value=self.default_value.value
-        )
-        for key, value in data.items():
-            if key != 'label' and value.lower().strip() in ('none', '-'):
-                item.pop(key, None)
-                continue
-            if value:
-                item[key] = value
+        ))
 
         if self.selected_item is not None:
             try:
@@ -330,7 +324,7 @@ class TicketFormsView(ViewOptionItem):
                     (i18n.t(locale, 'settings.tickets.modals.info.placeholder'),
                      item.get('placeholder')),
                     (i18n.t(locale, 'settings.tickets.modals.info.default'),
-                     item.get('default_value')[:250]),
+                     item.get('default_value', '')[:250]),
                     (i18n.t(locale, 'settings.tickets.modals.info.style'),
                      get_style(locale, item.get('style', 1))),
                     (i18n.t(locale, 'settings.tickets.modals.info.required'),

@@ -9,7 +9,7 @@ import asyncio
 
 
 log_webhook = os.environ.get('log_webhook')
-loop = asyncio.get_event_loop()
+
 
 TRACE = logging.DEBUG - 5
 CORE = logging.INFO + 5
@@ -87,13 +87,15 @@ def formatter_discord_message(message, use_color=True):
 
 async def post_mes(webhook_url: str, text: str) -> None:
     from bot.main import bot
-    _log = logging.getLogger('beta.bot.misc.webhook')
+    _log = logging.getLogger('beta.'+__name__)
+    _log.trace('Receive request send message')
 
     async with task_lock:
         data = {
             'content': '```ansi\n' + text[:1900] + '```'
         }
         async with bot.session.post(webhook_url, data=data) as response:
+            _log.trace('Send webhook message')
             if response.ok:
                 return
 
@@ -151,6 +153,8 @@ class DiscordHandler(logging.Handler):
         super().__init__()
 
     def emit(self, record: logging.LogRecord) -> None:
+        loop = asyncio.get_event_loop()
+
         try:
             msg = self.format(record)
             task = loop.create_task(post_mes(self.webhook_url, msg))
@@ -250,7 +254,6 @@ class LordLogger(logging.Logger):
 
         logger.trace("Houston, we have a %s", "interesting problem", exc_info=1)
         """
-        self.debug
         if self.isEnabledFor(TRACE):
             self._adt_log(TRACE, msg, *args, **kwargs)
 
