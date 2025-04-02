@@ -288,7 +288,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = None, mapping: Optiona
         return f'{lang}.{path}'
 
     if not data:
-        return data
+        return ''
 
     kwargs['Emoji'] = Emoji
     if mapping is not None:

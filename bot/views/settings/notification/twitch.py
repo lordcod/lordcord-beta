@@ -61,7 +61,7 @@ class TwitchItemModal(nextcord.ui.Modal):
         self.username = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.notifi.twitch.modal.label'),
             placeholder=i18n.t(
-                locale, 'settings.notifi.twitch.modal.description'),
+                locale, 'settings.notifi.youtube.modal.placeholder'),
         )
         self.add_item(self.username)
 
