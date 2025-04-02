@@ -14,7 +14,7 @@ from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
-from bot.misc.sites.site import VkSite
+from bot.misc.sites.site import ApiSite
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
@@ -96,7 +96,7 @@ class LordBot(commands.AutoShardedBot):
 
         self.__session = None
 
-        self.vk_site = VkSite(self)
+        self.api_site = ApiSite(self)
         self.twnoti = TwitchNotification(self)
         self.ytnoti = YoutubeNotification(self)
 
@@ -104,7 +104,7 @@ class LordBot(commands.AutoShardedBot):
 
         self.add_listener(self.listen_on_connect, 'on_connect')
         self.add_listener(self.listen_on_ready, 'on_ready')
-        self.loop.create_task(self.vk_site.run())
+        self.loop.create_task(self.api_site.run())
 
     def get_git_info(self):
         repo = git.Repo(search_parent_directories=True)

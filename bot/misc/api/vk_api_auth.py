@@ -33,7 +33,7 @@ class VkApiAuth:
     def __init__(
         self,
         client_id: int,
-        redirect_uri: str,
+        redirect_uri: Optional[str] = None,
         session: Optional[ClientSession] = None
     ):
         self.client_id = client_id

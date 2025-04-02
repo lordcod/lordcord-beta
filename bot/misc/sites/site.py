@@ -1,29 +1,22 @@
 from __future__ import annotations
+
 import asyncio
 from typing import TYPE_CHECKING
-from fastapi import APIRouter, FastAPI, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from fastapi import APIRouter, FastAPI
 import uvicorn
-from bot.misc.api.vk_api_auth import VkApiAuth
-from os import getenv
-from fastapi.templating import Jinja2Templates
-from bot.databases.localdb import get_table
+
+from bot.misc.sites.routers.command import CommandRouter
+from .routers.database import DataBaseRouter
+from .routers.vk import VkRouter
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
-SALT = '4051975f'
-vk_api_auth = VkApiAuth(
-    int(getenv('VK_CLIENT_ID')),
-    getenv('API_URL')+'/vk-callback'
-)
-templates = Jinja2Templates(directory="templates")
 
-
-class VkSite:
+class ApiSite:
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        self.vk_api_auth = vk_api_auth
+        self.app = FastAPI()
         self.__running = False
 
     def is_running(self) -> bool:
@@ -36,10 +29,12 @@ class VkSite:
             return
 
         self.__running = True
-        app = self._setup()
+
+        router = self._setup()
+        self.app.include_router(router)
 
         config = uvicorn.Config(
-            app,
+            self.app,
             host='0.0.0.0',
             port=port,
             log_level=None,
@@ -54,79 +49,10 @@ class VkSite:
         loop.run_until_complete(self.run())
 
     def _setup(self) -> APIRouter:
-        self.app = FastAPI(debug=True)
+        router = APIRouter()
 
-        self.app.add_api_route(
-            '/vk-callback',
-            self._get_vk_callback,
-            methods=['GET'],
-            response_class=HTMLResponse
-        )
-        self.app.add_api_route(
-            '/vk-callback',
-            self._post_vk_callback,
-            methods=['POST'],
-            response_class=PlainTextResponse
-        )
-        self.app.add_api_route(
-            '/',
-            self._get_invite,
-            response_class=RedirectResponse
-        )
+        router.include_router(VkRouter(self.bot)._setup('/vk'))
+        router.include_router(DataBaseRouter(self.bot)._setup('/database'))
+        router.include_router(CommandRouter(self.bot)._setup('/commands'))
 
-        return self.app
-
-    async def _post_vk_callback(self, request: Request):
-        data = await request.json()
-
-        if data['type'] == 'confirmation':
-            callback_code_db = await get_table('vk_callback_code')
-            code = await callback_code_db.get(data['group_id'])
-            return code
-
-        self.bot.dispatch('vk_post', data)
-
-        return 'ok'
-
-    async def _get_invite(self, request: Request):
-        if id := request.query_params.get('group'):
-            return self.vk_api_auth.get_auth_group_link(id)
-        else:
-            return self.vk_api_auth.get_auth_link('test')
-
-    async def _get_vk_callback(self, request: Request):
-        params = request.query_params
-
-        if vk_api_auth.session is None:
-            vk_api_auth.session = self.bot.session
-
-        if not set(['code', 'state', 'device_id']) - set(params.keys()):
-            data = await vk_api_auth.verifi(params.get('state'),
-                                            params.get('device_id'),
-                                            params.get('code'))
-
-            if 'error' in data:
-                return data['error_description']
-
-            self.bot.dispatch('vk_user', data)
-            return RedirectResponse('/accept')
-
-        for key in params.keys():
-            if key.startswith('access_token_'):
-                self.bot.dispatch('vk_club',
-                                  int(key.removeprefix('access_token_')),
-                                  params.get(key))
-                return RedirectResponse('/accept')
-
-        return templates.TemplateResponse(
-            request=request,
-            name="response.html",
-            context={"url": '/vk-callback'}
-        )
-
-
-if __name__ == '__main__':
-    class Bot:
-        def dispatch(self, *args):
-            print(args)
-    VkSite(Bot()).run_sync()
+        return router
