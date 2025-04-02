@@ -59,6 +59,7 @@ class VkSite:
         self.app.add_api_route(
             '/vk-callback',
             self._get_vk_callback,
+            methods=['GET'],
             response_class=HTMLResponse
         )
         self.app.add_api_route(
