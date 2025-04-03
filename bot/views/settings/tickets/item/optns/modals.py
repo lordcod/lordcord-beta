@@ -8,7 +8,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import ModalItemPayload, TicketsPayload
 from bot.languages import i18n
-from bot.misc.utils import AsyncSterilization, get_emoji_as_color, get_emoji_wrap
+from bot.misc.utils import AsyncSterilization, bool_filter, get_emoji_as_color, get_emoji_wrap
 from .base import ViewOptionItem
 
 
@@ -102,11 +102,10 @@ class TicketFormsModal(nextcord.ui.Modal):
         else:
             item = {}
 
-        item.update(dict(
-            label=self.label.value,
-            placeholder=self.placeholder.value,
-            default_value=self.default_value.value
-        ))
+        data = dict(label=self.label.value,
+                    placeholder=self.placeholder.value,
+                    default_value=self.default_value.value)
+        item.update(bool_filter(data))
 
         if self.selected_item is not None:
             try:

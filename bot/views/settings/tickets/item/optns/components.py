@@ -4,7 +4,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, is_emoji
 from bot.resources.ether import Emoji
 from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU
 from .base import OptionItem, ViewOptionItem
@@ -119,10 +119,15 @@ class ComponentsSelectOptionModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         buttons = ticket_data.get('buttons', {})
         option = buttons.get(self.selected_value)
+
+        if not is_emoji(self.emoji.value):
+            await interaction.response.send_message(i18n.t(locale,
+                                                           'settings.set-reaction.error.located'))
 
         for model in {'label', 'emoji'}:
             value = getattr(self, model).value
@@ -170,7 +175,8 @@ class ComponentsButtonStyleDropDown(nextcord.ui.StringSelect):
                 label=i18n.t(locale, opt['label']),
                 value=style,
                 emoji=opt.get('emoji'),
-                default=button.get('style', nextcord.ButtonStyle.secondary) == style
+                default=button.get(
+                    'style', nextcord.ButtonStyle.secondary) == style
             )
             for style, opt in button_styles.items()
         ]
@@ -182,7 +188,8 @@ class ComponentsButtonStyleDropDown(nextcord.ui.StringSelect):
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
-        ticket_data['buttons'][self.selected_value]['style'] = int(self.values[0])
+        ticket_data['buttons'][self.selected_value]['style'] = int(
+            self.values[0])
         await gdb.set_on_json('tickets', self.message_id, ticket_data)
 
         await OptionItem.edit_panel(self, interaction)
@@ -278,7 +285,8 @@ class ComponentsPlaceholderModal(nextcord.ui.Modal):
                                 label=label))
 
         self.placeholder = nextcord.ui.TextInput(
-            label=i18n.t(locale, 'settings.tickets.components.modal.placeholder'),
+            label=i18n.t(
+                locale, 'settings.tickets.components.modal.placeholder'),
             max_length=100,
             placeholder=placeholder
         )

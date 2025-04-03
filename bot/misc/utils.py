@@ -604,6 +604,12 @@ async def clone_message(message: nextcord.Message) -> dict:
     }
 
 
+def bool_filter(data: T) -> T:
+    if isinstance(data, dict):
+        return dict(filter(lambda _, v: v, data.items()))
+    return type(data)(filter(bool, data))
+
+
 class LordTimerHandler:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop

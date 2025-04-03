@@ -8,7 +8,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import FaqPayload, TicketsPayload
 from bot.languages import i18n
-from bot.misc.utils import AsyncSterilization, get_emoji_wrap
+from bot.misc.utils import AsyncSterilization, bool_filter, get_emoji_wrap, is_emoji
 from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
 from .base import OptionItem, ViewOptionItem
 
@@ -76,6 +76,7 @@ class TicketFAQModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         faq = ticket_data.get('faq', {})
@@ -83,6 +84,10 @@ class TicketFAQModal(nextcord.ui.Modal):
 
         faq['items'] = faq_items
         ticket_data['faq'] = faq
+
+        if not is_emoji(self.emoji.value):
+            await interaction.response.send_message(i18n.t(locale,
+                                                           'settings.set-reaction.error.located'))
 
         if self.faq_item:
             faq_item_payload = self.faq_item.copy()
@@ -95,12 +100,7 @@ class TicketFAQModal(nextcord.ui.Modal):
             description=self.description.value,
             response=self.response.value
         )
-        for key, value in data.items():
-            if key != 'label' and value.lower().strip() in ('none', '-'):
-                faq_item_payload.pop(key, None)
-                continue
-            if value:
-                faq_item_payload[key] = value
+        faq_item_payload.update(bool_filter(data))
 
         if self.selected_faq_item is not None:
             try:
