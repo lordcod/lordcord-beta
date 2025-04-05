@@ -6,7 +6,6 @@ __pycache__/
 *.db
 tests
 emojis.json
-assets/
 temp.txt
 temp/
 auto/

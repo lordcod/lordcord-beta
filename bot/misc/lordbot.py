@@ -8,7 +8,7 @@ import aiohttp
 import nextcord
 import re
 from aiohttp_socks import ProxyConnector
-from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict
+from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Dict
 
 from nextcord.ext import commands
 from tortoise import Tortoise
@@ -95,6 +95,8 @@ class LordBot(commands.AutoShardedBot):
             name=f'{DEFAULT_PREFIX}help | {self.release_tag}')
 
         self.__session = None
+        self.__send_api_state = None
+        self.__wait_api_state = None
 
         self.api_site = ApiSite(self)
         self.twnoti = TwitchNotification(self)
@@ -105,6 +107,16 @@ class LordBot(commands.AutoShardedBot):
         self.add_listener(self.listen_on_connect, 'on_connect')
         self.add_listener(self.listen_on_ready, 'on_ready')
         self.loop.create_task(self.api_site.run())
+
+    async def wait_api_state(self, state: str, timeout: Optional[int] = None) -> bool:
+        return await self.__wait_api_state(state, timeout=timeout)
+
+    async def send_api_state(self, state: str, data: Any) -> bool:
+        return await self.__send_api_state(state, data)
+
+    def _set_callback_api_state(self, send, wait):
+        self.__send_api_state = send
+        self.__wait_api_state = wait
 
     def get_git_info(self):
         repo = git.Repo(search_parent_directories=True)

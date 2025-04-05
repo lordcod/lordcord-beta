@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from typing import TYPE_CHECKING
 from fastapi import APIRouter, FastAPI
 import uvicorn
 
 from bot.misc.sites.routers.command import CommandRouter
+from bot.misc.sites.routers.websokets import WebSocketRouter
 from .routers.database import DataBaseRouter
 from .routers.vk import VkRouter
 
@@ -41,6 +43,11 @@ class ApiSite:
             access_log=None,
             log_config=None,
         )
+
+        if os.path.exists('keys/cert.pem') and os.path.exists('keys/key.pem'):
+            config.ssl_certfile = 'keys/cert.pem'
+            config.ssl_keyfile = 'keys/key.pem'
+
         server = uvicorn.Server(config)
         await server.serve()
 
@@ -51,8 +58,13 @@ class ApiSite:
     def _setup(self) -> APIRouter:
         router = APIRouter()
 
+        router.add_api_route('/accept', self._get_accept)
+        router.include_router(WebSocketRouter(self.bot)._setup())
         router.include_router(VkRouter(self.bot)._setup('/vk'))
         router.include_router(DataBaseRouter(self.bot)._setup('/database'))
         router.include_router(CommandRouter(self.bot)._setup('/commands'))
 
         return router
+
+    async def _get_accept(self):
+        return {'status': 'ok'}

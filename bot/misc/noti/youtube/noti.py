@@ -230,10 +230,10 @@ class YtNoti(Notification[YtNotiApi]):
             _, diff = self.cache.video_history.get_diff(videos)
             self.cache.video_history.extend(diff)
 
-        self.__running = True
+        self._running = True
         while True:
             await asyncio.sleep(self.heartbeat_timeout)
-            if not self.__running:
+            if not self._running:
                 break
             self.last_heartbeat = time.time()
 

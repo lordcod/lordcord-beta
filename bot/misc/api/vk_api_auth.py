@@ -8,6 +8,8 @@ import random
 from typing import Optional, Union
 from aiohttp import ClientSession, ClientResponse
 from string import hexdigits
+from hashlib import sha256
+from base64 import urlsafe_b64encode
 
 SALT = ''.join([random.choice(hexdigits) for _ in range(15)])
 
@@ -41,19 +43,16 @@ class VkApiAuth:
         self.session = session
 
     def generate_code_challange(self, code: Union[str, bytes]):
-        from hashlib import sha256
-        from encodings.base64_codec import base64_encode
         if isinstance(code, str):
             code = code.encode()
 
         token = code+SALT.encode()
-        hash = base64_encode(sha256(token).digest())[0].decode()
+        hash = urlsafe_b64encode(sha256(token).digest()).decode()
         return (
             hash
             .replace('/', '_')
             .replace('=', '')
             .replace('\u002B', '-')
-            .replace('\n', '')
         )
 
     def get_auth_link(self, state: str):
@@ -70,13 +69,14 @@ class VkApiAuth:
         )
         return link
 
-    def get_auth_group_link(self, group_id: int):
+    def get_auth_group_link(self, group_id: int, state: str):
         link = (
             "https://oauth.vk.com/authorize"
             "?response_type=token"
             f"&client_id={self.client_id}"
             f"&redirect_uri={self.redirect_uri}"
             f"&group_ids={group_id}"
+            f"&state={state}"
             "&v=5.101"
             "&display=popup"
             "&scope=manage"
@@ -92,6 +92,7 @@ class VkApiAuth:
             'code': code,
             'device_id': device_id,
             'redirect_uri': self.redirect_uri,
+            'state': state
         }
         async with self.session.post(url, data=data) as response:
             response.raise_for_status()

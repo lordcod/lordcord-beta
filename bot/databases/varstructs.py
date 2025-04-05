@@ -284,6 +284,17 @@ class YoutubeNotifiItemPayload(TypedDict):
 YoutubeNotifiPayload = Dict[str, YoutubeNotifiItemPayload]
 
 
+class VkNotifiItemPayload(TypedDict):
+    id: str
+    channel_id: int
+    message: str
+    name: str
+    group_id: int
+
+
+VkNotifiPayload = Dict[str, VkNotifiItemPayload]
+
+
 class AutoRolesPayload(TypedDict, total=False):
     every: List[int]
     bot: List[int]

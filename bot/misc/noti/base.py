@@ -23,38 +23,29 @@ class NotificationApi:
         self.bot: LordBot = bot
 
     async def request(self, method: str, url: str, **kwargs) -> Any:
-        exception: Optional[Exception] = None
+        try:
+            async with self.bot.session.request(method, url, **kwargs) as response:
+                content_type = response.headers.get('Content-Type')
+                if content_type == 'application/json' or 'application/json' in content_type:
+                    data = await response.json()
+                else:
+                    data = await response.read()
+        except (asyncio.TimeoutError, ClientConnectionError) as exc:
+            _log.error('Temporary error in the request', exc_info=exc)
+            return
+        except Exception as exc:
+            _log.error(
+                'It was not possible to get data from the api', exc_info=exc)
+            return
 
-        for _ in range(3):
-            try:
-                async with self.bot.session.request(method, url, **kwargs) as response:
-                    content_type = response.headers.get('Content-Type')
-                    if content_type == 'application/json' or 'application/json' in content_type:
-                        data = await response.json()
-                    else:
-                        data = await response.read()
-            except (asyncio.TimeoutError, ClientConnectionError) as exc:
-                _log.debug('Temporary error in the request', exc_info=exc)
-                exception = exc
-            except Exception as exc:
-                _log.error(
-                    'It was not possible to get data from the api', exc_info=exc)
-                exception = exc
+        if response.ok:
+            return data
 
-            if response.ok:
-                return data
-            else:
-                try:
-                    response.raise_for_status()
-                except Exception as exc:
-                    _log.error('It was not possible to get data from the api, status: %s, data: %s',
-                               response.status, data, exc_info=exc)
-                    exception = exc
-
-            await asyncio.sleep(30)
-
-        if exception is not None:
-            raise exception from None
+        try:
+            response.raise_for_status()
+        except Exception as exc:
+            _log.error('It was not possible to get data from the api, status: %s, data: %s',
+                       response.status, data, exc_info=exc)
 
 
 class Notification(Generic[T]):

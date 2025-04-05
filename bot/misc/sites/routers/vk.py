@@ -1,17 +1,24 @@
 from __future__ import annotations
+import base64
+import hashlib
 from typing import TYPE_CHECKING, Optional
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from bot.misc.api.vk_api_auth import VkApiAuth
 from os import getenv
 from fastapi.templating import Jinja2Templates
-from bot.databases.localdb import get_table
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
 SALT = '4051975f'
+password = hashlib.sha256("random string".encode()).digest()
 templates = Jinja2Templates(directory="templates")
+
+
+def decrypt(enc_data: str) -> str:
+    enc_bytes = base64.urlsafe_b64decode(enc_data)
+    return "".join(chr(a ^ b) for a, b in zip(enc_bytes, password))
 
 
 class VkRouter:
@@ -41,7 +48,7 @@ class VkRouter:
             response_class=HTMLResponse
         )
         router.add_api_route(
-            '/callback',
+            '/callback/{code}',
             self._post_vk_callback,
             methods=['POST'],
             response_class=PlainTextResponse
@@ -54,23 +61,23 @@ class VkRouter:
 
         return router
 
-    async def _post_vk_callback(self, request: Request):
+    async def _post_vk_callback(self, request: Request, code: str):
         data = await request.json()
 
+        enc = decrypt(code)
+        randhex, group_id, group_code = enc.split('-')
+
         if data['type'] == 'confirmation':
-            callback_code_db = await get_table('vk_callback_code')
-            code = await callback_code_db.get(data['group_id'])
-            return code
+            return group_code
 
         self.bot.dispatch('vk_post', data)
 
         return 'ok'
 
-    async def _get_invite(self, request: Request):
-        if id := request.query_params.get('group'):
-            return self.vk_api_auth.get_auth_group_link(id)
-        else:
-            return self.vk_api_auth.get_auth_link('test')
+    async def _get_invite(self, request: Request, state: str,  group: Optional[int] = None):
+        if group is not None:
+            return self.vk_api_auth.get_auth_group_link(group, state)
+        return self.vk_api_auth.get_auth_link(state)
 
     async def _get_vk_callback(self, request: Request):
         params = request.query_params
@@ -91,9 +98,12 @@ class VkRouter:
 
         for key in params.keys():
             if key.startswith('access_token_'):
-                self.bot.dispatch('vk_club',
-                                  int(key.removeprefix('access_token_')),
-                                  params.get(key))
+                self.bot.dispatch(
+                    'vk_club',
+                    int(key.removeprefix('access_token_')),
+                    params.get(key),
+                    params.get('state')
+                )
                 return RedirectResponse('/accept')
 
         return templates.TemplateResponse(

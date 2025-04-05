@@ -1,4 +1,6 @@
 import asyncio
+import random
+import string
 import time
 from typing import Literal, Optional
 import nextcord
@@ -24,6 +26,15 @@ class Teams(commands.Cog):
         if ctx.author.id not in member_teams:
             raise errors.OnlyTeamError(author=ctx.author)
         return True
+
+    @commands.command()
+    async def test_vk_verify(self, ctx: commands.Context):
+        state = ''.join([random.choice(string.hexdigits) for _ in range(12)])
+        await ctx.send(f'https://lordcord.xyz/server-select?state={state}')
+        data = await self.bot.wait_api_state(state)
+        await ctx.send(str(data))
+        data = await self.bot.wait_api_state(state)
+        await ctx.send(str(data))
 
     @commands.command()
     async def switch_command(self, ctx: commands.Context, flag: bool, *, cmd_name: str):
