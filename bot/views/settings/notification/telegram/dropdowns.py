@@ -22,7 +22,9 @@ class TelegramChannelDropDown(nextcord.ui.ChannelSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         from .items import TelegramItemView
         value = self.values[0]
-        view = await TelegramItemView(interaction.guild, value)
+        self.data['channel_id'] = value.id
+
+        view = await TelegramItemView(interaction.guild, self.selected_id, self.data)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 

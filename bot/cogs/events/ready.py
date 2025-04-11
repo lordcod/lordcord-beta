@@ -101,7 +101,6 @@ class ReadyEvent(commands.Cog):
 
         for name, emojis in json_values.items():
             missing = set(names)-set(emojis.keys())
-            print(missing)
             if missing:
                 _log.trace('Emojis were not found in %s: %s', name, missing)
 

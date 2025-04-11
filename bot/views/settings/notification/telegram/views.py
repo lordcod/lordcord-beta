@@ -46,8 +46,6 @@ class TelegramView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        from .utils import generate_hex
-
         request_id = random.randint(1_000_000, 1_000_000_000)
 
         def check_registration(id: str, chat):
