@@ -1,3 +1,4 @@
+from collections import defaultdict
 import logging
 import os
 from typing import Dict
@@ -76,7 +77,8 @@ class ReadyEvent(commands.Cog):
         values = {}
         json_values = {}
         names = ('aqua', 'mala', 'barh', 'lava',
-                 'perl', 'yant', 'sume', 'sliv')
+                 'perl', 'yant', 'sume', 'sliv',
+                 'elys')
 
         def get_color(name: str) -> str:
             for prefix in names:
@@ -99,6 +101,7 @@ class ReadyEvent(commands.Cog):
 
         for name, emojis in json_values.items():
             missing = set(names)-set(emojis.keys())
+            print(missing)
             if missing:
                 _log.trace('Emojis were not found in %s: %s', name, missing)
 

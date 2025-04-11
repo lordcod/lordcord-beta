@@ -13,6 +13,7 @@ class ColorType(IntEnum):
     yant = 5
     sume = 6
     sliv = 7
+    elys = 9
 
     @classmethod
     def get(cls, name: str) -> 'ColorType':
