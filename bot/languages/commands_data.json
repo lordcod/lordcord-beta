@@ -8,6 +8,94 @@
     },
     "commands": [
         {
+            "name": "ideas mute",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 3,
+            "count_examples": 1
+        },
+        {
+            "name": "ideas unmute",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 2,
+            "count_examples": 1
+        },
+        {
+            "name": "ideas ban",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 2,
+            "count_examples": 1
+        },
+        {
+            "name": "ideas unban",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 2,
+            "count_examples": 1
+        },
+        {
+            "name": "give-role-all",
+            "category": "moderation",
+            "aliases": ["give-role-everyone", "give-role"],
+            "allowed_disabled": true,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
+            "name": "slots",
+            "category": "economy",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "edit",
+            "category": "moderation",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 2,
+            "count_examples": 0
+        },
+        {
+            "name": "userinfo",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
+            "name": "invite",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 0,
+            "count_examples": 0
+        },
+        {
+            "name": "tic",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
+            "name": "invites",
+            "category": "major",
+            "aliases": [],
+            "allowed_disabled": false,
+            "count_args": 1,
+            "count_examples": 0
+        },
+        {
             "name": "balance",
             "category": "economy",
             "aliases": [

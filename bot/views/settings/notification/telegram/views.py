@@ -41,8 +41,8 @@ class TelegramView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = await notification.NotificationView(interaction.guild)
-        await interaction.response.edit_message(modal)
+        view = await notification.NotificationView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
