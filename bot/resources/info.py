@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from bot.databases.varstructs import IdeasMessagesPayload, IdeasPayload,  TicketsItemPayload
 
 DISCORD_SUPPORT_SERVER = 'https://discord.com/invite/np6RhahkZH'
-SITE = 'https://lordcord.fun'
+SITE = 'https://lordcord.xyz'
 
 DEFAULT_MAPPING_LANGUAGE = {'en': 'en-US', 'es': 'es-ES'}
 
@@ -281,6 +281,7 @@ DEFAULT_TICKET_PERMISSIONS = {k: (allow.value, deny.value)
 
 DEFAULT_TWITCH_MESSAGE = '🎥 У __{stream.username}__ начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
 DEFAULT_YOUTUBE_MESSAGE = '🎥 Новое видео на YouTube от {video.username}!\nСмотрите прямо сейчас: {video.url}'
+DEFAULT_TELEGRAM_MESSAGE = '{message.text}'
 
 DEFAULT_TICKET_TYPE = 2
 DEFAULT_TICKET_FAQ_TYPE = 2
@@ -376,6 +377,7 @@ DEFAULT_THREAD_NAME = 'Discussion of the idea from {member.username}'
 DEFAULT_IDEAS_REVOTING = True
 DEFAULT_IDEAS_ALLOW_IMAGE = True
 DEFAULT_IDEAS_MIN_LENGTH = 10
+DEFAULT_IDEAS_MAX_LENGTH = 1500
 
 
 DEFAULT_IDEAS_PAYLOAD: IdeasPayload = {

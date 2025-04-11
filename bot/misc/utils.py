@@ -7,8 +7,6 @@ from nextcord.ext import commands
 
 
 import inspect
-import nextcord.types
-import nextcord.types.message
 import re
 import string
 import random
@@ -52,7 +50,6 @@ T = TypeVar('T')
 C_co = TypeVar("C_co", bound=type, covariant=True)
 WelMes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
-REGEXP_FORMAT = re.compile(r"(\{\s*([\.\|\s\-_a-zA-Z0-9]*)\s*\})")
 MISSING = nextcord.utils._MissingSentinel()
 
 
@@ -479,53 +476,114 @@ class BlackjackGame:
         return val
 
 
+def flatten_dict(data: dict, prefix: str = ''):
+    new_data = {}
+    for k, v in data.items():
+        if isinstance(v, dict):
+            new_data.update(flatten_dict(v, prefix+k+'.'))
+        else:
+            new_data[prefix+k] = v
+    return new_data
+
+
+class ExpressionTemplate:
+    def __init__(self, context: dict):
+        self.context = flatten_dict(context)
+
+    def render(self, template: str) -> str:
+        """Основной метод рендеринга шаблона"""
+        pattern = r'{%\s*(.*?)\s*=>\s*(.*?)\s*%}'
+        return re.sub(pattern, self._process_match, template)
+
+    def _process_match(self, match: re.Match) -> str:
+        """Обработка выражения {% условие => значение || дефолт %}"""
+        condition, result = match.groups()
+        value, default = self._parse_variable_with_default(result)
+
+        return (
+            str(value)
+            if self._eval_condition(condition)
+            else default or ''
+        )
+
+    def _eval_condition(self, condition: str) -> bool:
+        """Оценивает логическое условие"""
+        condition = condition.strip()
+
+        if '==' in condition:
+            var, val = map(str.strip, condition.split('==', 1))
+            return str(self.context.get(var)) == self._strip_quotes(val)
+        elif '!=' in condition:
+            var, val = map(str.strip, condition.split('!=', 1))
+            return str(self.context.get(var)) != self._strip_quotes(val)
+        else:
+            return bool(self.context.get(condition))
+
+    def _parse_variable_with_default(self, result: str) -> Tuple[str, Optional[str]]:
+        """Извлекает переменную и дефолтное значение из выражения"""
+        if '||' in result:
+            value, default = map(self._strip_quotes, result.split('||', 1))
+            return value.strip(), default.strip()
+        return self._strip_quotes(result).strip(), None
+
+    def _strip_quotes(self, text: str) -> str:
+        """Удаляет кавычки и пробелы"""
+        return text.strip().strip('"\'') if isinstance(text, str) else text
+
+
 class LordTemplate:
+    REGEXP_FORMAT = re.compile(r'{([^{}]+)}')
+
     def findall(self, string: str) -> List[Tuple[str, str]]:
-        return REGEXP_FORMAT.findall(string)
+        return [(match.group(0), match.group(1)) for match in self.REGEXP_FORMAT.finditer(string)]
 
     def parse_key(self, var: str) -> Tuple[str, Optional[str]]:
-        if '|' not in var:
-            return var.strip(), None
+        parts = [part.strip() for part in var.split('|', 1)]
+        return (parts[0], parts[1]) if len(parts) == 2 else (parts[0], None)
 
-        key, *defaults = var.split('|')
-        return key.strip(), '|'.join(defaults).strip()
+    def get_value(self, key: str, data: Dict[str, Any]) -> Any:
+        if key in data:
+            return data[key]
+        parts = key.split('.')
+        value = data
+        for part in parts:
+            if isinstance(value, dict):
+                value = value.get(part)
+            else:
+                return None
+            if value is None:
+                break
+        return value
 
-    def parse_value(self, variables: List[Tuple[str, str]], forms: dict) -> dict:
-        data = {}
-        for every, var in variables:
+    def parse_value(self, variables: List[Tuple[str, str]], forms: Dict[str, Any]) -> Dict[str, Any]:
+        result = {}
+        for original, var in variables:
             key, default = self.parse_key(var)
-            if key in forms:
-                data[every] = forms[key]
-                if not data[every] and default is not None:
-                    data[every] = default
-            elif '.' in key and key.split('.')[1] and key.split('.')[0] in forms:
-                value = forms[key.split('.')[0]]
+            value = self.get_value(key, forms)
 
-                for v in key.split('.')[1:]:
-                    if value is None:
-                        break
-                    value = getattr(value, v, None)
+            if isinstance(value, dict):
+                result[original] = default
+            elif value not in (None, '', []):
+                result[original] = value
+            else:
+                result[original] = default
+        return result
 
-                data[every] = value
-                if not value and default is not None:
-                    data[every] = default
-            elif default is not None:
-                data[every] = default
-        return data
-
-# TODO: Fix formating
+    def render(self, template: str, data: Dict[str, Any]) -> str:
+        variables = self.findall(template)
+        values = self.parse_value(variables, data)
+        for original, replacement in values.items():
+            template = template.replace(original, str(
+                replacement) if replacement is not None else '')
+        return template
 
 
 def lord_format(string: Any, forms: dict) -> str:
     if not isinstance(string, str):
         string = orjson.dumps(string).decode()
-
-    template = LordTemplate()
-    variables = template.findall(string)
-    values = template.parse_value(variables, forms)
-    for old, new in values.items():
-        string = string.replace(old, str(new))
-    return string
+    string = ExpressionTemplate(forms).render(string)
+    result = LordTemplate().render(string, forms)
+    return result
 
 
 class TranslatorFlags:
@@ -1049,7 +1107,7 @@ class GeneratorMessage:
         }
 
     @lru_cache()
-    def parse(self, with_empty: bool = False):
+    def parse(self, with_empty: bool = False, with_webhook: bool = False):
         data = self.decode_data()
         ret = {}
 
@@ -1062,6 +1120,8 @@ class GeneratorMessage:
         embed = self.parse_embed(data)
         embeds = self.parse_embeds(data.pop('embeds', MISSING))
         flags = data.pop('flags', MISSING)
+        username = data.pop('username', MISSING)
+        avatar_url = data.pop('avatar_url', MISSING)
 
         if content is not MISSING and plain_text is not MISSING:
             return self.get_error(5415)
@@ -1084,6 +1144,12 @@ class GeneratorMessage:
 
         if flags is not MISSING:
             ret['flags'] = nextcord.MessageFlags._from_value(flags)
+
+        if username is not MISSING and with_webhook:
+            ret['username'] = username
+
+        if avatar_url is not MISSING and with_webhook:
+            ret['avatar_url'] = avatar_url
 
         if data:
             _log.trace('Message data: %s', ret)
@@ -1119,8 +1185,8 @@ class GeneratorMessage:
                 url = data[arg]
                 if (
                     not url
-                    or (isinstance(url, str) and url.lower() == 'none')
-                    or (isinstance(url, dict) and url.get('url').lower() == 'none')
+                    or (isinstance(url, str) and url.strip() == '')
+                    or (isinstance(url, dict) and url.get('url').strip() == '')
                 ):
                     del data[arg]
                     continue

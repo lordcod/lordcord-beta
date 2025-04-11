@@ -20,6 +20,7 @@ from bot.databases import localdb, GuildDateBases
 from bot.languages import i18n
 from bot.resources.info import (
     DEFAULT_IDEAS_ALLOW_IMAGE,
+    DEFAULT_IDEAS_MAX_LENGTH,
     DEFAULT_IDEAS_MIN_LENGTH,
     DEFAULT_IDEAS_PAYLOAD,
     DEFAULT_IDEAS_PAYLOAD_RU,
@@ -540,7 +541,7 @@ class IdeaModal(nextcord.ui.Modal):
             style=nextcord.TextInputStyle.paragraph,
             placeholder=i18n.t(locale, 'ideas.idea-modal.placeholder'),
             min_length=ideas_data.get('min_length', DEFAULT_IDEAS_MIN_LENGTH),
-            max_length=1500
+            max_length=ideas_data.get('max_length', DEFAULT_IDEAS_MAX_LENGTH)
         )
         self.add_item(self.idea)
 
@@ -549,7 +550,7 @@ class IdeaModal(nextcord.ui.Modal):
             style=nextcord.TextInputStyle.short,
             placeholder=i18n.t(locale, 'ideas.idea-modal.image.placeholder'),
             min_length=10,
-            max_length=150,
+            max_length=250,
             required=False
         )
         if allow_image:

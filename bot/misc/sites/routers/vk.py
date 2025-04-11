@@ -4,9 +4,9 @@ import hashlib
 from typing import TYPE_CHECKING, Optional
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
-from bot.misc.api.vk_api_auth import VkApiAuth
 from os import getenv
 from fastapi.templating import Jinja2Templates
+from bot.misc.api.vk_api_auth import VkApiAuth
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
@@ -64,8 +64,7 @@ class VkRouter:
     async def _post_vk_callback(self, request: Request, code: str):
         data = await request.json()
 
-        enc = decrypt(code)
-        randhex, group_id, group_code = enc.split('-')
+        randhex, group_id, group_code = decrypt(code).split('-')
 
         if data['type'] == 'confirmation':
             return group_code

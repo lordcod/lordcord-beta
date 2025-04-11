@@ -143,19 +143,19 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
             bot, self, client_id, client_secret))
 
     async def callback_on_start(self, stream: Stream):
-        _log.debug('%s started stream', stream.user_name)
+        _log.debug('%s started stream', stream.user_login)
 
-        if stream.user_name not in self.user_info:
-            user = await self.api.get_user_info(stream.user_name)
+        if stream.user_login not in self.user_info:
+            user = await self.api.get_user_info(stream.user_login)
         else:
-            user = self.user_info[stream.user_name]
+            user = self.user_info[stream.user_login]
 
-        for gid in self.directed_data[stream.user_name]:
+        for gid in self.directed_data[stream.user_login]:
             guild = self.bot.get_guild(gid)
             gdb = GuildDateBases(gid)
             twitch_data = await gdb.get('twitch_notification')
             for id, data in twitch_data.items():
-                if data['username'] == stream.user_name:
+                if data['username'] == stream.user_login:
                     channel = self.bot.get_channel(data['channel_id'])
                     payload = get_payload(
                         guild=guild, stream=stream, user=user)
@@ -185,8 +185,10 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
         _log.debug('Started twitch parsing')
 
         gms = await GuildModel.filter(~Q(twitch_notification={}))
+        _log.trace('ALL DATA %s', gms)
         for gm in gms:
             for data in gm.twitch_notification.values():
+                _log.trace('LOAD DATA %s %s', gm.id, data)
                 await self.add_channel(gm.id, data['username'])
 
         for uid in self.usernames:

@@ -45,7 +45,7 @@ class YtNotiApi(NotificationApi):
     def __init__(
         self,
         bot: LordBot,
-        cache: TwCache,
+        cache: YtCache,
         token: str
     ) -> None:
         super().__init__(bot)
@@ -177,8 +177,8 @@ class YtNotiApi(NotificationApi):
 
     async def search_channel_ids(self, query: str) -> List[Channel]:
         search_result = await self.search(query)
-        geted_result = await self.get_channel_ids([data.id for data in search_result])
-        return geted_result
+        gutted_result = await self.get_channel_ids([data.id for data in search_result])
+        return gutted_result
 
 
 class YtNoti(Notification[YtNotiApi]):
@@ -241,7 +241,6 @@ class YtNoti(Notification[YtNotiApi]):
             for cid in self.cache.channel_ids:
                 try:
                     videos = await self.api.get_video_history(cid)
-                    _log.trace('Getting videos %s', videos)
                 except Exception as exp:
                     _log.error('An error was received when executing the request (%s)',
                                cid,

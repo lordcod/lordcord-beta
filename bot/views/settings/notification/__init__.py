@@ -3,7 +3,9 @@ import nextcord
 
 from bot.views.settings._view import DefaultSettingsView
 from bot.views.settings.notification.farewell import FarewellView
+from bot.views.settings.notification.telegram import TelegramView
 from bot.views.settings.notification.twitch import TwitchView
+from bot.views.settings.notification.vk import VkView
 from bot.views.settings.notification.youtube import YoutubeView
 from .welcomer import WelcomerView
 
@@ -18,12 +20,16 @@ distribution = {
     'farewell': FarewellView,
     'twitch': TwitchView,
     'youtube': YoutubeView,
+    'telegram': TelegramView,
+    'vk': VkView
 }
 distribution_emoji = {
     'welcomer': 'welcmes',
     'farewell': 'reject',
     'twitch': 'twitch',
-    'youtube': 'youtube'
+    'youtube': 'youtube',
+    'telegram': 'welcmes',
+    'vk': 'welcmes',
 }
 
 

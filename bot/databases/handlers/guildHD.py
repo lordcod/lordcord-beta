@@ -19,20 +19,56 @@ def check_registration(func):
     return wrapped
 
 
+class AwaitableGDBGet:
+    def __init__(
+        self,
+        gdb: GuildDateBases,
+        service: str,
+        default: Any
+    ):
+        self.gdb = gdb
+        self.service = service
+        self.default = default
+        self.operations = []
+
+    def __getattr__(self, *args, **kwargs):
+        self.operations.append(('__getattr__', args, kwargs))
+        return self
+
+    def __call__(self, *args, **kwds):
+        self.operations.append(('__call__', args, kwds))
+        return self
+
+    async def submit(self):
+        await self.gdb.register()
+
+        data = getattr(self.gdb.guild, self.service, self.default)
+        cache[self.gdb.guild_id][self.service] = data
+
+        for name, args, kwds in self.operations:
+            if name == '__getattr__':
+                data = getattr(data, *args, **kwds)
+            if name == '__call__':
+                data = data(*args, **kwds)
+
+        return data
+
+    def __await__(self):
+        return self.submit().__await__()
+
+
 class GuildDateBases:
     guild: GuildModel
 
     def __init__(self, guild_id: int) -> None:
         self.guild_id = guild_id
 
-    async def register(self):
+    async def register(self) -> bool:
         self.guild, ok = await GuildModel.get_or_create(id=self.guild_id)
+        return ok
 
-    @check_registration
-    async def get(self, service: str, default: Any = None) -> Any:
-        data = getattr(self.guild, service, default)
-        cache[self.guild_id][service] = data
-        return data
+    def get(self, service: str, default: Any = None) -> AwaitableGDBGet:
+        return AwaitableGDBGet(self, service, default)
 
     def get_cache(self, service: str, default: Any = None) -> Any:
         return cache[self.guild_id].get(service, default)

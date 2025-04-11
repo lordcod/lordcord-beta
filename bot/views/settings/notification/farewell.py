@@ -102,7 +102,7 @@ class FarewellView(DefaultSettingsView):
         self.add_item(await FarewellChannelDropDown(guild, self.data))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.save.label = i18n.t(locale, 'settings.button.save_changes')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
         self.view_message.label = i18n.t(
             locale, 'settings.button.preview_message')
@@ -114,8 +114,8 @@ class FarewellView(DefaultSettingsView):
         view = await notification.NotificationView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Update', style=nextcord.ButtonStyle.green, row=0, disabled=True)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction[LordBot]):
+    @nextcord.ui.button(label='Save changes', style=nextcord.ButtonStyle.green, row=0, disabled=True)
+    async def save(self, button: nextcord.ui.Button, interaction: nextcord.Interaction[LordBot]):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set('farewell_message', self.data)
 

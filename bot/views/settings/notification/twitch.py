@@ -166,7 +166,7 @@ class TwitchItemView(nextcord.ui.View):
         if (('channel_id' in data and 'username' in data)
             and (selected_id not in twitch_data
                  or data != twitch_data[selected_id])):
-            self.edit.disabled = False
+            self.save.disabled = False
 
         if selected_id in twitch_data:
             self.delete.disabled = False
@@ -174,7 +174,7 @@ class TwitchItemView(nextcord.ui.View):
         self.add_item(await TwitchChannelDropDown(guild, selected_id, data))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.save.label = i18n.t(locale, 'settings.button.save_changes')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
         self.view_message.label = i18n.t(
             locale, 'settings.button.preview_message')
@@ -188,8 +188,8 @@ class TwitchItemView(nextcord.ui.View):
         view = await TwitchView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Update', style=nextcord.ButtonStyle.green, row=1, disabled=True)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction[LordBot]):
+    @nextcord.ui.button(label='Save changes', style=nextcord.ButtonStyle.green, row=1, disabled=True)
+    async def save(self, button: nextcord.ui.Button, interaction: nextcord.Interaction[LordBot]):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set_on_json('twitch_notification', self.selected_id, self.data)
 

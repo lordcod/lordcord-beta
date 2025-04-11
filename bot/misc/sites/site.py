@@ -7,6 +7,7 @@ from fastapi import APIRouter, FastAPI
 import uvicorn
 
 from bot.misc.sites.routers.command import CommandRouter
+from bot.misc.sites.routers.telegram.router import TelegramRouter
 from bot.misc.sites.routers.websokets import WebSocketRouter
 from .routers.database import DataBaseRouter
 from .routers.vk import VkRouter
@@ -44,7 +45,7 @@ class ApiSite:
             log_config=None,
         )
 
-        if os.path.exists('keys/cert.pem') and os.path.exists('keys/key.pem'):
+        if os.path.exists('keys/cert.pem') and os.path.exists('keys/key.pem') and False:
             config.ssl_certfile = 'keys/cert.pem'
             config.ssl_keyfile = 'keys/key.pem'
 
@@ -63,6 +64,7 @@ class ApiSite:
         router.include_router(VkRouter(self.bot)._setup('/vk'))
         router.include_router(DataBaseRouter(self.bot)._setup('/database'))
         router.include_router(CommandRouter(self.bot)._setup('/commands'))
+        router.include_router(TelegramRouter(self.bot)._setup('/telegram'))
 
         return router
 

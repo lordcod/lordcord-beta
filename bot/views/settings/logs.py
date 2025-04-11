@@ -134,12 +134,12 @@ class LogsView(DefaultSettingsView):
         super().__init__()
 
         if selected_logs:
-            self.edit.disabled = False
+            self.save.disabled = False
         if selected_channel_id in logs_data:
             self.delete.disabled = False
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.save.label = i18n.t(locale, 'settings.button.save_changes')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
 
         self.add_item(await ChannelSetDropDown(guild, selected_channel_id))
@@ -155,8 +155,8 @@ class LogsView(DefaultSettingsView):
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
-    async def edit(self,
+    @nextcord.ui.button(label='Save changes', style=nextcord.ButtonStyle.blurple, disabled=True)
+    async def save(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction[LordBot]):
         channel = interaction.guild.get_channel(self.selected_channel_id)

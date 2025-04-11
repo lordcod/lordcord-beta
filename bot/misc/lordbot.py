@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 from collections import deque
+import aiogram
 import git
 import logging
 import os
@@ -10,13 +11,16 @@ import re
 from aiohttp_socks import ProxyConnector
 from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Dict
 
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+
 from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
 from bot.misc.sites.site import ApiSite
-from bot.resources.info import DEFAULT_PREFIX
-from bot.misc.utils import LordTimeHandler, get_parser_args
+from bot.resources.info import DEFAULT_PREFIX, SITE
+from bot.misc.utils import LordTimeHandler
 from bot.languages import i18n
 from bot.misc.noti import TwitchNotification, YoutubeNotification
 
@@ -54,10 +58,8 @@ class LordBot(commands.AutoShardedBot):
         if bot_command is None:
             allow_bot_command = not release
 
-        if release or get_parser_args().get('api'):
-            self.API_URL = 'https://api.lordcord.fun'
-        else:
-            self.API_URL = 'http://localhost:5000'
+        self.SITE_URL = SITE
+        self.API_URL = os.getenv('API_URL')
 
         self.release = release
         self.allow_bot_command = allow_bot_command
@@ -101,6 +103,10 @@ class LordBot(commands.AutoShardedBot):
         self.api_site = ApiSite(self)
         self.twnoti = TwitchNotification(self)
         self.ytnoti = YoutubeNotification(self)
+        self.telegram_client = aiogram.Bot(
+            os.getenv('TELEGRAM_TOKEN'),
+            default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+        )
 
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
@@ -127,7 +133,7 @@ class LordBot(commands.AutoShardedBot):
         self.release_tag = tags_dt[max(tags_dt)].name
 
     def load_i18n_dir(self, dirname: str) -> None:
-        if not os.path.exists(dirname):
+        if not os.path.exists(dirname) or self.release:
             return
 
         for filename in os.listdir(dirname):
@@ -136,8 +142,14 @@ class LordBot(commands.AutoShardedBot):
                 self.load_i18n_dir(path)
             if not os.path.isfile(path) or not filename.endswith('.json'):
                 continue
+
+            args = filename.split('.')
+            locale = args[-2] if len(args) > 2 else None
+            _log.trace('Load temp file languages %s, locale %s',
+                       filename, locale)
+
             data = i18n._parse_json(i18n._load_file(path))
-            i18n.parser(data)
+            i18n.parser(data, locale)
 
     def load_i18n_config(self) -> None:
         i18n.config['locale'] = 'en'

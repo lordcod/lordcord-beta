@@ -103,6 +103,7 @@ class IdeasPayload(TypedDict, total=False):
     reactions: Optional[IdeasReactionsPayload]
     components: IdeasComponentsPayload
     min_length: int
+    max_length: int
     # User id,  moderator_id, reason
     ban_users: List[Tuple[int, int, str]]
     # User id, moderator_id, Timestamp, reason
@@ -266,8 +267,9 @@ class TempChannelsItemPayload(TypedDict):
 class TwitchNotifiItemPayload(TypedDict):
     id: str
     channel_id: int
-    username: str
     message: str
+
+    username: str
 
 
 TwitchNotifiPayload = Dict[str, TwitchNotifiItemPayload]
@@ -276,9 +278,10 @@ TwitchNotifiPayload = Dict[str, TwitchNotifiItemPayload]
 class YoutubeNotifiItemPayload(TypedDict):
     id: str
     channel_id: int
+    message: str
+
     yt_name: str
     yt_id: str
-    message: str
 
 
 YoutubeNotifiPayload = Dict[str, YoutubeNotifiItemPayload]
@@ -288,11 +291,26 @@ class VkNotifiItemPayload(TypedDict):
     id: str
     channel_id: int
     message: str
+
     name: str
+    icon_url: str
     group_id: int
 
 
 VkNotifiPayload = Dict[str, VkNotifiItemPayload]
+
+
+class TgNotifiItemPayload(TypedDict):
+    id: str
+    channel_id: int
+    message: str
+
+    name: str
+    icon_url: str
+    group_id: int
+
+
+TgNotifiPayload = Dict[str, TgNotifiItemPayload]
 
 
 class AutoRolesPayload(TypedDict, total=False):

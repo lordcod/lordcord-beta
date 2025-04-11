@@ -1,4 +1,5 @@
 import os
+from socket import getnameinfo
 from tortoise.models import Model
 from tortoise.expressions import Q
 from tortoise import fields, Tortoise, run_async
@@ -51,8 +52,6 @@ class GuildModel(Model):
     role_reactions = JSONField(default={})
     delete_task = fields.BigIntField(default=0)
     tempvoice = JSONField(default={})
-    twitch_notification = JSONField(default={})
-    youtube_notification = JSONField(default={})
     farewell_message = JSONField(default={})
     message_state = JSONField(default={})
     voice_time_state = JSONField(default={})
@@ -61,13 +60,31 @@ class GuildModel(Model):
     thread_roles = JSONField(default={})
     thread_open = JSONField(default={})
 
+    # NOTIFICATION
+
+    twitch_notification = JSONField(default={})
+    youtube_notification = JSONField(default={})
+    vk_notification = JSONField(default={})
+    telegram_notification = JSONField(default={})
+
+
+# TEMP BLOCK
+# class BaseNotificationModel(Model):
+#     id = fields.CharField(20, primary_key=True)
+#     guild_id = fields.IntField()
+#     channel_id = fields.IntField()
+#     message = fields.TextField()
+
+#     class Meta:
+#         abstract = True
+
 
 class EconomicModel(Model):
     class Meta:
         table = "economic"
 
-    guild_id = fields.BigIntField(null=True)
-    member_id = fields.BigIntField(null=True)
+    guild_id = fields.BigIntField()
+    member_id = fields.BigIntField()
     balance = fields.BigIntField(default=0)
     bank = fields.BigIntField(default=0)
     daily = fields.BigIntField(default=0)
@@ -82,8 +99,8 @@ class RoleModel(Model):
     class Meta:
         table = "roles"
 
-    guild_id = fields.BigIntField(null=True)
-    member_id = fields.BigIntField(null=True)
+    guild_id = fields.BigIntField()
+    member_id = fields.BigIntField()
     role_id = fields.BigIntField(null=True)
     time = fields.BigIntField(null=True)
     system = fields.BooleanField(null=True)
@@ -93,8 +110,8 @@ class BanModel(Model):
     class Meta:
         table = "bans"
 
-    guild_id = fields.BigIntField(null=True)
-    member_id = fields.BigIntField(null=True)
+    guild_id = fields.BigIntField()
+    member_id = fields.BigIntField()
     time = fields.BigIntField(null=True)
 
 
@@ -104,9 +121,15 @@ if __name__ == '__main__':
             db_url="sqlite://db/.sqlite3",
             modules={'models': ['__main__']},
         )
-        # for gm in await GuildModel.all():
-        #     if gm.youtube_notification is not None:
-        #         print()
-        await Tortoise.generate_schemas()
+        await Tortoise.generate_schemas(safe=True)
 
+        g = await GuildModel.get(id=1179069504186232852)
+        g.vk_notification = {
+            'nesog': {
+                'id': 'nesog',
+                'group_id': 222485128,
+                'channel_id': 1179069504651796562
+            }
+        }
+        await g.save()
     run_async(main())

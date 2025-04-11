@@ -80,12 +80,15 @@ class MessageModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
         locale = await self.gdb.get('language')
+        greeting_message = await self.gdb.get('greeting_message')
 
         super().__init__(i18n.t(locale, 'settings.welcomer.modal.title'))
 
         self.message = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.welcomer.modal.label'),
-            placeholder=i18n.t(locale, 'settings.welcomer.modal.placeholder')
+            placeholder=i18n.t(locale, 'settings.welcomer.modal.placeholder'),
+            style=nextcord.TextInputStyle.paragraph,
+            default_value=greeting_message.get('message')
         )
         self.add_item(self.message)
 
@@ -211,5 +214,4 @@ class WelcomerView(DefaultSettingsView):
         await self.gdb.set('greeting_message', {})
 
         view = await WelcomerView(interaction.guild)
-
         await interaction.response.edit_message(embed=view.embed, view=view)

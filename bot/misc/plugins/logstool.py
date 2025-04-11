@@ -153,12 +153,11 @@ async def get_webhook(channel: nextcord.TextChannel) -> Optional[nextcord.Webhoo
     client = channel._state._get_client()
     webhooks_db = await localdb.get_table('logs_webhooks')
     webhook_data = await webhooks_db.get(channel.id)
-    _log.trace(webhook_data)
 
     if webhook_data is not None:
         webhook_data['type'] = 1
-        cache_webhook = nextcord.Webhook.from_state(webhook_data, channel._state)
-        _log.trace(cache_webhook)
+        cache_webhook = nextcord.Webhook.from_state(
+            webhook_data, channel._state)
 
         with contextlib.suppress(nextcord.NotFound):
             webhook = await cache_webhook.fetch(prefer_auth=False)
@@ -208,7 +207,8 @@ def on_logs(log_type: int):
                 return
 
             for channel_id, logs_types in guild_data.items():
-                tasks.append(asyncio.create_task(send_log(self, mes, channel_id, logs_types)))
+                tasks.append(asyncio.create_task(
+                    send_log(self, mes, channel_id, logs_types)))
 
             for task in tasks:
                 await task
