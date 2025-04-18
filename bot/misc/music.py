@@ -18,9 +18,9 @@ from bot.views.music import MusicView
 
 _log = logging.getLogger(__name__)
 
-FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+FFMPEG_OPTIONS = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 ffmpeg_path = "ffmpeg"
-initally_num = 10
 DEFAULT_VOLUME = 0.5
 
 
@@ -219,7 +219,8 @@ class MusicPlayer:
             self.stopped_at = time.time()-self.started_at
             self.leaved_task = self.get_leaved_task()
             await self.message.edit(
-                content=i18n.t(locale, 'music.player.out.not_user', time=time.time()+180),
+                content=i18n.t(locale, 'music.player.out.not_user',
+                               time=time.time()+180),
                 embeds=[],
                 view=None
             )
@@ -245,19 +246,23 @@ class MusicPlayer:
             icon_url=self.data.get_image('480x480')
         )
         if self.voice.is_playing():
-            embed.set_thumbnail("https://i.postimg.cc/NfhqmcP9/GIF-20240709-000613-764-ezgif-com-gif-maker.gif")
+            embed.set_thumbnail(
+                "https://i.postimg.cc/NfhqmcP9/GIF-20240709-000613-764-ezgif-com-gif-maker.gif")
             embed.add_field(
                 name=i18n.t(locale, 'music.player.message.status'),
                 value=i18n.t(locale, 'music.player.message.listen',
-                             passtime=convert_time(time.time()-self.started_at),
+                             passtime=convert_time(
+                                 time.time()-self.started_at),
                              fulltime=convert_time(self.data.diration))
             )
         if self.voice.is_paused():
-            embed.set_thumbnail("https://i.postimg.cc/0Q5b0SWQ/cf937614db244f5f8728623910d7a7aas-AWmsn-Zwjf-R1-R9ll-0.png")
+            embed.set_thumbnail(
+                "https://i.postimg.cc/0Q5b0SWQ/cf937614db244f5f8728623910d7a7aas-AWmsn-Zwjf-R1-R9ll-0.png")
             embed.add_field(
                 name=i18n.t(locale, 'music.player.message.status'),
                 value=i18n.t(locale, 'music.player.message.pause',
-                             passtime=convert_time(time.time()-self.started_at),
+                             passtime=convert_time(
+                                 time.time()-self.started_at),
                              fulltime=convert_time(self.data.diration))
             )
 
@@ -296,7 +301,8 @@ class MusicPlayer:
 
         if not queue.has(self.guild_id, self.index+1):
             await self.message.edit(
-                content=i18n.t(locale, 'music.player.out.previous', time=time.time()+180),
+                content=i18n.t(locale, 'music.player.out.previous',
+                               time=time.time()+180),
                 embeds=[],
                 view=None
             )
@@ -320,7 +326,8 @@ class MusicPlayer:
 
         source = nextcord.FFmpegPCMAudio(
             music_url, pipe=False, executable=ffmpeg_path, **options)
-        source = nextcord.PCMVolumeTransformer(source, volume=sessions_volume[self.guild_id])
+        source = nextcord.PCMVolumeTransformer(
+            source, volume=sessions_volume[self.guild_id])
         self.voice.play(source, after=self.callback)
 
         if indent_song is not None:
