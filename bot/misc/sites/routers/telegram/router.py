@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from functools import partial
+from contextlib import asynccontextmanager
 import logging
 from os import getenv
 from typing import TYPE_CHECKING
@@ -34,11 +34,13 @@ class TelegramRouter:
 
     def _setup(self, prefix: str = ''):
         dp['dispatch'] = self.bot.dispatch
+        dp['storage'] = dict()
+
         self.callback_url = getenv('API_URL')+prefix+'/'
 
         router = APIRouter(
             prefix=prefix,
-            on_startup=[lambda: asyncio.create_task(self.on_startup())]
+            lifespan=self.lifespan
         )
 
         router.add_api_route('/', self._get, methods=['GET'])
@@ -47,12 +49,14 @@ class TelegramRouter:
 
         return router
 
-    async def on_startup(self):
+    @asynccontextmanager
+    async def lifespan(self, app):
         _log.trace('Registered tg webhook as %s', self.callback_url)
         await self.tg_bot.set_webhook(self.callback_url,
                                       allowed_updates=dp.resolve_used_update_types(),
                                       secret_token=token,
                                       drop_pending_updates=True)
+        yield
 
     async def _get_icon(self, request: Request, id: int):
         chat = await self.tg_bot.get_chat(id)

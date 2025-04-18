@@ -46,22 +46,26 @@ class TelegramView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        request_id = random.randint(1_000_000, 1_000_000_000)
+        request_id = random.randint(1_000_000, 20_000_000)
 
-        def check_registration(id: str, chat):
+        def check_registration(id: str, chat, categories):
             return int(id) == request_id
 
         view = await TelegramWaitingView(interaction.guild, request_id)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-        _, chat = await interaction.client.wait_for('tg_channel_joined', check=check_registration)
+        _, chat, categories = await interaction.client.wait_for('tg_channel_joined', check=check_registration)
+
+        if categories is not None and len(categories) == 0:
+            categories = None
 
         id = generate_hex()
         data = {
             'id': id,
             'chat_id': chat.chat_id,
             'title': chat.title,
-            'username': chat.username
+            'username': chat.username,
+            'categories': categories
         }
 
         view = await TelegramItemView(interaction.guild, id, data)

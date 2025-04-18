@@ -1,8 +1,6 @@
+
 from aiogram import F, Router
-from aiogram.types import (
-    Message, ReplyKeyboardRemove,
-    ChatMemberAdministrator, ChatMemberMember, ChatMemberOwner
-)
+from aiogram.types import Message
 
 router = Router()
 
@@ -12,30 +10,8 @@ async def channel_message(message: Message, dispatch):
     dispatch('tg_post', message)
 
 
-@router.message(F.chat_shared)
-async def on_chat_shared(message: Message, dispatch):
-    try:
-        me = await message.bot.me()
-        status = await message.bot.get_chat_member(message.chat_shared.chat_id,
-                                                   me.id)
-    except Exception:
-        status = False
-    else:
-        status = isinstance(
-            status, (ChatMemberMember, ChatMemberAdministrator))
-
-    if not status:
-        await message.answer("Бот отсутствует в этом канале.")
+@router.message()
+async def group_message(message: Message, dispatch):
+    if message.chat.type == 'private':
         return
-
-    status = await message.bot.get_chat_member(message.chat_shared.chat_id, message.from_user.id)
-
-    if not isinstance(status, (ChatMemberAdministrator, ChatMemberOwner)):
-        await message.answer("У вас нет прав администратора в этом канале.")
-        return
-
-    await message.answer("<b>→ Канал успешно подключён — можно продолжить настройку!</b>",
-                         reply_markup=ReplyKeyboardRemove())
-
-    dispatch('tg_channel_joined',
-             message.chat_shared.request_id, message.chat_shared)
+    dispatch('tg_post', message)

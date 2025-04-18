@@ -6,9 +6,7 @@ import os
 import sys
 import traceback
 import asyncio
-from os import getenv
-from dotenv import load_dotenv
-load_dotenv()
+from bot.misc.env import Tokens
 
 
 TRACE = logging.DEBUG - 5
@@ -184,7 +182,7 @@ class LordLogger(logging.Logger):
         self.addHandler(self.console)
 
         color_formatter = DiscordColoredFormatter(self.COLOR_FORMAT)
-        self.discord_handler = DiscordHandler(getenv('log_webhook'))
+        self.discord_handler = DiscordHandler(Tokens.log_webhook)
         self.discord_handler.setFormatter(color_formatter)
         self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
         if name.startswith(DEFAULT_HTTP_LOGS):

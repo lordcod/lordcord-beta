@@ -93,7 +93,12 @@ class TelegramItemView(nextcord.ui.View):
 
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, row=1, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        from .views import TelegramView
+
         gdb = GuildDateBases(interaction.guild_id)
         telegram_data = await gdb.get('telegram_notification')
         telegram_data.pop(self.selected_id, None)
         await gdb.set('telegram_notification', telegram_data)
+
+        view = await TelegramView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)

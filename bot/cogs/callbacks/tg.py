@@ -3,7 +3,6 @@ import re
 from os import getenv
 from pathlib import Path
 from typing import Optional
-from fastapi.background import P
 from nextcord import File
 import nextcord
 from nextcord.ext import commands
@@ -73,13 +72,13 @@ class TgCallEvent(commands.Cog):
         self.bot = bot
 
     async def get_channels(self, id: int):
-        channels = set()
-        guilds = await GuildModel.filter(~Q(telegram_notification={}))
+        channels = []
+        guilds, data = await GuildModel.filter(~Q(telegram_notification={}))
         for gm in guilds:
             for data in gm.telegram_notification.values():
                 if data['chat_id'] == id and (
                         chnl := self.bot.get_channel(data['channel_id'])):
-                    channels.add(chnl)
+                    channels.append([chnl, data])
         return channels
 
     @commands.Cog.listener()
@@ -90,6 +89,11 @@ class TgCallEvent(commands.Cog):
 
         _log.trace('Receive callback data (id:%s): %s',
                    message.message_id, message.text)
+
+        try:
+            topic = message.reply_to_message.forum_topic_created.name
+        except AttributeError:
+            topic = None
 
         embeds = []
         files = []
@@ -113,9 +117,12 @@ class TgCallEvent(commands.Cog):
         avatar_url = f'{getenv("API_URL")}/telegram/icon/{message.chat.id}'
 
         channels = await self.get_channels(message.chat.id)
-        for channel in channels:
-            webhook = await get_webhook(channel)
+        for channel, data in channels:
+            categories = data.get('categories', [])
+            if topic not in categories:
+                continue
 
+            webhook = await get_webhook(channel)
             await webhook.send(content,
                                username=message.chat.title,
                                avatar_url=avatar_url,

@@ -2,7 +2,10 @@ import logging
 
 from aiogram import Dispatcher
 from aiogram.types import ErrorEvent
-from . import commands, messages
+
+from .commands import start
+from .commands import active
+from . import messages, settings
 
 
 dp = Dispatcher()
@@ -14,5 +17,5 @@ async def error_handler(event: ErrorEvent):
     _log.critical("Critical error caused by %s",
                   event.exception, exc_info=True)
 
-routers = [commands.router, messages.router]
+routers = [start.router, active.router, settings.router, messages.router]
 dp.include_routers(*routers)
