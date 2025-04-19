@@ -10,7 +10,8 @@ import logging
 from typing import Any, Callable, Coroutine, Dict, List, Optional,  Tuple, TypeVar
 import nextcord
 
-from bot.databases import GuildDateBases, localdb
+from bot.databases import GuildDateBases
+from bot.databases.datastore import DataStore
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
 
@@ -151,7 +152,7 @@ async def pre_remove_role(member: nextcord.Member, role: nextcord.Role) -> None:
 
 async def get_webhook(channel: nextcord.TextChannel) -> Optional[nextcord.Webhook]:
     client = channel._state._get_client()
-    webhooks_db = await localdb.get_table('logs_webhooks')
+    webhooks_db = DataStore('logs_webhooks')
     webhook_data = await webhooks_db.get(channel.id)
 
     if webhook_data is not None:
@@ -236,7 +237,7 @@ class Logs:
                 f"> Channel: {message.channel.name} ({message.channel.mention})\n"
                 f"> Message id: {message.id}\n"
                 f"> Message author: {str(message.author)} ({message.author.mention})\n"
-                f"> Message created: <t:{message.created_at.timestamp() :.0f}:f> (<t:{message.created_at.timestamp() :.0f}:R>)"
+                f"> Message created: <t:{message.created_at.timestamp():.0f}:f> (<t:{message.created_at.timestamp():.0f}:R>)"
             ),
             timestamp=datetime.datetime.today()
         )
@@ -278,7 +279,7 @@ class Logs:
                         f"> Channel: {before.channel.name} ({before.channel.mention})\n"
                         f"> Message id: {before.id}\n"
                         f"> Message author: {str(before.author)} ({before.author.mention})\n"
-                        f"> Message created: <t:{before.created_at.timestamp() :.0f}:f> (<t:{before.created_at.timestamp() :.0f}:R>)"
+                        f"> Message created: <t:{before.created_at.timestamp():.0f}:f> (<t:{before.created_at.timestamp():.0f}:R>)"
                     ),
                     timestamp=datetime.datetime.today()
                 )
@@ -296,7 +297,7 @@ class Logs:
                 f"> Channel: {before.channel.name} ({before.channel.mention})\n"
                 f"> Message id: {before.id}\n"
                 f"> Message author: {str(before.author)} ({before.author.mention})\n"
-                f"> Message created: <t:{before.created_at.timestamp() :.0f}:f> (<t:{before.created_at.timestamp() :.0f}:R>)"
+                f"> Message created: <t:{before.created_at.timestamp():.0f}:f> (<t:{before.created_at.timestamp():.0f}:R>)"
             ),
             timestamp=datetime.datetime.today()
         )
@@ -410,7 +411,7 @@ class Logs:
             color=nextcord.Colour.brand_green(),
             description=(
                 f'> Member: **{member.name}** (**{member.id}**)\n'
-                f'> Amount: *{amount :,}*{currency_emoji}'
+                f'> Amount: *{amount:,}*{currency_emoji}'
             ),
             timestamp=datetime.datetime.today()
         )
@@ -431,7 +432,7 @@ class Logs:
             color=nextcord.Colour.brand_green(),
             description=(
                 f'> Role: {role.mention} (**{role.id}**)\n'
-                f'> Amount: *{amount :,}*{currency_emoji}'
+                f'> Amount: *{amount:,}*{currency_emoji}'
             ),
             timestamp=datetime.datetime.today()
         )
@@ -452,7 +453,7 @@ class Logs:
             color=nextcord.Colour.red(),
             description=(
                 f'> Member: **{member.name}** (**{member.id}**)\n'
-                f'> Amount: *{amount :,}*{currency_emoji}'
+                f'> Amount: *{amount:,}*{currency_emoji}'
             ),
             timestamp=datetime.datetime.today()
         )

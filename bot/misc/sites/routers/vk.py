@@ -1,5 +1,4 @@
 from __future__ import annotations
-import base64
 import hashlib
 from typing import TYPE_CHECKING, Optional
 from fastapi import APIRouter, Request
@@ -7,18 +6,15 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from os import getenv
 from fastapi.templating import Jinja2Templates
 from bot.misc.api.vk_api_auth import VkApiAuth
+from bot.misc.utils import Tokenizer
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
-SALT = '4051975f'
-password = hashlib.sha256("random string".encode()).digest()
+HASH = "RUkFEDT2pGQnnEbF"
+SALT = '4051975f'+HASH
+password = Tokenizer.generate_key(HASH)
 templates = Jinja2Templates(directory="templates")
-
-
-def decrypt(enc_data: str) -> str:
-    enc_bytes = base64.urlsafe_b64decode(enc_data)
-    return "".join(chr(a ^ b) for a, b in zip(enc_bytes, password))
 
 
 class VkRouter:
@@ -64,7 +60,8 @@ class VkRouter:
     async def _post_vk_callback(self, request: Request, code: str):
         data = await request.json()
 
-        randhex, group_id, group_code = decrypt(code).split('-')
+        randhex, group_id, group_code = Tokenizer.decrypt(
+            code, password).split('-')
 
         if data['type'] == 'confirmation':
             return group_code

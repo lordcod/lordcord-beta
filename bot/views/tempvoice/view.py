@@ -3,7 +3,8 @@ from enum import IntEnum
 from typing import Optional
 import nextcord
 
-from bot.databases import GuildDateBases, localdb
+from bot.databases import GuildDateBases
+from bot.databases.datastore import DataStore
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 from .information import simple_but_voice_items, advance_but_voice_items
@@ -16,8 +17,8 @@ class VoiceStatus(IntEnum):
 
 
 async def get_voice(interaction: nextcord.Interaction) -> Optional[nextcord.VoiceChannel]:
-    channels_tracks_db = await localdb.get_table('channels_track_data')
-    channels_data = await localdb.get_table('channels_data')
+    channels_tracks_db = DataStore('channels_track_data')
+    channels_data = DataStore('channels_data')
     channels_track_data = await channels_tracks_db.get(interaction.guild.id, [])
 
     for cid in channels_track_data:

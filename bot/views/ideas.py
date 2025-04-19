@@ -16,7 +16,8 @@ from bot.misc.utils import AsyncSterilization, IdeaPayload, generate_message, ge
 
 from bot.databases.varstructs import (ButtonPayload, IdeasPayload, IdeasReactionsPayload,
                                       IdeasReactionSystem as ReactionSystemType, IdeasSuggestSystem)
-from bot.databases import localdb, GuildDateBases
+from bot.databases import GuildDateBases
+from bot.databases.datastore import DataStore
 from bot.languages import i18n
 from bot.resources.info import (
     DEFAULT_IDEAS_ALLOW_IMAGE,
@@ -220,7 +221,7 @@ class VotingModal(nextcord.ui.Modal):
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data: IdeasPayload = await gdb.get('ideas')
 
-        mdb = await localdb.get_table('ideas')
+        mdb = DataStore('ideas')
         idea_data = await mdb.get(interaction.message.id)
         idea_content, idea_image, idea_author_id = idea_data.get(
             'idea'), idea_data.get('image'), idea_data.get('user_id')
@@ -292,7 +293,7 @@ class ConfirmModal(VotingModal):
 
         idea_data['approved_message_id'] = apprd_msg.id
 
-        mdb = await localdb.get_table('ideas')
+        mdb = DataStore('ideas')
         await mdb.set(interaction.message.id, idea_data)
 
 
@@ -348,7 +349,7 @@ class DenyModal(VotingModal):
 
         idea_data['denied_message_id'] = denrd_msg.id
 
-        mdb = await localdb.get_table('ideas')
+        mdb = DataStore('ideas')
         await mdb.set(interaction.message.id, idea_data)
 
 
@@ -442,7 +443,7 @@ class ReactionConfirmView(nextcord.ui.View):
         refresh_view(self, self.locale, ideas_data, payload)
 
     async def save_data(self, message_id) -> None:
-        mdb = await localdb.get_table('ideas')
+        mdb = DataStore('ideas')
         idea_data = await mdb.get(message_id)
         idea_data.update({
             'promoted': self.promoted_data,
@@ -454,7 +455,7 @@ class ReactionConfirmView(nextcord.ui.View):
         gdb = GuildDateBases(guild_id)
         self.locale = await gdb.get('language')
 
-        mdb = await localdb.get_table('ideas')
+        mdb = DataStore('ideas')
         idea_data = await mdb.get(message_id)
         self.promoted_data = idea_data.get('promoted', [])
         self.demoted_data = idea_data.get('demoted', [])
@@ -621,7 +622,7 @@ class IdeaModal(nextcord.ui.Modal):
             'idea': idea,
             'image': image
         }
-        mdb = await localdb.get_table('ideas')
+        mdb = DataStore('ideas')
         await mdb.set(mes.id, idea_data)
 
         Timeout(interaction.guild_id,

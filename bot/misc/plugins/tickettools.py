@@ -2,7 +2,7 @@ import contextlib
 from enum import IntEnum
 import logging
 import nextcord
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import CategoryPayload, TicketsItemPayload, TicketsPayload, UserTicketPayload
 from typing import Dict,  List, Literal, Optional, Self, Tuple
@@ -88,7 +88,7 @@ class ModuleTicket:
 
     @classmethod
     async def from_channel_id(cls, member: nextcord.Member, channel: nextcord.TextChannel) -> Self:
-        tickets_data = await localdb.get_table('tickets')
+        tickets_data = DataStore('tickets')
         ticket_data = await tickets_data.get(channel.id)
 
         message_id = ticket_data['ticket_id']
@@ -159,17 +159,17 @@ class ModuleTicket:
         return ticket_data
 
     async def fetch_ticket_data(self):
-        tickets_data = await localdb.get_table('tickets')
+        tickets_data = DataStore('tickets')
         return await tickets_data.get(self.ticket_channel.id)
 
     async def set_ticket_data(self, data=None):
         if data is None:
             data = self.get_ticket_data()
-        tickets_data = await localdb.get_table('tickets')
+        tickets_data = DataStore('tickets')
         await tickets_data.set(self.ticket_channel.id, data)
 
     async def get_ticket_data_from_member(self, category: Optional[CategoryPayload] = None) -> List[UserTicketPayload]:
-        tickets_data = await localdb.get_table('tickets')
+        tickets_data = DataStore('tickets')
         keys = await self.get_ticket_keys()
         tickets: List[UserTicketPayload] = await tickets_data.multi_get(keys)
         ret = []
@@ -189,7 +189,7 @@ class ModuleTicket:
         return ret
 
     async def get_ticket_count(self):
-        tickets_data = await localdb.get_table('tickets')
+        tickets_data = DataStore('tickets')
         keys = await self.get_ticket_keys()
         tickets: List[UserTicketPayload] = await tickets_data.multi_get(keys)
 
@@ -206,19 +206,19 @@ class ModuleTicket:
         }
 
     async def get_ticket_keys(self):
-        tickets_data_panel = await localdb.get_table('tickets-panel')
+        tickets_data_panel = DataStore('tickets-panel')
         channels = await tickets_data_panel.get(self.message_id, [])
         return channels
 
     async def remove_ticket_count(self):
-        tickets_data_panel = await localdb.get_table('tickets-panel')
+        tickets_data_panel = DataStore('tickets-panel')
         channels = await tickets_data_panel.get(self.message_id, [])
         with contextlib.suppress(IndexError):
             channels.remove(self.ticket_channel.id)
         await tickets_data_panel.set(self.message_id, channels)
 
     async def increment_ticket_count(self):
-        tickets_data_panel = await localdb.get_table('tickets-panel')
+        tickets_data_panel = DataStore('tickets-panel')
         channels = await tickets_data_panel.get(self.message_id, [])
         channels.append(self.ticket_channel.id)
         await tickets_data_panel.set(self.message_id, channels)

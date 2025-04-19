@@ -6,7 +6,7 @@ from typing import Literal, Optional
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import localdb
+from bot.databases.datastore import cache
 from bot.databases.handlers.economyHD import EconomyMemberDB
 from bot.databases.models import EconomicModel
 from bot.misc.lordbot import LordBot
@@ -51,8 +51,7 @@ class Teams(commands.Cog):
 
     @commands.command()
     async def shutdown(self, ctx: commands.Context):
-        await localdb._update_db(__name__)
-        await localdb.cache.close(close_connection_pool=True)
+        await cache.close(close_connection_pool=True)
         await ctx.send("The bot has activated the completion process!")
         await self.bot.close()
 
@@ -108,14 +107,6 @@ class Teams(commands.Cog):
         await self.bot.engine.execute(query)
         await ctx.message.add_reaction(Emoji.success)
 
-    @commands.command(aliases=['update_db'])
-    async def update_redis(
-        self,
-        ctx: commands.Context
-    ):
-        await localdb._update_db(__name__)
-        await ctx.message.add_reaction(Emoji.success)
-
     @commands.command(aliases=['notifi_info'])
     async def get_notifi_info(self, ctx: commands.Context):
         twnoti = self.bot.twnoti
@@ -123,8 +114,8 @@ class Teams(commands.Cog):
 
         await ctx.send(
             'Notification is worked\n'
-            f'Twitch: {twnoti.running} (<t:{twnoti.last_heartbeat :.0f}:R>)\n'
-            f'Youtube: {ytnoti.running} (<t:{ytnoti.last_heartbeat :.0f}:R>)'
+            f'Twitch: {twnoti.running} (<t:{twnoti.last_heartbeat:.0f}:R>)\n'
+            f'Youtube: {ytnoti.running} (<t:{ytnoti.last_heartbeat:.0f}:R>)'
         )
 
     @commands.command()

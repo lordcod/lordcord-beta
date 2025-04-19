@@ -3,7 +3,7 @@ from enum import IntEnum
 from typing import Optional
 
 import nextcord
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 
@@ -14,8 +14,8 @@ class VoiceStatus(IntEnum):
 
 
 async def get_voice(interaction: nextcord.Interaction) -> Optional[nextcord.VoiceChannel]:
-    channels_tracks_db = await localdb.get_table('channels_track_data')
-    channels_data = await localdb.get_table('channels_data')
+    channels_tracks_db = DataStore('channels_track_data')
+    channels_data = DataStore('channels_data')
     channels_track_data = await channels_tracks_db.get(interaction.guild.id, [])
 
     for cid in channels_track_data:
@@ -55,7 +55,7 @@ class OwnerSettingsDropDown(VoiceUserSelect):
             await interaction.response.edit_message(content=i18n.t(locale, 'tempvoice.errors.himself'), view=None)
             return
 
-        channels_data = await localdb.get_table('channels_data')
+        channels_data = DataStore('channels_data')
         voice = await get_voice(interaction)
 
         voice_data = await channels_data.get(voice.id)
@@ -235,7 +235,7 @@ class UserMuteSettingsDropDown(VoiceUserSelect):
             await interaction.response.edit_message(content=i18n.t(locale, 'tempvoice.errors.not_user'), view=None)
             return
 
-        channels_data = await localdb.get_table('channels_data')
+        channels_data = DataStore('channels_data')
         data = await channels_data.get(voice.id)
         mutes = data.get('mutes', {})
 
@@ -270,7 +270,7 @@ class UserMuteFDSettingsDropDown(VoiceUserSelect):
             await interaction.response.edit_message(content=i18n.t(locale, 'tempvoice.errors.not_user'), view=None)
             return
 
-        channels_data = await localdb.get_table('channels_data')
+        channels_data = DataStore('channels_data')
         data = await channels_data.get(voice.id)
         mutes = data.get('mutes', {})
         mutes[user.id] = True
@@ -300,7 +300,7 @@ class UserUnmuteFDSettingsDropDown(VoiceUserSelect):
             await interaction.response.edit_message(content=i18n.t(locale, 'tempvoice.errors.not_user'), view=None)
             return
 
-        channels_data = await localdb.get_table('channels_data')
+        channels_data = DataStore('channels_data')
         data = await channels_data.get(voice.id)
         mutes = data.get('mutes', {})
         mutes[user.id] = False
@@ -318,7 +318,8 @@ class LimitSettingsModal(nextcord.ui.Modal):
         super().__init__(i18n.t(locale, 'tempvoice.items.modal.limit.title'))
         self.limit = nextcord.ui.TextInput(
             label=i18n.t(locale, 'tempvoice.items.modal.limit.label'),
-            placeholder=i18n.t(locale, 'tempvoice.items.modal.limit.placeholder'),
+            placeholder=i18n.t(
+                locale, 'tempvoice.items.modal.limit.placeholder'),
             max_length=2,
         )
         self.add_item(self.limit)
@@ -377,7 +378,8 @@ class NameSettingsModal(nextcord.ui.Modal):
         super().__init__(i18n.t(locale, 'tempvoice.items.modal.name.title'))
         self.name = nextcord.ui.TextInput(
             label=i18n.t(locale, 'tempvoice.items.modal.name.label'),
-            placeholder=i18n.t(locale, 'tempvoice.items.modal.name.placeholder'),
+            placeholder=i18n.t(
+                locale, 'tempvoice.items.modal.name.placeholder'),
             max_length=100,
         )
         self.add_item(self.name)

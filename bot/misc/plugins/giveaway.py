@@ -1,7 +1,7 @@
 import asyncio
 import nextcord
 from typing import Coroutine, Any, Dict
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.handlers.economyHD import EconomyMemberDB
 from bot.databases.varstructs import GiveawayData
 from bot.databases import GuildDateBases
@@ -141,6 +141,7 @@ class Giveaway:
     async def complete(self) -> None:
         await self.fetch_giveaway_data()
 
+        # TODO: REFACTOING AND FIX
         winner_number = utils.decrypt_token(
             self.giveaway_data.get('key'), self.giveaway_data.get('token'))
         winner_ids = []
@@ -188,7 +189,7 @@ class Giveaway:
             title=giveaway_data.get("prize"),
             description=(
                 f"{giveaway_description}"
-                f"Ends: <t:{giveaway_data.get('date_end') :.0f}:f> (<t:{giveaway_data.get('date_end') :.0f}:R>)\n"
+                f"Ends: <t:{giveaway_data.get('date_end'):.0f}:f> (<t:{giveaway_data.get('date_end'):.0f}:R>)\n"
                 f"Sponsored by <@{giveaway_data.get('sponsor_id')}>\n"
                 f"Entries: **{len(giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{giveaway_data.get('quantity')}**"
@@ -207,7 +208,7 @@ class Giveaway:
             title=self.giveaway_data.get("prize"),
             description=(
                 f"{giveaway_description}"
-                f"Ends: <t:{self.giveaway_data.get('date_end') :.0f}:f> (<t:{self.giveaway_data.get('date_end') :.0f}:R>)\n"
+                f"Ends: <t:{self.giveaway_data.get('date_end'):.0f}:f> (<t:{self.giveaway_data.get('date_end'):.0f}:R>)\n"
                 f"Sponsored by <@{self.giveaway_data.get('sponsor_id')}>\n"
                 f"Entries: **{len(self.giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{', '.join([wu.mention for wu in winners])}**"

@@ -2,3 +2,19 @@
 tortoise_orm = "TORTOISE_ORM.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
+
+[tool.poetry]
+name = "lordbeta"
+version = "0.7.9a"
+description = "Discord bot"
+authors = ["LordCode <9999269010dddd@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

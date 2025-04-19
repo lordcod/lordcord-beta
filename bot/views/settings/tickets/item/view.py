@@ -1,7 +1,7 @@
 import contextlib
 import nextcord
 
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload, UserTicketPayload
 from bot.languages import i18n
@@ -14,8 +14,8 @@ from bot.views.settings.tickets.item.embeds import get_embed
 
 
 async def delete_every_tickets(guild: nextcord.Guild, message_id: int):
-    tickets_data_panel = await localdb.get_table('tickets-panel')
-    tickets_data = await localdb.get_table('tickets')
+    tickets_data_panel = DataStore('tickets-panel')
+    tickets_data = DataStore('tickets')
     keys = await tickets_data_panel.get(message_id, [])
     tickets: list[UserTicketPayload] = await tickets_data.multi_get(keys)
 

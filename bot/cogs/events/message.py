@@ -6,7 +6,8 @@ import nextcord
 import math
 from nextcord.ext import commands
 
-from bot.databases import GuildDateBases, localdb
+from bot.databases import GuildDateBases
+from bot.databases.datastore import DataStore
 from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.moderation.spam import parse_message
@@ -138,7 +139,7 @@ class MessageEvent(commands.Cog):
             message.author.id, 0) + 1
         await gdb.set('message_state', guild_state)
 
-        state = await localdb.get_table('messages')
+        state = DataStore('messages')
         await state.increment(message.author.id)
 
     async def give_score(self, message: nextcord.Message) -> None:
@@ -161,7 +162,7 @@ class MessageEvent(commands.Cog):
             message.author.id, 0) + score
         await gdb.set('score_state', guild_state)
 
-        state = await localdb.get_table('score')
+        state = DataStore('score')
         await state.increment(message.author.id, score)
 
         BETWEEN_MESSAGES_TIME[message.author.id] = time.time() + 10

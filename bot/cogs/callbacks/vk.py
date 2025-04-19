@@ -10,14 +10,16 @@ from os import getenv
 import random
 import string
 
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.models import GuildModel, Q
 from bot.misc.lordbot import LordBot
 from bot.misc.api.vk_api import VkApi, VkApiError
+from bot.misc.utils.misc import Tokenizer
 
 _log = logging.getLogger(__name__)
 
-password = hashlib.sha256("random string".encode()).digest()
+HASH = "RUkFEDT2pGQnnEbF"
+password = Tokenizer.generate_key(HASH)
 
 
 def encrypt(data: str) -> str:
@@ -28,7 +30,7 @@ def encrypt(data: str) -> str:
 
 async def get_webhook(channel: nextcord.TextChannel) -> Optional[nextcord.Webhook]:
     client = channel._state._get_client()
-    webhooks_db = await localdb.get_table('notification_webhooks')
+    webhooks_db = DataStore('notification_webhooks')
     webhook_data = await webhooks_db.get(channel.id)
 
     if webhook_data is not None:
@@ -79,7 +81,8 @@ class VkCallEvent(commands.Cog):
 
         code = (await vk.method('groups.getCallbackConfirmationCode',
                                 group_id=id))['code']
-        enc = encrypt(f"{uuid.uuid4().int % 1_000_000}-{id}-{code}")
+        enc = Tokenizer.encrypt(f"{uuid.uuid4().int % 1_000_000}-{id}-{code}",
+                                password)
 
         try:
             server_id = (await vk.method(
@@ -101,7 +104,7 @@ class VkCallEvent(commands.Cog):
             wall_post_new=1
         )
 
-        vk_tokens_db = await localdb.get_table('vk_tokens')
+        vk_tokens_db = DataStore('vk_tokens')
         await vk_tokens_db.set(id, token)
 
         await self.bot.send_api_state(state,
@@ -129,7 +132,7 @@ class VkCallEvent(commands.Cog):
                    post_id, data["object"].get("text", ""))
 
         group_id = data["group_id"]
-        vk_tokens_db = await localdb.get_table('vk_tokens')
+        vk_tokens_db = DataStore('vk_tokens')
         token = await vk_tokens_db.get(group_id)
         if token:
             vk = VkApi(self.bot, token)

@@ -3,7 +3,6 @@ import nextcord
 from nextcord.ext import commands, application_checks
 
 from bot.resources.ether import Emoji
-from bot.misc import utils
 from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
@@ -83,29 +82,7 @@ class Basic(commands.Cog):
 
     @commands.command()
     async def captcha(self, ctx: commands.Context):
-        gdb = GuildDateBases(ctx.guild.id)
-        lang = await gdb.get('language')
-        data, code = await utils.generator_captcha(random.randint(3, 7))
-        image_file = nextcord.File(
-            data, filename="captcha.png", description="Captcha", spoiler=True)
-        await ctx.send(content=i18n.t(lang, 'captcha.enter'), file=image_file)
-        check: Callable[
-            [nextcord.Message],
-            bool] = lambda mes: (mes.channel == ctx.channel
-                                 and mes.author == ctx.author)
-        try:
-            message: nextcord.Message = await self.bot.wait_for("message",
-                                                                timeout=30,
-                                                                check=check)
-        except asyncio.TimeoutError:
-            await ctx.send(content=i18n.t(lang, 'captcha.failed'))
-            return
-
-        if message.content.upper() == code:
-            await ctx.send((f"{Emoji.congratulation}"
-                            f"{i18n.t(lang, 'captcha.congratulation')}"))
-        else:
-            await ctx.send(content=i18n.t(lang, 'captcha.failed'))
+        await ctx.send("The command is no longer available!")
 
     @nextcord.slash_command(
         name="activiti",

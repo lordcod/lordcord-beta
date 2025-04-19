@@ -4,7 +4,7 @@ import math
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.plugins import logstool
 from bot.misc.lordbot import LordBot
@@ -63,13 +63,13 @@ class VoiceStateEvent(commands.Cog):
             await current_players[channel.guild.id].point_user()
 
     async def connect_to_voice(self, member: nextcord.Member) -> None:
-        state = await localdb.get_table('temp_voice_state')
+        state = DataStore('temp_voice_state')
         await state.set(member.id, time.time())
 
     async def disconnect_from_voice(self, member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
-        state = await localdb.get_table('voice_state')
-        temp_state = await localdb.get_table('temp_voice_state')
+        state = DataStore('voice_state')
+        temp_state = DataStore('temp_voice_state')
         member_started_at = await temp_state.get(member.id)
         await temp_state.delete(member.id)
 
@@ -87,7 +87,7 @@ class VoiceStateEvent(commands.Cog):
         await self.give_score(member, voice_time)
 
     async def give_score(self, member: nextcord.Member, voice_time: float) -> None:
-        state = await localdb.get_table('score')
+        state = DataStore('score')
         gdb = GuildDateBases(member.guild.id)
 
         multiplier = 1
