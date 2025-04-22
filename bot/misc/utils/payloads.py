@@ -185,7 +185,8 @@ def get_payload(
         bot_payload._prefix = 'bot'
 
     data = {
-        'today_dt': datetime.today().isoformat()
+        'today_dt': datetime.today().isoformat(),
+        'todayDt': datetime.today().isoformat(),
     }
     if member is not None:
         data.update(MemberPayload(member)._to_dict())
