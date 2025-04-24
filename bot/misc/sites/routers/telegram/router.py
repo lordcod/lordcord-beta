@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 from contextlib import asynccontextmanager
 import logging
-from os import getenv
 from typing import TYPE_CHECKING
 import random
 
@@ -13,6 +11,8 @@ from string import printable
 from fastapi import APIRouter, Request, Response
 
 from aiogram.types import Update
+
+from bot.misc.env import API_URL
 
 
 from .bot import dp
@@ -33,10 +33,15 @@ class TelegramRouter:
         self.callback_url = None
 
     def _setup(self, prefix: str = ''):
+        if self.tg_bot is None:
+            _log.warning(
+                'Telegram notifications are disabled due to the lack of a bot token.')
+            return APIRouter()
+
         dp['dispatch'] = self.bot.dispatch
         dp['storage'] = dict()
 
-        self.callback_url = getenv('API_URL')+prefix+'/'
+        self.callback_url = API_URL+prefix+'/'
 
         router = APIRouter(
             prefix=prefix,

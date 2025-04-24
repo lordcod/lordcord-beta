@@ -1,6 +1,5 @@
 import contextlib
 import re
-from os import getenv
 from pathlib import Path
 from typing import Optional
 from nextcord import File
@@ -9,6 +8,7 @@ from nextcord.ext import commands
 import logging
 from bot.databases.datastore import DataStore
 from bot.databases.models import GuildModel, Q
+from bot.misc.env import API_URL
 from bot.misc.lordbot import LordBot
 from aiogram.types import Message
 from aiogram.enums import MessageEntityType
@@ -114,7 +114,7 @@ class TgCallEvent(commands.Cog):
                 f"attachment://{filename}"))
 
         content = message._unparse_entities(discord_decoration)
-        avatar_url = f'{getenv("API_URL")}/telegram/icon/{message.chat.id}'
+        avatar_url = f'{API_URL}/telegram/icon/{message.chat.id}'
 
         channels = await self.get_channels(message.chat.id)
         for channel, data in channels:

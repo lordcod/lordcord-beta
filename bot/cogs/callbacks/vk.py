@@ -1,17 +1,16 @@
 import base64
 import contextlib
-import hashlib
+import random
+import string
 from typing import Optional
 import uuid
 import nextcord
 from nextcord.ext import commands
 import logging
-from os import getenv
-import random
-import string
 
 from bot.databases.datastore import DataStore
 from bot.databases.models import GuildModel, Q
+from bot.misc.env import API_URL
 from bot.misc.lordbot import LordBot
 from bot.misc.api.vk_api import VkApi, VkApiError
 from bot.misc.utils.misc import Tokenizer
@@ -88,7 +87,7 @@ class VkCallEvent(commands.Cog):
             server_id = (await vk.method(
                 'groups.addCallbackServer',
                 group_id=id,
-                url=getenv('API_URL')+'/vk/callback/'+enc,
+                url=API_URL+'/vk/callback/'+enc,
                 title=f"LC-{''.join([random.choice(string.ascii_lowercase) for _ in range(6)])}"
             ))['server_id']
         except VkApiError as exc:

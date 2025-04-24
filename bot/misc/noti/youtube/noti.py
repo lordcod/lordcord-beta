@@ -11,6 +11,7 @@ from datetime import datetime
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.models import GuildModel, Q
+from bot.misc.env import YOUTUBE_API_KEY
 from bot.misc.noti.base import Notification, NotificationApi
 from bot.misc.noti.twitch.noti import TwCache
 from bot.misc.utils import get_payload, generate_message, lord_format
@@ -185,7 +186,7 @@ class YtNoti(Notification[YtNotiApi]):
     def __init__(
         self,
         bot: LordBot,
-        apikey: str = os.getenv('YOUTUBE_API_KEY')
+        apikey: str = YOUTUBE_API_KEY
     ) -> None:
         self.cache = YtCache()
         super().__init__(bot, YtNotiApi(bot, self.cache, apikey))

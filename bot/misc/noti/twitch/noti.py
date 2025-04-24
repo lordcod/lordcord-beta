@@ -10,6 +10,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.models import GuildModel, Q
+from bot.misc.env import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET
 from bot.misc.noti.base import Notification, NotificationApi
 from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
@@ -135,8 +136,8 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
     def __init__(
         self,
         bot: LordBot,
-        client_id: str = os.getenv('TWITCH_CLIENT_ID'),
-        client_secret: str = os.getenv('TWITCH_CLIENT_SECRET')
+        client_id: str = TWITCH_CLIENT_ID,
+        client_secret: str = TWITCH_CLIENT_SECRET
     ) -> None:
         TwCache.__init__(self)
         Notification.__init__(self, bot=bot, api=TwNotiAPI(

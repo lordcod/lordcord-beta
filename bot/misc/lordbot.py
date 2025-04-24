@@ -18,6 +18,7 @@ from nextcord.ext import commands
 from tortoise import Tortoise
 
 from bot.databases import GuildDateBases
+from bot.misc.env import API_URL, PROXY, TELEGRAM_TOKEN
 from bot.misc.sites.site import ApiSite
 from bot.resources.info import DEFAULT_PREFIX, SITE
 from bot.misc.utils import LordTimeHandler
@@ -59,7 +60,7 @@ class LordBot(commands.AutoShardedBot):
             allow_bot_command = not release
 
         self.SITE_URL = SITE
-        self.API_URL = os.getenv('API_URL')
+        self.API_URL = API_URL
 
         self.release = release
         self.allow_bot_command = allow_bot_command
@@ -67,52 +68,57 @@ class LordBot(commands.AutoShardedBot):
         intents = nextcord.Intents.all()
         intents.presences = False
 
-        if proxy_url := os.getenv('PROXY'):
-            connector = ProxyConnector.from_url(proxy_url, loop=loop)
+        if proxy_url := PROXY:
+            connector = ProxyConnector.from_url(
+                proxy_url, loop=loop)
         else:
             connector = None
-        _log.trace('Proxy %s, %s', proxy_url, connector)
+            _log.trace('Proxy %s, %s', proxy_url, connector)
 
-        super().__init__(
-            loop=loop,
-            intents=intents,
-            status=nextcord.Status.idle,
-            chunk_guilds_at_startup=chunk_guilds_at_startup,
-            help_command=None,
-            enable_debug_events=True,
-            connector=connector
-        )
+            super().__init__(
+                loop=loop,
+                intents=intents,
+                status=nextcord.Status.idle,
+                chunk_guilds_at_startup=chunk_guilds_at_startup,
+                help_command=None,
+                enable_debug_events=True,
+                connector=connector
+            )
 
-        _messages = deque(
-            self._connection._messages,
-            maxlen=None
-        )
-        self._connection._messages = _messages
-        self._connection.max_messages = None
+            _messages = deque(
+                self._connection._messages,
+                maxlen=None
+            )
+            self._connection._messages = _messages
+            self._connection.max_messages = None
 
-        self.load_i18n_config()
-        self.get_git_info()
+            self.load_i18n_config()
+            self.get_git_info()
 
-        self.activity = nextcord.CustomActivity(
-            name=f'{DEFAULT_PREFIX}help | {self.release_tag}')
+            self.activity = nextcord.CustomActivity(
+                name=f'{DEFAULT_PREFIX}help | {self.release_tag}')
 
-        self.__session = None
-        self.__send_api_state = None
-        self.__wait_api_state = None
+            self.__session = None
+            self.__send_api_state = None
+            self.__wait_api_state = None
 
-        self.api_site = ApiSite(self)
-        self.twnoti = TwitchNotification(self)
-        self.ytnoti = YoutubeNotification(self)
-        self.telegram_client = aiogram.Bot(
-            os.getenv('TELEGRAM_TOKEN'),
-            default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-        )
+            self.api_site = ApiSite(self)
+            self.twnoti = TwitchNotification(self)
+            self.ytnoti = YoutubeNotification(self)
+            if TELEGRAM_TOKEN:
+                self.telegram_client = aiogram.Bot(
+                    TELEGRAM_TOKEN,
+                    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+                )
+            else:
+                self.telegram_client = None
 
-        self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
+            self.lord_handler_timer: LordTimeHandler = LordTimeHandler(
+                self.loop)
 
-        self.add_listener(self.listen_on_connect, 'on_connect')
-        self.add_listener(self.listen_on_ready, 'on_ready')
-        self.loop.create_task(self.api_site.run())
+            self.add_listener(self.listen_on_connect, 'on_connect')
+            self.add_listener(self.listen_on_ready, 'on_ready')
+            self.loop.create_task(self.api_site.run())
 
     async def wait_api_state(self, state: str, timeout: Optional[int] = None) -> bool:
         return await self.__wait_api_state(state, timeout=timeout)
@@ -140,8 +146,8 @@ class LordBot(commands.AutoShardedBot):
             path = os.path.join(dirname, filename)
             if os.path.isdir(path):
                 self.load_i18n_dir(path)
-            if not os.path.isfile(path) or not filename.endswith('.json'):
-                continue
+                if not os.path.isfile(path) or not filename.endswith('.json'):
+                    continue
 
             args = filename.split('.')
             locale = args[-2] if len(args) > 2 else None

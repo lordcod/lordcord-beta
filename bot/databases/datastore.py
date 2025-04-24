@@ -1,31 +1,42 @@
 import logging
-import os
 from redis.asyncio import ConnectionPool, StrictRedis
 from typing import Optional
 from bot.databases.misc import adapter
+from bot.misc.env import REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 
 # Логгер
 _log = logging.getLogger(__name__)
 
-POOL = ConnectionPool(
-    host=os.environ.get('REDIS_HOST'),
-    port=os.environ.get('REDIS_PORT'),
-    password=os.environ.get('REDIS_PASSWORD'),
-    db=0
-)
-cache = StrictRedis(connection_pool=POOL, health_check_interval=30)
+if REDIS_HOST is not None:
+    POOL = ConnectionPool(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        password=REDIS_PASSWORD,
+        db=0
+    )
+    cache = StrictRedis(connection_pool=POOL, health_check_interval=30)
+else:
+    POOL = cache = None
 
 
 class DataStore:
     def __init__(self, table_name: str):
         self.table_name = table_name
 
+        self.__with_redis = bool(cache)
+        if not self.__with_redis:
+            self.__cache = {}
+
     async def _get_data(self) -> Optional[dict]:
         """
         Получаем данные из Redis для конкретной таблицы базы данных.
         Ожидаем, что данные будут в формате JSON.
         """
-        data = await cache.get(self.table_name)
+        if self.__with_redis:
+            data = await cache.get(self.table_name)
+        else:
+            data = self.__cache.get(self.table_name)
+
         _log.trace('Load data from %s database: %s', self.table_name, data)
         if data:
             return adapter.loads(data)
@@ -37,7 +48,11 @@ class DataStore:
         Преобразуем данные в формат JSON перед сохранением.
         """
         serialized_data = adapter.dumps(data)
-        await cache.set(self.table_name, serialized_data)
+        if self.__with_redis:
+            await cache.set(self.table_name, serialized_data)
+        else:
+            self.__cache[self.table_name] = serialized_data
+
         _log.trace('Updated data from %s database: %s',
                    self.table_name, serialized_data)
 
