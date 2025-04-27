@@ -4,6 +4,7 @@ import asyncio
 import os
 from typing import TYPE_CHECKING
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from bot.misc.sites.routers.command import CommandRouter
@@ -20,6 +21,23 @@ class ApiSite:
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         self.app = FastAPI()
+
+        origins = [
+            "http://localhost.tiangolo.com",
+            "https://localhost.tiangolo.com",
+            "http://localhost",
+            "http://localhost:8080",
+            "http://localhost:5173",
+        ]
+
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
         self.__running = False
 
     def is_running(self) -> bool:

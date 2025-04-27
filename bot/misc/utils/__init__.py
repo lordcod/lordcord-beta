@@ -4,7 +4,7 @@ from .payloads import (
     TempletePayload, get_payload, welcome_message_items
 )
 from .templates import (
-    ExpressionTemplate, LordTemplate, lord_format
+    ExpressionTemplate, LordTemplate, lord_format, flatten_dict
 )
 from .emoji import (
     get_emoji, get_emoji_as_color, get_emoji_wrap, GuildEmoji,
@@ -20,7 +20,7 @@ from .timers import (
 from .image_utils import generate_welcome_image
 from .time_calc import TimeCalculator, translate_to_timestamp
 from .misc import (
-    MISSING, flatten_dict, clamp, randquan,
+    MISSING, clamp, randquan,
     AsyncSterilization, bool_filter, cut_back,
     generate_random_token, decrypt_token, replace_dict_key,
     randfloat, get_award, to_rgb, Tokenizer,

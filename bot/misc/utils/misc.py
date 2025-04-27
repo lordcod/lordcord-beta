@@ -43,16 +43,6 @@ def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
     return random.randint(int(a*10**scope), int(b*10**scope)) / 10**scope
 
 
-def flatten_dict(data: dict, prefix: str = ''):
-    new_data = {}
-    for k, v in data.items():
-        if isinstance(v, dict):
-            new_data.update(flatten_dict(v, prefix + k + '.'))
-        else:
-            new_data[prefix + k] = v
-    return new_data
-
-
 def clamp(val: Union[int, float], minv: Union[int, float], maxv: Union[int, float]) -> Union[int, float]:
     return min(maxv, max(minv, val))
 

@@ -5,7 +5,6 @@ from collections import defaultdict
 import logging
 import time
 from typing import List,  TYPE_CHECKING,  Dict, Set
-import os
 import xmltodict
 from datetime import datetime
 
@@ -13,7 +12,6 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.models import GuildModel, Q
 from bot.misc.env import YOUTUBE_API_KEY
 from bot.misc.noti.base import Notification, NotificationApi
-from bot.misc.noti.twitch.noti import TwCache
 from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_YOUTUBE_MESSAGE
 
@@ -137,7 +135,7 @@ class YtNotiApi(NotificationApi):
         params = {
             'part': 'snippet,id',
             'type': 'channel',
-            'maxResults': 15,
+            'maxResults': 20,
             'q': query,
             'key': self.token
         }
@@ -159,12 +157,10 @@ class YtNotiApi(NotificationApi):
         params = [
             ('part', 'snippet,id'),
             ('type', 'channel'),
-            ('maxResults', 15),
+            ('maxResults', 20),
             ('key', self.token)
         ]
-
-        for id in ids:
-            params.append(('id', id))
+        params.extend(zip(['id']*len(ids), ids))
 
         json = await self.request('GET', url, params=params)
 

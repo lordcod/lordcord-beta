@@ -20,7 +20,7 @@ DEFAULT_HTTP_LOGS = (
     'bot'
 )
 DEFAULT_LOGS = {
-    'nextcord': logging.INFO,
+    'nextcord': logging.DEBUG,
     'pyngrok': logging.NOTSET,
     'git': logging.INFO,
     'httpx': logging.INFO,

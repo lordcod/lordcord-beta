@@ -3,7 +3,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import orjson
 
-from .misc import flatten_dict
+
+def flatten_dict(data: dict, prefix: str = ''):
+    new_data = {}
+    for k, v in data.items():
+        if isinstance(v, dict):
+            new_data.update(flatten_dict(v, prefix + k + '.'))
+        else:
+            new_data[prefix + k] = v
+    return new_data
 
 
 class ExpressionTemplate:
@@ -43,8 +51,8 @@ class ExpressionTemplate:
         """Извлекает переменную и дефолтное значение из выражения"""
         if '||' in result:
             value, default = map(self._strip_quotes, result.split('||', 1))
-            return value.strip(), default.strip()
-        return self._strip_quotes(result).strip(), None
+            return value, default
+        return self._strip_quotes(result), None
 
     def _strip_quotes(self, text: str) -> str:
         """Удаляет кавычки и пробелы"""
