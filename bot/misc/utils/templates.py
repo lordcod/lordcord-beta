@@ -1,7 +1,12 @@
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import orjson
+
+available_flags: Dict[str, Callable[[str], str]] = {
+    'upper': lambda s: s.upper(),
+    'lower': lambda s: s.lower(),
+}
 
 
 def flatten_dict(data: dict, prefix: str = ''):
@@ -65,9 +70,30 @@ class LordTemplate:
     def findall(self, string: str) -> List[Tuple[str, str]]:
         return [(match.group(0), match.group(1)) for match in self.REGEXP_FORMAT.finditer(string)]
 
+    def execute_flags(self, value: str, flags: List[str]):
+        for flag in flags:
+            execute = available_flags.get(flag)
+            if execute is None:
+                continue
+            value = execute(value)
+        return value
+
+    def parse_flag(self, name: str):
+        pattern = r'(\?&([a-zA-Z0-9]|\?&)+)$'
+        flags = []
+
+        results = re.findall(pattern, name)
+        if results:
+            flags = list(filter(bool, results[0][0].split('?&')))
+            name = name.removesuffix(results[0][0])
+        return name, flags
+
     def parse_key(self, var: str) -> Tuple[str, Optional[str]]:
-        parts = [part.strip() for part in var.split('|', 1)]
-        return (parts[0], parts[1]) if len(parts) == 2 else (parts[0], None)
+        name, *default = [part.strip() for part in var.split('|', 1)]
+        if len(default) == 0:
+            default.append(None)
+        name, flags = self.parse_flag(name)
+        return name, *default, flags
 
     def get_value(self, key: str, data: Dict[str, Any]) -> Any:
         if key in data:
@@ -86,12 +112,13 @@ class LordTemplate:
     def parse_value(self, variables: List[Tuple[str, str]], forms: Dict[str, Any]) -> Dict[str, Any]:
         result = {}
         for original, var in variables:
-            key, default = self.parse_key(var)
+            key, default, flags = self.parse_key(var)
             value = self.get_value(key, forms)
 
             if isinstance(value, dict):
                 result[original] = default
             elif value not in (None, '', []):
+                value = self.execute_flags(value, flags)
                 result[original] = value
             else:
                 result[original] = default
@@ -112,3 +139,8 @@ def lord_format(string: Any, forms: dict) -> str:
     string = ExpressionTemplate(forms).render(string)
     result = LordTemplate().render(string, forms)
     return result
+
+
+if __name__ == "__main__":
+    exp = LordTemplate()
+    print(exp.render('Hey, { name.main?&upper }', {'name.main': 'danya'}))

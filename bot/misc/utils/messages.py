@@ -115,7 +115,10 @@ class GeneratorMessage:
                 elif isinstance(url, dict) and not url.get('url', '').strip():
                     del data[arg]
 
-        return nextcord.Embed.from_dict(new_data)
+        embed = nextcord.Embed.from_dict(new_data)
+        if embed:
+            return embed
+        return MISSING
 
     def parse_embeds(self, data):
         if data is MISSING:

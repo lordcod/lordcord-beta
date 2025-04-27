@@ -1,78 +1,14 @@
-from PIL import UnidentifiedImageError
-from aiohttp import ClientConnectorError
+from httpx import delete
 import nextcord
-from easy_pil import load_image_async
 
+from bot.misc.utils.image_utils import WelcomeImageGenerator
 from bot.views.settings import notification
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc import utils
 from bot.languages import i18n
 from bot.databases import GuildDateBases
-
-
-@utils.AsyncSterilization
-class MyIWMModal(nextcord.ui.Modal):
-    async def __init__(self, guild_id: int) -> None:
-        self.gdb = GuildDateBases(guild_id)
-        locale = self.gdb.get('language')
-
-        super().__init__("image")
-
-        self.link = nextcord.ui.TextInput(
-            label=i18n.t(locale, 'settings.welcomer.image.link'),
-            placeholder=i18n.t(locale, 'settings.welcomer.image.placeholder'),
-            min_length=10,
-            max_length=1000
-        )
-
-        self.add_item(self.link)
-
-    async def callback(self, interaction: nextcord.Interaction) -> None:
-        locale = self.gdb.get('language')
-        link = self.link.value
-
-        try:
-            await load_image_async(link)
-        except (ClientConnectorError, UnidentifiedImageError):
-            await interaction.response.send_message(i18n.t(locale, 'settings.welcomer.image.error'), ephemeral=True)
-            return
-
-        await self.gdb.set_on_json('greeting_message', 'image', link)
-
-        view = await WelcomerView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-
-@utils.AsyncSterilization
-class IWMDropDown(nextcord.ui.StringSelect):
-    async def __init__(self, guild_id: int) -> None:
-        self.gdb = GuildDateBases(guild_id)
-        greeting_message: dict = await self.gdb.get('greeting_message')
-        image = greeting_message.get('image')
-
-        options = []
-        for name, wel_mes in utils.welcome_message_items.items():
-            options.append(nextcord.SelectOption(
-                label=wel_mes[0],
-                value=name,
-                description=wel_mes[2],
-                default=wel_mes[1] == image
-            ))
-        super().__init__(options=options)
-
-    async def callback(self, interaction: nextcord.Interaction) -> None:
-        value = self.values[0]
-        if value == "my-image":
-            modal = await MyIWMModal(interaction.guild_id)
-            await interaction.response.send_modal(modal)
-            return
-
-        image = utils.welcome_message_items[value][1]
-        await self.gdb.set_on_json('greeting_message', 'image', image)
-
-        view = await WelcomerView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
+from bot.resources.info import DEFAULT_WELCOMER_IMAGE_CONFIG, DEFAULT_WELCOMER_CONTENT
 
 
 @utils.AsyncSterilization
@@ -108,7 +44,6 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
-
         super().__init__(
             placeholder=i18n.t(
                 locale, 'settings.welcomer.dropdown-placeholder'),
@@ -119,13 +54,16 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
 
-        self.gdb = GuildDateBases(interaction.guild_id)
-        greeting_message: dict = await self.gdb.get('greeting_message')
+        gdb = GuildDateBases(interaction.guild_id)
+        greeting_message = await gdb.get('greeting_message')
         greeting_message['channel_id'] = channel.id
-        await self.gdb.set('greeting_message', greeting_message)
+        if greeting_message.get('enabled') is None:
+            greeting_message['enabled'] = True
+        if 'content' not in greeting_message:
+            greeting_message['message'] = DEFAULT_WELCOMER_CONTENT
+        await gdb.set('greeting_message', greeting_message)
 
         view = await WelcomerView(interaction.guild)
-
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
@@ -139,16 +77,14 @@ class WelcomerView(DefaultSettingsView):
         locale = await self.gdb.get('language')
         color = await self.gdb.get('color')
         greeting_message: dict = await self.gdb.get('greeting_message')
+        enabled = greeting_message.get('enabled')
+        message = greeting_message.get('message')
+        image_config = greeting_message.get('image')
+        channel_id = greeting_message.get('channel_id')
 
         super().__init__()
 
-        self.back.label = i18n.t(locale, 'settings.button.back')
-        self.install.label = i18n.t(locale, 'settings.welcomer.button.install')
-        self.preview.label = i18n.t(locale, 'settings.welcomer.button.view')
-        self.delete.label = i18n.t(locale, 'settings.welcomer.button.delete')
-
         self.add_item(await ChannelsDropDown(guild.id))
-        self.add_item(await IWMDropDown(guild.id))
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.welcomer.embed.title'),
@@ -156,9 +92,7 @@ class WelcomerView(DefaultSettingsView):
             color=color
         )
 
-        if channel := guild.get_channel(
-                greeting_message.get('channel_id')):
-            self.delete.disabled = False
+        if channel := guild.get_channel(channel_id):
             self.channel = channel
 
             self.embed.add_field(
@@ -166,35 +100,78 @@ class WelcomerView(DefaultSettingsView):
                             channel=channel.mention),
                 value='',
                 inline=False)
-        else:
-            self.install.disabled = True
 
-        if greeting_message.get('message'):
-            self.delete.disabled = False
-        else:
-            self.preview.disabled = True
+        if (message or image_config) and enabled:
+            self.preview.disabled = False
 
-        if not (greeting_message.get('message') and greeting_message.get('channel_id')):
+        if enabled:
+            self.set_message.disabled = False
+            self.switch_image.disabled = False
+
+        if not (message or image_config) or not channel_id or not enabled:
             self.embed.add_field(
                 name=i18n.t(locale, 'settings.welcomer.embed.field.failure'),
                 value='',
                 inline=False
             )
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.set_message.label = i18n.t(
+            locale, 'settings.welcomer.button.install')
+        self.preview.label = i18n.t(locale, 'settings.welcomer.button.view')
+        self.delete.label = i18n.t(locale, 'settings.welcomer.button.delete')
+
+        if image_config:
+            self.switch_image.label = i18n.t(
+                locale, 'settings.welcomer.button.disable_image')
+            self.switch_image.style = nextcord.ButtonStyle.danger
+        else:
+            self.switch_image.label = i18n.t(
+                locale, 'settings.welcomer.button.enable_image')
+            self.switch_image.style = nextcord.ButtonStyle.success
+
+        if enabled:
+            self.switch.label = i18n.t(locale, 'settings.button.disable')
+            self.switch.style = nextcord.ButtonStyle.danger
+        else:
+            self.switch.label = i18n.t(locale, 'settings.button.enable')
+            self.switch.style = nextcord.ButtonStyle.success
+
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = await notification.NotificationView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.success)
-    async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Switch', style=nextcord.ButtonStyle.red, row=1)
+    async def switch(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        greeting_message: dict = await self.gdb.get('greeting_message')
+        enabled = greeting_message.get('enabled')
+        if not enabled:
+            greeting_message['enabled'] = True
+            greeting_message['content'] = DEFAULT_WELCOMER_CONTENT
+            await self.gdb.set('greeting_message', greeting_message)
+        else:
+            await self.gdb.set_on_json('greeting_message', 'enabled', False)
+
+        view = await WelcomerView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Clear', style=nextcord.ButtonStyle.red, row=1)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.gdb.set('greeting_message', {'enabled': False})
+
+        view = await WelcomerView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Set message', style=nextcord.ButtonStyle.success, disabled=True, row=2)
+    async def set_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await MessageModal(interaction.guild)
 
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='View', style=nextcord.ButtonStyle.blurple)
+    @nextcord.ui.button(label='View', style=nextcord.ButtonStyle.blurple, disabled=True, row=2)
     async def preview(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.defer()
+        await interaction.response.defer(with_message=True, ephemeral=True)
 
         greeting_message: dict = await self.gdb.get('greeting_message')
         content: str = greeting_message.get('message')
@@ -202,16 +179,28 @@ class WelcomerView(DefaultSettingsView):
         message_format = utils.lord_format(content, payload)
         message_data = utils.generate_message(message_format)
 
-        if image_link := greeting_message.get('image'):
-            image_bytes = await utils.generate_welcome_image(interaction.user, image_link)
+        content: str = greeting_message.get('message')
+
+        message_format = utils.lord_format(content, payload)
+        message_data = utils.generate_message(message_format)
+
+        if (image_config := greeting_message.get('image')) and isinstance(image_config, dict):
+            wig = WelcomeImageGenerator(
+                interaction.user, interaction.client.session, image_config)
+            image_bytes = await wig.generate()
             file = nextcord.File(image_bytes, "welcome-image.png")
             message_data["file"] = file
 
-        await interaction.followup.send(**message_data, ephemeral=True)
+        await interaction.followup.send(**message_data)
 
-    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
-    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.gdb.set('greeting_message', {})
+    @nextcord.ui.button(label='Switch image', style=nextcord.ButtonStyle.red, disabled=True, row=2)
+    async def switch_image(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        greeting_message: dict = await self.gdb.get('greeting_message')
+        image_config = greeting_message.get('image')
+        if image_config and isinstance(image_config, dict):
+            await self.gdb.set_on_json('greeting_message', 'image', {})
+        else:
+            await self.gdb.set_on_json('greeting_message', 'image', DEFAULT_WELCOMER_IMAGE_CONFIG)
 
         view = await WelcomerView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

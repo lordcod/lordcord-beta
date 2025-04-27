@@ -1,7 +1,7 @@
 from .blackjack import BlackjackGame
 from .payloads import (
     GuildPayload, MemberPayload, IdeaPayload, StreamPayload, VideoPayload,
-    TempletePayload, get_payload, welcome_message_items
+    TempletePayload, get_payload
 )
 from .templates import (
     ExpressionTemplate, LordTemplate, lord_format, flatten_dict
@@ -17,7 +17,7 @@ from .messages import (
 from .timers import (
     LordTimerHandler, LordTimeHandler, ItemLordTimeHandler
 )
-from .image_utils import generate_welcome_image
+from .image_utils import WelcomeImageGenerator
 from .time_calc import TimeCalculator, translate_to_timestamp
 from .misc import (
     MISSING, clamp, randquan,

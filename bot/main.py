@@ -1,14 +1,17 @@
+import sys
+import os
 import asyncio
 import nextcord
 from bot.misc import env
 from bot.misc.lordbot import LordBot
 
-import os
 
+release = sys.platform != 'win32'
 
 bot = LordBot(
     loop=asyncio.get_event_loop(),
-    chunk_guilds_at_startup=True
+    chunk_guilds_at_startup=release,
+    release=release
 )
 
 

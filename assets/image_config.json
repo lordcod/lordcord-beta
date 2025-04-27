@@ -1,0 +1,47 @@
+{
+  "background": {
+    "width": 800,
+    "height": 450,
+    "url": "assets/background.jpg"
+  },
+  "images": [
+    {
+      "type": "avatar",
+      "target": "member",
+      "size": [140, 140],
+      "position": [330, 100],
+      "border": { "color": "#C8C8FF", "width": 5, "radius": 70 }
+    }
+  ],
+  "texts": [
+    {
+      "type": "gradient",
+      "text": "HELLO, { member.username?&upper }",
+      "font_path": "assets/Nunito-ExtraBold.ttf",
+      "font_size": 38,
+      "x": 400,
+      "y": 260,
+      "color_start": [100, 150, 255],
+      "color_stop": [200, 220, 255],
+      "max_width": 680
+    },
+    {
+      "type": "simple",
+      "text": "{ guild.name }",
+      "font_path": "assets/Nunito-ExtraBold.ttf",
+      "font_size": 28,
+      "x": 400,
+      "y": 315,
+      "fill": "#E0E0E0"
+    },
+    {
+      "type": "simple",
+      "text": "Member #{ guild.memberCount }",
+      "font_path": "assets/Nunito-ExtraBold.ttf",
+      "font_size": 23,
+      "x": 400,
+      "y": 355,
+      "fill": "#A0A0A0"
+    }
+  ]
+}

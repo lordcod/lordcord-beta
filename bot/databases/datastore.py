@@ -37,7 +37,6 @@ class DataStore:
         else:
             data = self.__cache.get(self.table_name)
 
-        _log.trace('Load data from %s database: %s', self.table_name, data)
         if data:
             return adapter.loads(data)
         return {}
@@ -53,9 +52,6 @@ class DataStore:
         else:
             self.__cache[self.table_name] = serialized_data
 
-        _log.trace('Updated data from %s database: %s',
-                   self.table_name, serialized_data)
-
     async def get(self, key, default=None):
         data = await self._get_data()
         if not data:
@@ -70,7 +66,15 @@ class DataStore:
         await self._set_data(current_data)
 
     async def increment(self, key, delta=1):
-        value = await self.get(key)
+        value = await self.get(key, 0)
         await self.set(key, value+delta)
+
+    async def delete(self, key) -> bool:
+        current_data = await self._get_data()
+        if key in current_data:
+            current_data.pop(key)
+            await self._set_data(current_data)
+            return True
+        return False
 
     fetch = _get_data

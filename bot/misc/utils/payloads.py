@@ -8,25 +8,10 @@ from bot.databases import GuildDateBases
 from bot.databases.varstructs import CategoryPayload
 
 from .misc import MISSING
-from bot.resources.info import Emoji
 
 if TYPE_CHECKING:
     from bot.misc.noti.twitch.noti import Stream as TwStream, User as TwUser
     from bot.misc.noti.youtube.noti import Video as YtVideo
-
-from collections import namedtuple
-
-WelMes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
-
-welcome_message_items = {
-    "None": WelMes("None", None, None),
-    "my-image": WelMes("My image", ..., "You will be able to enter a link to an image."),
-    "view-from-mountain": WelMes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
-    "autumn-street": WelMes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
-    "winter-day": WelMes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
-    "magic-city": WelMes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
-    "city-dawn": WelMes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
-}
 
 
 def parse_prefix(

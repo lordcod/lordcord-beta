@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import nextcord
+import orjson
 from bot.resources.ether import ColorType, Emoji
 
 if TYPE_CHECKING:
@@ -63,6 +64,11 @@ DEFAULT_GUILD_DATA = {
 }
 
 COUNT_ROLES_PAGE = 5
+
+with open('assets/image_config.json', 'rb') as file:
+    DEFAULT_WELCOMER_IMAGE_CONFIG = orjson.loads(file.read())
+
+DEFAULT_WELCOMER_CONTENT = "Welcome to the server {guild.name}!"
 
 DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
     'names': {

@@ -17,7 +17,6 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
-from PIL import Image, ImageFont, ImageDraw
 
 SALT = b'lkGrd8F209'
 MISSING = nextcord.utils._MissingSentinel()
@@ -90,40 +89,6 @@ def replace_dict_key(data: dict, old, new) -> dict:
         index = keys.index(old)
         keys[index] = new
     return {k if k != old else new: v for k, v in data.items()}
-
-
-def add_gradient(
-    background: Image.Image,
-    font: ImageFont.FreeTypeFont,
-    text: str,
-    height: int,
-    color_start: Tuple[int, int, int],
-    color_stop: Tuple[int, int, int]
-) -> None:
-    w, h = font.getbbox(text)[2:]
-
-    gradient = Image.new("RGB", (w, h))
-    draw_gradient(gradient, color_start, color_stop)
-
-    im_text = Image.new("RGBA", (w, h))
-    d = ImageDraw.Draw(im_text)
-    d.text((0, 0), text, font=font)
-
-    background.draft("RGBA", background.size)
-    background.paste(
-        gradient,
-        (int(background.size[0] / 2 - im_text.size[0] / 2), height),
-        im_text
-    )
-
-
-def draw_gradient(img: Image.Image, start: Tuple[int, int, int], end: Tuple[int, int, int]):
-    px = img.load()
-    for y in range(0, img.height):
-        color = tuple(int(start[i] + (end[i] - start[i])
-                      * y / img.height) for i in range(3))
-        for x in range(0, img.width):
-            px[x, y] = color
 
 
 def to_rgb(color: str | int):
