@@ -28,8 +28,8 @@ distribution_emoji = {
     'farewell': 'reject',
     'twitch': 'twitch',
     'youtube': 'youtube',
-    'telegram': 'welcmes',
-    'vk': 'welcmes',
+    'telegram': 'telegram',
+    'vk': 'vk',
 }
 
 
