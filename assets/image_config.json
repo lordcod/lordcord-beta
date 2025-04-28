@@ -10,7 +10,7 @@
       "target": "member",
       "size": [140, 140],
       "position": [330, 100],
-      "border": { "color": "#C8C8FF", "width": 5, "radius": 70 }
+      "border": { "color": "#C8C8FF", "width": 0, "radius": 70 }
     }
   ],
   "texts": [
