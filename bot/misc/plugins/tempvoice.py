@@ -7,7 +7,7 @@ from typing import Optional
 import nextcord
 from nextcord.utils import snowflake_time
 
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import get_payload, get_emoji_wrap, lord_format
@@ -39,7 +39,7 @@ class TempVoiceModule:
 
         gdb = GuildDateBases(member.guild.id)
         data = await gdb.get('tempvoice')
-        channels_data = await localdb.get_table('channels_data')
+        channels_data = DataStore('channels_data')
 
         if not (data and data.get('enabled')):
             return
@@ -113,7 +113,8 @@ class TempVoiceModule:
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'tempvoice.panel.message.title', emoji=emoji),
-            description=i18n.t(locale, 'tempvoice.panel.message.description', emoji=emoji),
+            description=i18n.t(
+                locale, 'tempvoice.panel.message.description', emoji=emoji),
             color=color,
             timestamp=datetime.today()
         )
@@ -141,8 +142,8 @@ class TempVoiceModule:
     async def check_user(self, channel: nextcord.VoiceChannel):
         gdb = GuildDateBases(self.member.guild.id)
         locale = await gdb.get('language')
-        channels_tracks_db = await localdb.get_table('channels_track_data')
-        channels_data = await localdb.get_table('channels_data')
+        channels_tracks_db = DataStore('channels_track_data')
+        channels_data = DataStore('channels_data')
         channels_track_data = await channels_tracks_db.get(self.member.guild.id, [])
 
         for cid in channels_track_data:
@@ -173,8 +174,8 @@ class TempVoiceModule:
         return True
 
     async def get_count(self):
-        channels_tracks_db = await localdb.get_table('channels_track_data')
-        channels_data = await localdb.get_table('channels_data')
+        channels_tracks_db = DataStore('channels_track_data')
+        channels_data = DataStore('channels_data')
         channels_track_data = await channels_tracks_db.get(self.member.guild.id, [])
 
         total = 1
@@ -195,8 +196,8 @@ class TempVoiceModule:
 
         gdb = GuildDateBases(self.member.guild.id)
         data = await gdb.get('tempvoice')
-        channels_tracks_db = await localdb.get_table('channels_track_data')
-        channels_data = await localdb.get_table('channels_data')
+        channels_tracks_db = DataStore('channels_track_data')
+        channels_data = DataStore('channels_data')
         channels_track_data = await channels_tracks_db.get(self.member.guild.id, [])
 
         type_panel = data.get('type_panel', 1)
@@ -256,7 +257,7 @@ class TempVoiceModule:
         if len(channel.members) > 0:
             return
 
-        channels_data = await localdb.get_table('channels_data')
+        channels_data = DataStore('channels_data')
         voice_data = await channels_data.get(channel.id)
         voice_data['status'] = VoiceStatus.closed
         voice_data['closed_time'] = time.time()

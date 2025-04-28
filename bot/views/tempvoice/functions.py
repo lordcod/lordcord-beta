@@ -3,7 +3,8 @@ from enum import IntEnum
 from typing import Optional
 import nextcord
 
-from bot.databases import GuildDateBases, localdb
+from bot.databases import GuildDateBases
+from bot.databases.datastore import DataStore
 from bot.languages import i18n
 from .items import (
     LimitSettingsModal,
@@ -27,8 +28,8 @@ class VoiceStatus(IntEnum):
 
 
 async def get_voice(interaction: nextcord.Interaction) -> Optional[nextcord.VoiceChannel]:
-    channels_tracks_db = await localdb.get_table('channels_track_data')
-    channels_data = await localdb.get_table('channels_data')
+    channels_tracks_db = DataStore('channels_track_data')
+    channels_data = DataStore('channels_data')
     channels_track_data = await channels_tracks_db.get(interaction.guild.id, [])
 
     for cid in channels_track_data:
@@ -127,7 +128,8 @@ class TempVoiceFunctioins:
     async def process_set_bitrate(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
         locale = await gdb.get('language')
-        modal = BitrateSettingsModal(locale, interaction.guild.bitrate_limit//1000)
+        modal = BitrateSettingsModal(
+            locale, interaction.guild.bitrate_limit//1000)
         await interaction.response.send_modal(modal)
 
     # next panel

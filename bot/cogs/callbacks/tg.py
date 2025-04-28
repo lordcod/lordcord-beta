@@ -1,14 +1,14 @@
 import contextlib
 import re
-from os import getenv
 from pathlib import Path
 from typing import Optional
 from nextcord import File
 import nextcord
 from nextcord.ext import commands
 import logging
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.databases.models import GuildModel, Q
+from bot.misc.env import API_URL
 from bot.misc.lordbot import LordBot
 from aiogram.types import Message
 from aiogram.enums import MessageEntityType
@@ -40,7 +40,7 @@ discord_decoration = DiscordMarkdownDecoration()
 
 async def get_webhook(channel: nextcord.TextChannel) -> Optional[nextcord.Webhook]:
     client = channel._state._get_client()
-    webhooks_db = await localdb.get_table('notification_webhooks')
+    webhooks_db = DataStore('notification_webhooks')
     webhook_data = await webhooks_db.get(channel.id)
 
     if webhook_data is not None:
@@ -73,7 +73,7 @@ class TgCallEvent(commands.Cog):
 
     async def get_channels(self, id: int):
         channels = []
-        guilds, data = await GuildModel.filter(~Q(telegram_notification={}))
+        guilds = await GuildModel.filter(~Q(telegram_notification={}))
         for gm in guilds:
             for data in gm.telegram_notification.values():
                 if data['chat_id'] == id and (
@@ -114,12 +114,12 @@ class TgCallEvent(commands.Cog):
                 f"attachment://{filename}"))
 
         content = message._unparse_entities(discord_decoration)
-        avatar_url = f'{getenv("API_URL")}/telegram/icon/{message.chat.id}'
+        avatar_url = f'{API_URL}/telegram/icon/{message.chat.id}'
 
         channels = await self.get_channels(message.chat.id)
         for channel, data in channels:
             categories = data.get('categories', [])
-            if topic not in categories:
+            if categories is not None and topic not in categories:
                 continue
 
             webhook = await get_webhook(channel)

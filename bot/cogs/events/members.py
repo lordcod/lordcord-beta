@@ -1,7 +1,7 @@
 import functools
 import nextcord
 from nextcord.ext import commands
-
+from bot.misc.utils.image_utils import WelcomeImageGenerator
 from bot.databases.varstructs import AutoRolesPayload
 from bot.misc import utils
 from bot.databases import GuildDateBases
@@ -85,19 +85,20 @@ class MembersEvent(commands.Cog):
         guild = member.guild
         greeting_message: dict = await gdb.get('greeting_message', {})
         channel = guild.get_channel(greeting_message.get("channel_id"))
+        enabled = greeting_message.get('enabled')
+        content = greeting_message.get('message')
+        image_config = greeting_message.get('image')
 
-        if not channel:
+        if not (channel and enabled and (content or image_config)):
             return
 
         payload = utils.get_payload(member=member)
-
-        content: str = greeting_message.get('message')
-
         message_format = utils.lord_format(content, payload)
         message_data = utils.generate_message(message_format)
 
-        if image_link := greeting_message.get('image'):
-            image_bytes = await utils.generate_welcome_image(member, image_link)
+        if image_config and isinstance(image_config, dict):
+            wig = WelcomeImageGenerator(member, self.bot.session, image_config)
+            image_bytes = await wig.generate()
             file = nextcord.File(image_bytes, "welcome-image.png")
             message_data["file"] = file
 
@@ -156,7 +157,7 @@ class MembersEvent(commands.Cog):
             for member_id, _, add_at, code in member_invites:
                 member = ctx.guild.get_member(member_id)
 
-                embed.description += f"<t:{add_at :.0f}:f> | {member.mention if member else '**'+member_id+'**'} | `{code}`"
+                embed.description += f"<t:{add_at:.0f}:f> | {member.mention if member else '**'+member_id+'**'} | `{code}`"
 
         if not embed.description:
             embed.description = "Information not found!"

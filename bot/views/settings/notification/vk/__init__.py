@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import random
 import string
 from typing import TYPE_CHECKING, Optional
@@ -16,8 +15,6 @@ from bot.views.settings._view import DefaultSettingsView
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
-
-secret_key = Tokenizer.generate_key()
 
 
 def generate_hex() -> str:

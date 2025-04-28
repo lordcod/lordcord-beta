@@ -2,7 +2,7 @@ import nextcord
 from nextcord.ext import commands
 import time
 
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.misc.lordbot import LordBot
 
 
@@ -20,7 +20,7 @@ class MemberTimeoutEvent(commands.Cog):
 
         guild_id = entry.guild.id
         user_id = entry.target.id
-        timeout_db = await localdb.get_table('timeout')
+        timeout_db = DataStore('timeout')
         timeout_data = await timeout_db.get(guild_id, {})
         loctime = time.time()
 
@@ -46,7 +46,8 @@ class MemberTimeoutEvent(commands.Cog):
             try:
                 data = timeout_data[user_id]
                 duration = data[2]
-                self.bot.lord_handler_timer.close(f'timeout:{guild_id}:{entry.user.id}')
+                self.bot.lord_handler_timer.close(
+                    f'timeout:{guild_id}:{entry.user.id}')
             except (KeyError, IndexError, AttributeError):
                 duration = None
 
@@ -57,7 +58,7 @@ class MemberTimeoutEvent(commands.Cog):
             await timeout_db.set(guild_id, timeout_data)
 
     async def process_untimeout(self, member: nextcord.Member):
-        timeout_db = await localdb.get_table('timeout')
+        timeout_db = DataStore('timeout')
         timeout_data = await timeout_db.get(member.guild.id, {})
 
         try:
@@ -74,7 +75,7 @@ class MemberTimeoutEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        timeout_db = await localdb.get_table('timeout')
+        timeout_db = DataStore('timeout')
 
         for guild_id, data in (await timeout_db.fetch()).items():
             guild = self.bot.get_guild(guild_id)

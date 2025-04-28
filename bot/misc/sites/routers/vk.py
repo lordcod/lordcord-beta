@@ -1,31 +1,31 @@
 from __future__ import annotations
-import base64
 import hashlib
+import logging
 from typing import TYPE_CHECKING, Optional
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
-from os import getenv
 from fastapi.templating import Jinja2Templates
 from bot.misc.api.vk_api_auth import VkApiAuth
+from bot.misc.env import API_URL, VK_CLIENT_ID
+from bot.misc.utils import Tokenizer
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
-SALT = '4051975f'
-password = hashlib.sha256("random string".encode()).digest()
+HASH = "RUkFEDT2pGQnnEbF"
+SALT = '4051975f'+HASH
+password = Tokenizer.generate_key(HASH)
 templates = Jinja2Templates(directory="templates")
 
 
-def decrypt(enc_data: str) -> str:
-    enc_bytes = base64.urlsafe_b64decode(enc_data)
-    return "".join(chr(a ^ b) for a, b in zip(enc_bytes, password))
+_log = logging.getLogger(__name__)
 
 
 class VkRouter:
     def __init__(
         self,
         bot: LordBot,
-        client_id: int = int(getenv('VK_CLIENT_ID')),
+        client_id: int = VK_CLIENT_ID,
         redirect_uri: Optional[str] = None
     ) -> None:
         self.bot = bot
@@ -35,9 +35,12 @@ class VkRouter:
         )
 
     def _setup(self, prefix: str = "") -> APIRouter:
+        if self.vk_api_auth.client_id is None:
+            _log.warning(
+                'Vk notifications are disabled due to the lack of a bot token.')
+            return APIRouter(prefix=prefix)
         if self.vk_api_auth.redirect_uri is None:
-            self.vk_api_auth.redirect_uri = getenv(
-                'API_URL', '')+prefix+'/callback'
+            self.vk_api_auth.redirect_uri = API_URL+prefix+'/callback'
 
         router = APIRouter(prefix=prefix)
 
@@ -64,7 +67,8 @@ class VkRouter:
     async def _post_vk_callback(self, request: Request, code: str):
         data = await request.json()
 
-        randhex, group_id, group_code = decrypt(code).split('-')
+        randhex, group_id, group_code = Tokenizer.decrypt(
+            code, password).split('-')
 
         if data['type'] == 'confirmation':
             return group_code

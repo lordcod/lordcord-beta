@@ -3,7 +3,7 @@ import logging
 import time
 import nextcord
 from nextcord.ext import commands
-from bot.databases import localdb
+from bot.databases.datastore import DataStore
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 

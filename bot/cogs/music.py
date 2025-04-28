@@ -6,6 +6,7 @@ from yandex_music_api import Client as YaClient
 from yandex_music_api.exceptions import NotFound as YandexNotFound
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
+from bot.misc.env import YANDEX_API_TOKEN
 from bot.misc.lordbot import LordBot
 
 from bot.views.selector_music import SelectMusicView
@@ -31,9 +32,8 @@ class Voice(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        token = environ.get('yandex_api_token')
-        if token:
-            self.yandex_client = YaClient(token)
+        if YANDEX_API_TOKEN:
+            self.yandex_client = YaClient(YANDEX_API_TOKEN)
         else:
             _log.warning('Music cog disable')
             self.bot.unload_extension('bot.cogs.music')

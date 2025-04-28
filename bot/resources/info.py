@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import nextcord
+import orjson
 from bot.resources.ether import ColorType, Emoji
 
 if TYPE_CHECKING:
@@ -64,6 +65,11 @@ DEFAULT_GUILD_DATA = {
 
 COUNT_ROLES_PAGE = 5
 
+with open('assets/image_config.json', 'rb') as file:
+    DEFAULT_WELCOMER_IMAGE_CONFIG = orjson.loads(file.read())
+
+DEFAULT_WELCOMER_CONTENT = "Welcome to the server {guild.name}!"
+
 DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
     'names': {
         'open': '{ticket.count.total}-ticket',
@@ -79,7 +85,7 @@ DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
             "color": "{guild.color}",
             "footer": {
                 "text": "{bot.displayName}",
-                "timestamp": "{today_dt}",
+                "timestamp": "{todayDt}",
                 'icon_url': '{bot.avatar}'
             }, "thumbnail": ""
         },
@@ -87,7 +93,7 @@ DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
             "title": "Support team ticket controls",
             "color": "{guild.color}",
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'close': {
@@ -95,7 +101,7 @@ DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
             "description": "The ticket is closed by {member.mention}",
             "color": 16765743,
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'reopen': {
@@ -103,7 +109,7 @@ DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
             "description": "The ticket is opened by {member.mention}",
             "color": 53380,
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'delete': {
@@ -111,7 +117,7 @@ DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
             "description": 'Ticket will be deleted in a few seconds',
             "color": 16718362,
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'open': '{member} Welcome!',
@@ -169,7 +175,7 @@ DEFAULT_TICKET_PAYLOAD_RU: TicketsItemPayload = {
             "color": "{guild.color}",
             "footer": {
                 "text": "{bot.displayName}",
-                "timestamp": "{today_dt}",
+                "timestamp": "{todayDt}",
                 'icon_url': '{bot.avatar}'
             },
             "thumbnail": ""
@@ -180,7 +186,7 @@ DEFAULT_TICKET_PAYLOAD_RU: TicketsItemPayload = {
             "title": "Контроль заявок в службе поддержки",
             "color": "{guild.color}",
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'close': {
@@ -188,7 +194,7 @@ DEFAULT_TICKET_PAYLOAD_RU: TicketsItemPayload = {
             "description": "Заявка закрыта {member.mention}",
             "color": 16765743,
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'reopen': {
@@ -196,7 +202,7 @@ DEFAULT_TICKET_PAYLOAD_RU: TicketsItemPayload = {
             "description": "Тикет открывается с помощью {member.mention}",
             "color": 53380,
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
         'delete': {
@@ -204,7 +210,7 @@ DEFAULT_TICKET_PAYLOAD_RU: TicketsItemPayload = {
             "description": 'Тикет будет удален через несколько секунд',
             "color": 16718362,
             "footer": {
-                "timestamp": "{today_dt}"
+                "timestamp": "{todayDt}"
             },
         },
 
@@ -636,4 +642,4 @@ activities_list = [
     }
 ]
 
-site_link = "https://lordcord.fun/link-role-callback"
+site_link = "https://lordcord.xyz/link-role-callback"
