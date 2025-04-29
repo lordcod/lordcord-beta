@@ -1,4 +1,6 @@
 import re
+import numpy as np
+
 from typing import Callable
 
 from functools import lru_cache
@@ -6,9 +8,13 @@ from functools import lru_cache
 from bot.databases import GuildDateBases
 from bot.resources import ether
 
-from colormath.color_objects import sRGBColor
+from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
-from .misc import to_rgb, get_distance
+from colormath.color_diff import delta_e_cie2000
+
+if not hasattr(np, 'asscalar'):
+    np.asscalar = lambda a: a.item() if isinstance(
+        a, np.ndarray) and a.size == 1 else a
 
 colors = {
     '#58b99d': '<:lzelrole:1265262139266826332>',
@@ -57,14 +63,27 @@ def get_emoji_as_color(system_emoji: int, name: str):
     return ether.every_emojis[name][system_emoji]
 
 
+def to_rgb(color: str | int):
+    if isinstance(color, str):
+        color = int(color.strip(' #0x')[:6], 16)
+
+    def _get_byte(byte: int) -> int:
+        return (color >> (8 * byte)) & 0xFF
+    return _get_byte(2), _get_byte(1), _get_byte(0)
+
+
+def get_distance(color1_lab, color2):
+    color2_rgb = sRGBColor(*to_rgb(color2))
+    color2_lab = convert_color(color2_rgb, LabColor)
+    return delta_e_cie2000(color1_lab, color2_lab)
+
+
 @lru_cache()
 def find_color_emoji(color):
-
     if not isinstance(color, tuple):
         color = to_rgb(color)
-    color1_rgb = to_rgb(color)
-
-    color1_lab = convert_color(sRGBColor(*color1_rgb), target_cs='lab')
+    color1_rgb = sRGBColor(*color)
+    color1_lab = convert_color(color1_rgb, LabColor)
 
     res = []
     for clr in colors:

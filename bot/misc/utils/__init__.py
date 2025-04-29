@@ -23,6 +23,6 @@ from .misc import (
     MISSING, clamp, randquan,
     AsyncSterilization, bool_filter, cut_back,
     generate_random_token, decrypt_token, replace_dict_key,
-    randfloat, get_award, to_rgb, Tokenizer,
-    get_distance,  parse_fission, TranslatorFlags
+    randfloat, get_award, Tokenizer,
+    parse_fission, TranslatorFlags
 )

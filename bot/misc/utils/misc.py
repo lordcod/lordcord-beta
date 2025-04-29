@@ -1,5 +1,4 @@
 # bot/misc/misc.py
-import functools
 import random
 import re
 import nextcord
@@ -12,10 +11,6 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from typing import Any, Iterable, TypeVar, Union, Generic, Tuple
-
-from colormath.color_objects import sRGBColor, LabColor
-from colormath.color_conversions import convert_color
-from colormath.color_diff import delta_e_cie2000
 
 
 SALT = b'lkGrd8F209'
@@ -89,21 +84,6 @@ def replace_dict_key(data: dict, old, new) -> dict:
         index = keys.index(old)
         keys[index] = new
     return {k if k != old else new: v for k, v in data.items()}
-
-
-def to_rgb(color: str | int):
-    if isinstance(color, str):
-        color = int(color.strip(' #0x')[:6], 16)
-
-    def _get_byte(byte: int) -> int:
-        return (color >> (8 * byte)) & 0xFF
-    return _get_byte(2), _get_byte(1), _get_byte(0)
-
-
-def get_distance(color1_lab, color2):
-    color2_rgb = sRGBColor(*to_rgb(color2))
-    color2_lab = convert_color(color2_rgb, LabColor)
-    return delta_e_cie2000(color1_lab, color2_lab)
 
 
 @lru_cache()
