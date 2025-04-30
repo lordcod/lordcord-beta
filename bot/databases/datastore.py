@@ -65,6 +65,13 @@ class DataStore:
 
         await self._set_data(current_data)
 
+    async def multi_set(self, pairs):
+        current_data = await self._get_data()
+        for key, value in pairs:
+            current_data[key] = value
+
+        await self._set_data(current_data)
+
     async def increment(self, key, delta=1):
         value = await self.get(key, 0)
         await self.set(key, value+delta)
@@ -76,5 +83,9 @@ class DataStore:
             await self._set_data(current_data)
             return True
         return False
+
+    async def exists(self, key) -> bool:
+        current_data = await self._get_data()
+        return key in current_data
 
     fetch = _get_data

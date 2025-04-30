@@ -108,7 +108,7 @@ class ThreadsNameModal(nextcord.ui.Modal):
         self.name = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.ideas.threads.name.label'),
             max_length=100,
-            placeholder=thread_name
+            default_value=thread_name
         )
         self.add_item(self.name)
 
@@ -148,9 +148,12 @@ class ThreadsView(ViewOptionItem):
         )
 
         description = join_args(
-            (i18n.t(locale, 'settings.ideas.value.thread_delete'), get_emoji(system_emoji, thread_delete)),
-            (i18n.t(locale, 'settings.ideas.value.thread_open'), get_emoji(system_emoji, thread_open)),
-            (i18n.t(locale, 'settings.ideas.value.thread_name'), thread_open and thread_name and '`'+thread_name+'`'),
+            (i18n.t(locale, 'settings.ideas.value.thread_delete'),
+             get_emoji(system_emoji, thread_delete)),
+            (i18n.t(locale, 'settings.ideas.value.thread_open'),
+             get_emoji(system_emoji, thread_open)),
+            (i18n.t(locale, 'settings.ideas.value.thread_name'),
+             thread_open and thread_name and '`'+thread_name+'`'),
         )
         self.embed.description += '\n\n'+description
 

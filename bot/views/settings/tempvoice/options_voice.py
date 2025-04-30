@@ -4,13 +4,16 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
+from bot.views.settings import tempvoice
 from bot.views.settings.tempvoice.optns.panel_type import TypePanelView
 from .optns.base import FunctionOptionItem, OptionItem, ViewOptionItem
 from .optns.limit import LimitModal
 from .optns.name import NameModal
 
-distribution: List[AsyncSterilization[OptionItem]] = [LimitModal, NameModal, TypePanelView]
-distribution_keys: Dict[str, AsyncSterilization[OptionItem]] = {item.cls.__name__.lower(): item for item in distribution}
+distribution: List[AsyncSterilization[OptionItem]] = [
+    LimitModal, NameModal, TypePanelView]
+distribution_keys: Dict[str, AsyncSterilization[OptionItem]] = {
+    item.cls.__name__.lower(): item for item in distribution}
 
 
 @AsyncSterilization
@@ -39,6 +42,9 @@ class TempVoiceDropDown(nextcord.ui.StringSelect):
 
         if isinstance(item, nextcord.ui.Modal):
             await interaction.response.send_modal(item)
+
+            view = await tempvoice.TempVoiceView(interaction.guild)
+            await interaction.message.edit(embed=view.embed, view=view)
         elif isinstance(item, ViewOptionItem):
             await interaction.response.edit_message(embed=item.embed, view=item)
         elif isinstance(item, FunctionOptionItem):

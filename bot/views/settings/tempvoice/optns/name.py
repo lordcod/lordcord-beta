@@ -22,7 +22,7 @@ class NameModal(nextcord.ui.Modal, OptionItem):
 
         self.name = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tempvoice.name.label'),
-            placeholder=name
+            default_value=name
         )
         self.add_item(self.name)
 

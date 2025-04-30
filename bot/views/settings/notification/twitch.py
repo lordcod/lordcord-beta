@@ -33,7 +33,8 @@ class TwitchMessageModal(nextcord.ui.Modal):
         self.message = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.notifi.message.title'),
             placeholder=i18n.t(locale, 'settings.notifi.message.placeholder'),
-            style=nextcord.TextInputStyle.paragraph
+            style=nextcord.TextInputStyle.paragraph,
+            default_value=data.get('message')
         )
         self.add_item(self.message)
 

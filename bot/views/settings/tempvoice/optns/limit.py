@@ -22,7 +22,7 @@ class LimitModal(nextcord.ui.Modal, OptionItem):
 
         self.limit = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tempvoice.limit.label'),
-            placeholder=limit
+            default_value=limit
         )
         self.add_item(self.limit)
 
