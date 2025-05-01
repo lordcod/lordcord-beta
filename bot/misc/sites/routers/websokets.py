@@ -1,9 +1,9 @@
 from __future__ import annotations
 import asyncio
 from collections import defaultdict
-import contextlib
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional
+import time
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -29,6 +29,9 @@ class WaitWebSocket:
 
 
 class WebSocketRouter():
+    bot: LordBot
+    websockets: Dict[str, List[Tuple[WebSocket, int, float]]]
+
     def __init__(
         self,
         bot: LordBot
@@ -36,7 +39,7 @@ class WebSocketRouter():
         bot._set_callback_api_state(self.send_api_state, self.wait_api_state)
 
         self.bot = bot
-        self.websockets: dict[str, List[WebSocket]] = defaultdict(list)
+        self.websockets = defaultdict(list)
 
     async def wait_api_state(self, state: str,
                              *, timeout: Optional[int] = None):
@@ -47,13 +50,26 @@ class WebSocketRouter():
 
     async def send_api_state(self, state: str, data: Any):
         websockets = self.websockets[state]
-        for ws in websockets:
-            with contextlib.suppress(WebSocketDisconnect, KeyError, RuntimeError):
+        time_now = time.time()
+        for index, data in enumerate(websockets.copy()):
+            ws, count, time_created = data
+            if time_created+3600 > time_now:
+                websockets.remove(data)
+                continue
+            if count <= 0:
+                websockets.remove(data)
+                continue
+
+            try:
                 await ws.send_json({
                     't': 'RECEIVE_STATE',
                     's': state,
                     'd': data
                 })
+            except (WebSocketDisconnect, KeyError, RuntimeError):
+                websockets.remove(data)
+            else:
+                websockets[index] = (ws, count-1)
         return True
 
     def _setup(self, prefix: str = ''):

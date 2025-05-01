@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+
+  "formatters": {
+    "default": {
+      "format": "[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "colored": {
+      "()": "bot.misc.logger.ColoredFormatter",
+      "format": "[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)"
+    }
+  },
+
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "formatter": "colored",
+      "level": "DEBUG"
+    },
+    "discord": {
+      "class": "bot.misc.logger.DiscordHandler",
+      "formatter": "default",
+      "level": "INFO"
+    }
+  },
+
+  "loggers": {
+    "bot": {
+      "handlers": ["console", "discord"],
+      "level": "TRACE",
+      "propagate": false
+    },
+    "nextcord": {
+      "handlers": ["console"],
+      "level": "DEBUG",
+      "propagate": false
+    },
+    "git": {
+      "handlers": ["console"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "httpx": {
+      "handlers": ["console"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "aiocache": {
+      "handlers": ["console"],
+      "level": "ERROR",
+      "propagate": false
+    },
+    "colormath": {
+      "handlers": ["console"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "aiosqlite": {
+      "handlers": ["console"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "tortoise": {
+      "handlers": ["console"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn": {
+      "handlers": ["console"],
+      "level": "INFO",
+      "propagate": false
+    }
+  },
+
+  "root": {
+    "level": "WARNING",
+    "handlers": ["console"]
+  }
+}

@@ -22,13 +22,12 @@ class ApiSite:
         self.bot = bot
         self.app = FastAPI()
 
-        origins = [
-            "http://localhost.tiangolo.com",
-            "https://localhost.tiangolo.com",
-            "http://localhost",
-            "http://localhost:8080",
-            "http://localhost:5173",
-        ]
+        if bot.release:
+            origins = [
+                "https://lordcord.xyz"
+            ]
+        else:
+            origins = ['*']
 
         self.app.add_middleware(
             CORSMiddleware,

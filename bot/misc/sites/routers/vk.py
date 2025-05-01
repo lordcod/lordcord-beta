@@ -1,10 +1,12 @@
 from __future__ import annotations
-import hashlib
+
 import logging
 from typing import TYPE_CHECKING, Optional
+
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
 from bot.misc.api.vk_api_auth import VkApiAuth
 from bot.misc.env import API_URL, VK_CLIENT_ID
 from bot.misc.utils import Tokenizer
