@@ -19,7 +19,8 @@ YOUTUBE_API_KEY = environ.get('YOUTUBE_API_KEY')
 
 VK_CLIENT_ID = environ.get('VK_CLIENT_ID')
 
+LOG_WEBHOOK = environ.get('log_webhook')
+
 
 class Tokens:
     token = environ["token"]
-    log_webhook = environ.get('log_webhook')

@@ -1,5 +1,11 @@
-from bot.misc.logger import setup_logging
-setup_logging()
+import orjson
+from cordlog import setup_logging
+
+config_path = "assets/log_config.json"
+with open(config_path, "rb") as f:
+    config = orjson.loads(f.read())
+
+setup_logging(config)
 
 
 if __name__ == "__main__":

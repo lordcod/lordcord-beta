@@ -8,7 +8,6 @@ from bot.databases.handlers.guildHD import GuildDateBases
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
-SALT = '4051975f'
 SALT = '6F530A9BE83CA1CE0F957A985A662A5AEDDEC2B2B24BD9C91AFC7163C40F1848'
 templates = Jinja2Templates(directory="templates")
 
@@ -28,7 +27,7 @@ class Tokenizer:
 def check_permission(payload, key):
     if (
         payload['scope'] not in ['admin', 'database', 'database.'+key]
-        or 'guild_id' not in payload and payload['scope'] != 'admin'
+        or ('guild_id' not in payload and payload['scope'] != 'admin')
     ):
         return JSONResponse({
             'error': 'Not authorization'

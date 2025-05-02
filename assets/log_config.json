@@ -8,7 +8,7 @@
       "datefmt": "%Y-%m-%d %H:%M:%S"
     },
     "colored": {
-      "()": "bot.misc.logger.ColoredFormatter",
+      "()": "cordlog.ColoredFormatter",
       "format": "[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)"
     }
   },
@@ -20,7 +20,7 @@
       "level": "DEBUG"
     },
     "discord": {
-      "class": "bot.misc.logger.DiscordHandler",
+      "class": "cordlog.DiscordHandler",
       "formatter": "default",
       "level": "INFO"
     }
@@ -34,7 +34,7 @@
     },
     "nextcord": {
       "handlers": ["console"],
-      "level": "DEBUG",
+      "level": "INFO",
       "propagate": false
     },
     "git": {

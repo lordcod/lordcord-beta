@@ -16,9 +16,10 @@ from aiogram.enums import ParseMode
 
 from nextcord.ext import commands
 from tortoise import Tortoise
+from cordlog import setup_storage
 
 from bot.databases import GuildDateBases
-from bot.misc.env import API_URL, PROXY, TELEGRAM_TOKEN
+from bot.misc.env import API_URL, PROXY, TELEGRAM_TOKEN, LOG_WEBHOOK
 from bot.misc.sites.site import ApiSite
 from bot.resources.info import DEFAULT_PREFIX, SITE
 from bot.misc.utils import LordTimeHandler
@@ -250,8 +251,16 @@ class LordBot(commands.AutoShardedBot):
         self.loop.create_task(self.ytnoti.parse())
 
     async def listen_on_connect(self) -> None:
-        if not self.release:
-            _log.debug("A test bot has been launched")
+        setup_storage(
+            webhook_url=LOG_WEBHOOK,
+            session=self.session
+        )
+        
+        if self.release:
+            _log.info("[PROD MODE] Start")
+        else:
+            _log.info("[DEV MODE] Start")
+
         _log.debug('Listen on connect')
 
         try:
