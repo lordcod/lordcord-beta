@@ -16,7 +16,7 @@
   "texts": [
     {
       "type": "gradient",
-      "text": "HELLO, { member.username?&upper }",
+      "text": "HELLO, { member.displayName?&upper }",
       "font_path": "assets/Nunito-ExtraBold.ttf",
       "font_size": 38,
       "x": 400,
