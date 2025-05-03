@@ -6,6 +6,7 @@ import orjson
 available_flags: Dict[str, Callable[[str], str]] = {
     'upper': lambda s: s.upper(),
     'lower': lambda s: s.lower(),
+    'quote': lambda s: s.replace('"', '\\"').replace('\n', '\\n')
 }
 
 

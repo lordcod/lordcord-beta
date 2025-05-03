@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from typing import Optional, Union, Any
 
 import orjson
@@ -11,6 +12,7 @@ from functools import lru_cache
 from bot.resources.ether import Emoji
 from .misc import MISSING
 
+_log = logging.getLogger(__name__)
 
 class GeneratorMessageDictPop(dict):
     def __init__(self, data):
@@ -36,7 +38,9 @@ class GeneratorMessage:
         if not isinstance(self.data, dict):
             try:
                 decode_data = orjson.loads(self.data)
-            except orjson.JSONDecodeError:
+            except orjson.JSONDecodeError as exc:
+                _log.warning(f"Possible parsing error: {self.data}",
+                             exc_info=exc)
                 decode_data = self.data
         else:
             decode_data = self.data.copy()
@@ -55,7 +59,9 @@ class GeneratorMessage:
 
     @lru_cache()
     def parse(self, with_empty: bool = False, with_webhook: bool = False):
+        print(self.data)
         data = self.decode_data()
+        print(data)
         if isinstance(data, str):
             data = {'content': data}
 

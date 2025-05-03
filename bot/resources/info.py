@@ -306,7 +306,7 @@ DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
     'created': {
         "title": "AN OPEN IDEA",
         "description": ("An suggest from {member.mention}\n\n"
-                        "{idea.content}"),
+                        "{idea.content?&quote}"),
         "color": nextcord.Color.orange().value,
         "author": {
             "name": "{member.displayName}",
@@ -319,7 +319,7 @@ DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
     'accept': {
         "title": "APPROVED IDEA",
         "description": ("An suggest from {member.mention}\n\n"
-                        "{idea.content}"),
+                        "{idea.content?&quote}"),
         "color": nextcord.Color.green().value,
         "author": {
             "name": "{member.displayName}",
@@ -336,7 +336,7 @@ DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
     'deny': {
         "title": "A REJECTED IDEA",
         "description": ("An suggest from {member.mention}\n\n"
-                        "{idea.content}"),
+                        "{idea.content?&quote}"),
         "color": nextcord.Color.red().value,
         "author": {
             "name": "{member.displayName}",
@@ -355,7 +355,7 @@ DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
 _FIELDS_REASON = [
     {
         "name": 'Reason:',
-        "value": "{idea.reason}",
+        "value": "{idea.reason?&quote}",
         "inline": False
     }
 ]
@@ -436,7 +436,7 @@ DEFAULT_IDEAS_MESSAGES_RU: IdeasMessagesPayload = {
     'created': {
         "title": "ОТКРЫТАЯ ИДЕЯ",
         "description": ("Предложение от {member.mention}\n\n"
-                        "{idea.content}"),
+                        "{idea.content?&quote}"),
         "color": nextcord.Color.orange().value,
         "author": {
             "name": "{member.displayName}",
@@ -449,7 +449,7 @@ DEFAULT_IDEAS_MESSAGES_RU: IdeasMessagesPayload = {
     'accept': {
         "title": "ОДОБРЕННАЯ ИДЕЯ",
         "description": ("Предложение от {member.mention}\n\n"
-                        "{idea.content}"),
+                        "{idea.content?&quote}"),
         "color": nextcord.Color.green().value,
         "author": {
             "name": "{member.displayName}",
@@ -466,7 +466,7 @@ DEFAULT_IDEAS_MESSAGES_RU: IdeasMessagesPayload = {
     'deny': {
         "title": "ОТВЕРГНУТАЯ ИДЕЯ",
         "description": ("Предложение от {member.mention}\n\n"
-                        "{idea.content}"),
+                        "{idea.content?&quote}"),
         "color": nextcord.Color.red().value,
         "author": {
             "name": "{member.displayName}",
@@ -485,7 +485,7 @@ DEFAULT_IDEAS_MESSAGES_RU: IdeasMessagesPayload = {
 _FIELDS_REASON_RU = [
     {
         "name": 'Причина:',
-        "value": "{idea.reason}",
+        "value": "{idea.reason?&quote}",
         "inline": False
     }
 ]

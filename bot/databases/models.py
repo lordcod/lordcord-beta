@@ -45,14 +45,12 @@ class GuildModel(Model):
     reactions = JSONField(default={})
     auto_translate = JSONField(default={})
     polls = JSONField(default={})
-    greeting_message = JSONField(default={})
     command_permissions = JSONField(default={})
     ideas = JSONField(default={})
     logs = JSONField(default={})
     role_reactions = JSONField(default={})
     delete_task = fields.BigIntField(default=0)
     tempvoice = JSONField(default={})
-    farewell_message = JSONField(default={})
     message_state = JSONField(default={})
     voice_time_state = JSONField(default={})
     score_state = JSONField(default={})
@@ -62,6 +60,9 @@ class GuildModel(Model):
 
     # NOTIFICATION
 
+    greeting_message = JSONField(default={})   
+    farewell_message = JSONField(default={})
+    
     twitch_notification = JSONField(default={})
     youtube_notification = JSONField(default={})
     vk_notification = JSONField(default={})
