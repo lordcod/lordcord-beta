@@ -17,7 +17,7 @@
     "console": {
       "class": "logging.StreamHandler",
       "formatter": "colored",
-      "level": "DEBUG"
+      "level": "TRACE"
     },
     "discord": {
       "class": "cordlog.DiscordHandler",
