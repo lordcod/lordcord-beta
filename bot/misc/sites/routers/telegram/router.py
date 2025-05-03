@@ -48,7 +48,8 @@ class TelegramRouter:
             lifespan=self.lifespan
         )
 
-        router.add_api_route('/', self._get, methods=['GET'])
+        if not self.bot.release:
+            router.add_api_route('/', self._get, methods=['GET'])
         router.add_api_route('/icon/{id}', self._get_icon, methods=['GET'])
         router.add_api_route('/', self._post, methods=['POST'])
 
@@ -56,7 +57,7 @@ class TelegramRouter:
 
     @asynccontextmanager
     async def lifespan(self, app):
-        _log.trace('Registered tg webhook as %s', self.callback_url)
+        _log.trace('Registered tg webhook as %s, %s', self.callback_url, token)
         await self.tg_bot.set_webhook(self.callback_url,
                                       allowed_updates=dp.resolve_used_update_types(),
                                       secret_token=token,
