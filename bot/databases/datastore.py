@@ -71,6 +71,18 @@ class DataStore:
             current_data[key] = value
 
         await self._set_data(current_data)
+    
+    async def multi_get(self, keys):
+        current_data = await self._get_data()
+        values = []
+        for key in keys:
+            try:
+                values.append(current_data[key])
+            except KeyError as exc:
+                _log.exception("Error in datastore",
+                               exc_info=exc)
+                continue
+        return values
 
     async def increment(self, key, delta=1):
         value = await self.get(key, 0)
