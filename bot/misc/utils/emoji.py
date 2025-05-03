@@ -1,5 +1,6 @@
 import re
 import numpy as np
+import emoji
 
 from typing import Callable
 
@@ -41,7 +42,6 @@ colors = {
 
 
 def is_default_emoji(text: str) -> bool:
-    import emoji
     return text.strip() in emoji.EMOJI_DATA
 
 
@@ -50,6 +50,8 @@ def is_custom_emoji(text: str) -> bool:
 
 
 def is_emoji(text: str) -> bool:
+    if not text:
+        return True
     return is_default_emoji(text) or is_custom_emoji(text)
 
 

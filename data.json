@@ -1,0 +1,214 @@
+{"guild_id": 1147950669785993226, "key": "ideas", "value": {
+    "min_length": 10,
+    "names": {
+        "category": "ИДЕИ",
+        "suggest": "🧐・предложить-идею",
+        "offers": "💡・предложения ",
+        "approved": "👌・одобренные ",
+        "rejected": "🤨・отказанные"
+    },
+    "messages": {
+        "suggestion": {
+            "title": "Идеи",
+            "description": "У вас есть хорошая идея?\nИ вы уверены, что она всем понравится!\nПрежде чем писать, убедитесь, что таких идей еще не было!",
+            "color": "{guild.color}"
+        },
+        "created": {
+            "title": "ОТКРЫТАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content?&quote}",
+            "color": 15105570,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            }
+        },
+        "accept": {
+            "title": "ОДОБРЕННАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content}",
+            "color": 3066993,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Одобренно | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            }
+        },
+        "deny": {
+            "title": "ОТВЕРГНУТАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content}",
+            "color": 15158332,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Отказано |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            }
+        },
+        "accept_with_reason": {
+            "title": "ОДОБРЕННАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content}",
+            "color": 3066993,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Одобренно | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            },
+            "fields": [{
+                "name": "Причина:",
+                "value": "{idea.reason?&quote}",
+                "inline": false
+            }]
+        },
+        "deny_with_reason": {
+            "title": "ОТВЕРГНУТАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content}",
+            "color": 15158332,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Отказано |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            },
+            "fields": [{
+                "name": "Причина:",
+                "value": "{idea.reason?&quote}",
+                "inline": false
+            }]
+        },
+        "approved": {
+            "title": "ОДОБРЕННАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content}",
+            "color": 3066993,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image?&quote}"
+            },
+            "footer": {
+                "text": "Одобренно | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            }
+        },
+        "approved_with_reason": {
+            "title": "APPROVED IDEA",
+            "description": "An suggest from {member.mention}\n\n{idea.content}",
+            "color": 3066993,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Approved | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            },
+            "fields": [{
+                "name": "Reason:",
+                "value": "{idea.reason?&quote}",
+                "inline": false
+            }]
+        },
+        "reject": {
+            "title": "ОТВЕРГНУТАЯ ИДЕЯ",
+            "description": "Предложение от {member.mention}\n\n{idea.content}",
+            "color": 15158332,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Отказано |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            }
+        },
+        "reject_with_reason": {
+            "title": "A REJECTED IDEA",
+            "description": "An suggest from {member.mention}\n\n{idea.content}",
+            "color": 15158332,
+            "author": {
+                "name": "{member.displayName}",
+                "icon_url": "{member.avatar}"
+            },
+            "image": {
+                "url": "{idea.image}"
+            },
+            "footer": {
+                "text": "Refused |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+                "icon_url": "{idea.mod.avatar}"
+            },
+            "fields": [{
+                "name": "Reason:",
+                "value": "{idea.reason?&quote}",
+                "inline": false
+            }]
+        }
+    },
+    "thread_name": "Обсуждение идеи от {member.username}",
+    "revoting": true,
+    "reactions": {
+        "success": "<a:tickmark:1165684814557495326>",
+        "crossed": "<a:crossed:1248999695867707402>"
+    },
+    "components": {
+        "suggest": {
+            "label": "Предложить идею",
+            "style": 3
+        },
+        "approve": {
+            "label": "Одобрить",
+            "style": 3
+        },
+        "deny": {
+            "label": "Отказать",
+            "style": 4
+        },
+        "like": {
+            "emoji": "👍",
+            "label": "{idea.promotedCount | 0}",
+            "style": 2
+        },
+        "dislike": {
+            "emoji": "👎",
+            "label": "{idea.demotedCount | 0}",
+            "style": 2
+        }
+    },
+    "enabled": true,
+    "channel_offers_id": 1368237907227312158,
+    "channel_approved_id": 1368237908988923985,
+    "channel_suggest_id": 1368237903003648081,
+    "message_suggest_id": 1368237905105125487,
+    "cooldown": 1200,
+    "moderation_role_ids": [1368236349148102697, 1163742629289271316]
+}}

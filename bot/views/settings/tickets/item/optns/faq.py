@@ -87,7 +87,9 @@ class TicketFAQModal(nextcord.ui.Modal):
 
         if not is_emoji(self.emoji.value):
             await interaction.response.send_message(i18n.t(locale,
-                                                           'settings.set-reaction.error.located'))
+                                                           'settings.set-reaction.error.located'),
+                                                    ephemeral=True)
+            return
 
         if self.faq_item:
             faq_item_payload = self.faq_item.copy()

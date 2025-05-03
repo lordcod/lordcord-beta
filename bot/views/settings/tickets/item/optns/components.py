@@ -128,6 +128,7 @@ class ComponentsSelectOptionModal(nextcord.ui.Modal):
         if not is_emoji(self.emoji.value):
             await interaction.response.send_message(i18n.t(locale,
                                                            'settings.set-reaction.error.located'))
+            return
 
         for model in {'label', 'emoji'}:
             value = getattr(self, model).value

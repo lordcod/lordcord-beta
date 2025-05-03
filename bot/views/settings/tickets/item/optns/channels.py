@@ -4,6 +4,7 @@ import nextcord
 from bot.databases.varstructs import TicketsPayload
 from bot.misc.plugins.tickettools import ModuleTicket
 from bot.misc.utils import AsyncSterilization, replace_dict_key
+from bot.resources.info import DEFAULT_TICKET_TYPE
 from bot.views.settings.tickets.item.optns.base import ViewOptionItem
 
 from bot.databases import GuildDateBases
@@ -120,11 +121,12 @@ class TicketChannelsView(ViewOptionItem):
         locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[message_id]
-
+        ticket_type = ticket_data.get('type', DEFAULT_TICKET_TYPE)
+        
         super().__init__()
 
         self.add_item(await TicketChannelDropDown(guild))
-        if ticket_data == 1:
+        if ticket_type == 1:
             self.add_item(await TicketCategoryDropDown(guild))
             self.add_item(await TicketClosedCategoryDropDown(guild))
 

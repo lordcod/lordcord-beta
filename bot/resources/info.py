@@ -284,6 +284,7 @@ DEFAULT_TICKET_PERMISSIONS_OVER = {
 }
 DEFAULT_TICKET_PERMISSIONS = {k: (allow.value, deny.value)
                               for k, (allow, deny) in DEFAULT_TICKET_PERMISSIONS_OVER.items()}
+DEFAULT_TICKET_PERMISSIONS = {} # clone from category
 
 DEFAULT_TWITCH_MESSAGE = '🎥 У __{stream.username}__ начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
 DEFAULT_YOUTUBE_MESSAGE = '🎥 Новое видео на YouTube от {video.username}!\nСмотрите прямо сейчас: {video.url}'

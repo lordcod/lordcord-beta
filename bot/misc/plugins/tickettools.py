@@ -53,7 +53,7 @@ def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: i
             data[guild_id] = value
         if key == 'owner':
             data[owner_id] = value
-
+    return data
 
 class ModuleTicket:
     locale: Optional[str] = None
@@ -259,8 +259,9 @@ class ModuleTicket:
         if not permission_data:
             permission_data = DEFAULT_TICKET_PERMISSIONS.copy()
 
-        parse_permissions_string(
+        permission_data = parse_permissions_string(
             permission_data, mod_roles, guild_id, owner_id)
+        
         parsed_data = {}
         for id, (allow, deny) in permission_data.items():
             key = self.guild.get_member(id) or self.guild.get_role(id)

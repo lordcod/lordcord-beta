@@ -59,9 +59,7 @@ class GeneratorMessage:
 
     @lru_cache()
     def parse(self, with_empty: bool = False, with_webhook: bool = False):
-        print(self.data)
         data = self.decode_data()
-        print(data)
         if isinstance(data, str):
             data = {'content': data}
 
