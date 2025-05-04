@@ -36,6 +36,7 @@ class FAQDropDown(nextcord.ui.StringSelect):
         tickets: TicketsPayload = await gdb.get('tickets', {})
         items = tickets.get(interaction.message.id).get('faq').get('items')
         response = items[int(self.values[0])]
+        
         data = generate_message(lord_format(
             response['response'], get_payload(member=interaction.user)))
         await interaction.response.send_message(**data, ephemeral=True)

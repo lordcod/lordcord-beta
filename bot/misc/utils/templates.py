@@ -9,6 +9,9 @@ available_flags: Dict[str, Callable[[str], str]] = {
     'quote': lambda s: s.replace('"', '\\"').replace('\n', '\\n')
 }
 
+def _strip_quotes(text: str) -> str:
+    """Удаляет кавычки и пробелы"""
+    return text.strip().strip('"\'') if isinstance(text, str) else text
 
 def flatten_dict(data: dict, prefix: str = ''):
     new_data = {}
@@ -46,29 +49,26 @@ class ExpressionTemplate:
 
         if '==' in condition:
             var, val = map(str.strip, condition.split('==', 1))
-            return str(self.context.get(var)) == self._strip_quotes(val)
+            return str(self.context.get(var)) == _strip_quotes(val)
         elif '!=' in condition:
             var, val = map(str.strip, condition.split('!=', 1))
-            return str(self.context.get(var)) != self._strip_quotes(val)
+            return str(self.context.get(var)) != _strip_quotes(val)
         else:
             return bool(self.context.get(condition))
 
     def _parse_variable_with_default(self, result: str) -> Tuple[str, Optional[str]]:
         """Извлекает переменную и дефолтное значение из выражения"""
         if '||' in result:
-            value, default = map(self._strip_quotes, result.split('||', 1))
+            value, default = map(_strip_quotes, result.split('||', 1))
             return value, default
-        return self._strip_quotes(result), None
-
-    def _strip_quotes(self, text: str) -> str:
-        """Удаляет кавычки и пробелы"""
-        return text.strip().strip('"\'') if isinstance(text, str) else text
-
+        return _strip_quotes(result), None
 
 class LordTemplate:
-    REGEXP_FORMAT = re.compile(r'{([^{}]+)}')
+    REGEXP_FORMAT = re.compile(r'{([a-zA-Z\.\-=_]+(?:\s*\|\s*[^{}]*)?)(?:\s*(\?&[a-zA-Z0-9]+)+)?}')
+
 
     def findall(self, string: str) -> List[Tuple[str, str]]:
+        """Находит все переменные и их дефолтные значения"""
         return [(match.group(0), match.group(1)) for match in self.REGEXP_FORMAT.finditer(string)]
 
     def execute_flags(self, value: str, flags: List[str]):
@@ -92,9 +92,11 @@ class LordTemplate:
     def parse_key(self, var: str) -> Tuple[str, Optional[str]]:
         name, *default = [part.strip() for part in var.split('|', 1)]
         if len(default) == 0:
-            default.append(None)
+            default = None
+        else:
+            default = _strip_quotes(default[0])
         name, flags = self.parse_flag(name)
-        return name, *default, flags
+        return name, default, flags
 
     def get_value(self, key: str, data: Dict[str, Any]) -> Any:
         if key in data:
@@ -143,5 +145,9 @@ def lord_format(string: Any, forms: dict) -> str:
 
 
 if __name__ == "__main__":
+    import json
     exp = LordTemplate()
-    print(exp.render('Hey, { name.main?&upper }', {'name.main': 'danya'}))
+    with open('temp.json', 'rb') as file:
+        content = file.read().decode()
+    res = exp.render(content, {'name.main': 'danya'})
+    print(res)
