@@ -99,16 +99,19 @@ class GeneratorMessage:
 
     def parse_embed(self, data: dict):
         new_data = GeneratorMessageDictPop(data)
-
+        
         with contextlib.suppress(KeyError):
             timestamp = data["timestamp"]
             if isinstance(timestamp, (int, float)):
                 try:
+                    # сначала пробуем как секунды
                     data["timestamp"] = datetime.fromtimestamp(
                         float(timestamp)).isoformat()
-                except OSError:
+                except (OSError, OverflowError, ValueError):
+                    # если не вышло - делим на 1000 (миллисекунды)
                     data["timestamp"] = datetime.fromtimestamp(
-                        float(timestamp)//1000).isoformat()
+                        float(timestamp) / 1000).isoformat()
+
 
         with contextlib.suppress(KeyError, ValueError):
             color = data.pop("color")
