@@ -28,4 +28,4 @@ jobs:
 
     - name: Run tests
       run: |
-        python -m unittest discover -s tests -p "*.py"  # Запуск всех тестов из папки tests
+        python -m unittest discover -s unittests -p "*.py"  # Запуск всех тестов из папки tests
