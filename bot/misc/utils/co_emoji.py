@@ -48,7 +48,6 @@ def is_default_emoji(text: str) -> bool:
 def is_custom_emoji(text: str) -> bool:
     return bool(re.fullmatch(r'<a?:.+?:\d{18,}>', text.strip()))
 
-
 def is_emoji(text: str) -> bool:
     if not text:
         return True

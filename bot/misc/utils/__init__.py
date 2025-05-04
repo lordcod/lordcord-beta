@@ -6,7 +6,7 @@ from .payloads import (
 from .templates import (
     ExpressionTemplate, LordTemplate, lord_format, flatten_dict
 )
-from .emoji import (
+from .co_emoji import (
     get_emoji, get_emoji_as_color, get_emoji_wrap, GuildEmoji,
     is_default_emoji, is_custom_emoji, is_emoji, find_color_emoji
 )
