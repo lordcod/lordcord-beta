@@ -9,10 +9,13 @@ from datetime import datetime
 from functools import lru_cache
 
 
-from bot.resources.ether import Emoji
 from .misc import MISSING
 
 _log = logging.getLogger(__name__)
+
+class GenerateMessageError(Exception):
+    pass
+
 
 class GeneratorMessageDictPop(dict):
     def __init__(self, data):
@@ -46,19 +49,21 @@ class GeneratorMessage:
             decode_data = self.data.copy()
         return decode_data if isinstance(decode_data, dict) else str(decode_data)
 
-    def get_error(self, error_status: Optional[int] = None):
+    def get_error(self, error_status: Optional[int] = None, with_exception: bool = True):
         if error_status == 5415:
-            content = f'{Emoji.cross} **Content** and **plain text** cannot be combined.'
+            content = '**Content** and **plain text** cannot be combined.'
         elif error_status == 5410:
-            content = f'{Emoji.cross} **Embed** and **embeds** cannot be combined.'
+            content = '**Embed** and **embeds** cannot be combined.'
         elif error_status == 404:
-            content = f'{Emoji.cross} The message is empty.'
+            content = 'The message is empty.'
         else:
-            content = f'{Emoji.cross} Unknown message error.'
-        return {"content": content}
+            content = 'Unknown message error.'
+        if with_exception:
+            raise GenerateMessageError(content)
+        return {'content': content}
 
     @lru_cache()
-    def parse(self, with_empty: bool = False, with_webhook: bool = False):
+    def parse(self, with_empty: bool = False, with_webhook: bool = False, with_exception: bool = True):
         data = self.decode_data()
         if isinstance(data, str):
             data = {'content': data}
@@ -73,9 +78,9 @@ class GeneratorMessage:
         avatar_url = data.pop('avatar_url', MISSING)
 
         if content is not MISSING and plain_text is not MISSING:
-            return self.get_error(5415)
+            return self.get_error(5415, with_exception)
         if embed is not MISSING and embeds is not MISSING:
-            return self.get_error(5410)
+            return self.get_error(5410, with_exception)
 
         ret = {}
         ret['content'] = content if content is not MISSING else plain_text if plain_text is not MISSING else None
@@ -89,7 +94,7 @@ class GeneratorMessage:
         if avatar_url is not MISSING and with_webhook:
             ret['avatar_url'] = avatar_url
         if with_empty and self.check_empty(ret):
-            return self.get_error(404)
+            return self.get_error(404, with_exception)
         return ret
 
     def parse_embed(self, data: dict):
@@ -142,3 +147,12 @@ async def clone_message(message: nextcord.Message) -> dict:
 def generate_message(content: str, *, with_empty: bool = False) -> dict:
     message = GeneratorMessage(content)
     return message.parse(with_empty)
+
+if __name__ == '__main__':
+    embed_data = {
+        "title": "Thumbnail Test",
+        "description": "With thumbnail",
+        "thumbnail": "https://example.com/thumb.png"
+    }
+    result = generate_message(orjson.dumps(embed_data).decode())
+    print(result)

@@ -1,12 +1,19 @@
-from typing import Optional
+from typing import List, Optional
 
 
-def param(attr: str, default: Optional[str] = None):
+
+def param(attr: str, flags: Optional[List[str] | str] = None, default: Optional[str] = None):
     attr = str(attr)
-    if default is None:
-        return '{'+attr+'}'
+    ret = '{'+attr
 
-    return '{'+attr+'|'+str(default)+'}'
+    if flags is not None:
+        flags = [flags] if isinstance(flags, str) else flags
+        for flag in flags:
+            ret += '?&'+flag
+    if default is not None:
+        ret += f' | {default}'
+
+    return ret+'}'
 
 
 def expression(attr: str, text: str, default: Optional[str] = None):
