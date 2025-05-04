@@ -64,12 +64,15 @@ class ExpressionTemplate:
         return _strip_quotes(result), None
 
 class LordTemplate:
-    REGEXP_FORMAT = re.compile(r'{([a-zA-Z\.\-=_]+(?:\s*\|\s*[^{}]*)?)(?:\s*(\?&[a-zA-Z0-9]+)+)?}')
-
-
+    REGEXP_FORMAT = re.compile(
+        r'{\s*([a-zA-Z0-9\.\-=_]+(?:\?&[a-zA-Z0-9]+)*)(?:\s*\|\s*([^{}]*))?\s*}'
+    )
+    
+    
     def findall(self, string: str) -> List[Tuple[str, str]]:
-        """Находит все переменные и их дефолтные значения"""
-        return [(match.group(0), match.group(1)) for match in self.REGEXP_FORMAT.finditer(string)]
+        return [(match.group(0), f"{match.group(1)}{' | ' + match.group(2) if match.group(2) else ''}") 
+                for match in self.REGEXP_FORMAT.finditer(string)]
+
 
     def execute_flags(self, value: str, flags: List[str]):
         for flag in flags:
@@ -145,9 +148,7 @@ def lord_format(string: Any, forms: dict) -> str:
 
 
 if __name__ == "__main__":
-    import json
     exp = LordTemplate()
-    with open('temp.json', 'rb') as file:
-        content = file.read().decode()
-    res = exp.render(content, {'name.main': 'danya'})
+    content = "Категория запроса: { ticket.category.name?&upper?&lower?&quote | okey } ℹ️"
+    res = exp.render(content, {'ticket.category.nam': 'test "" cat'})
     print(res)

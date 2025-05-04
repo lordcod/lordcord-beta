@@ -89,6 +89,7 @@ class FAQCreateDropDown(FAQDropDown.cls):
         self.custom_id = 'tickets:faq:dropdown:create'
         if guild_id is None:
             return
+    
         faq_option = buttons.get('faq_option')
         self.append_option(nextcord.SelectOption(
             label=faq_option['label'],
