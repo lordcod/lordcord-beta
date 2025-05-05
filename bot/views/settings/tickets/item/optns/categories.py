@@ -62,10 +62,9 @@ class TicketCategoriesModal(nextcord.ui.Modal):
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
-        categories = ticket_data.get('categories', [])
-        ticket_data['categories'] = categories
+        categories = ticket_data.setdefault('categories', [])
 
-        if self.selected_value:
+        if self.selected_value is not None:
             category = categories[self.selected_value]
         else:
             category = {}

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 import jwt
@@ -18,16 +18,16 @@ class Tokenizer:
         return jwt.encode(payload, SALT, algorithm="HS256")
 
     @staticmethod
-    def get_payload(token: str | Request):
+    def get_payload(token: str | Request) -> dict:
         if isinstance(token, Request):
             token = token.headers.get('Authorization')
         return jwt.decode(token, SALT, algorithms="HS256")
 
-
-def check_permission(payload, key):
+def check_permission(payload, guild_id, key):
     if (
         payload['scope'] not in ['admin', 'database', 'database.'+key]
         or ('guild_id' not in payload and payload['scope'] != 'admin')
+        or ((pgid := payload.get('guild_id')) and int(pgid) != guild_id)
     ):
         return JSONResponse({
             'error': 'Not authorization'
@@ -45,36 +45,36 @@ class DataBaseRouter:
         router = APIRouter(prefix=prefix)
 
         router.add_api_route(
-            '/',
+            '/{guild_id}/{key}/',
             self._put,
             methods=['PUT'],
             status_code=204
         )
         router.add_api_route(
-            '/',
+            '/{guild_id}/{key}/',
             self._get,
             methods=['GET']
         )
 
         return router
 
-    async def _get(self, request: Request, key: str, guild_id: Optional[int] = None):
+    async def _get(self, request: Request, guild_id: int, key: str):
         payload = Tokenizer.get_payload(request)
-        if response := check_permission(payload, key):
+        if response := check_permission(payload, guild_id, key):
             return response
 
-        gdb = GuildDateBases(int(payload.get('guild_id', guild_id)))
+        print(key)
+        gdb = GuildDateBases(guild_id)
         return await gdb.get(key)
 
-    async def _put(self, request: Request):
+    async def _put(self, request: Request, guild_id: int, key: str):
         data = await request.json()
         payload = Tokenizer.get_payload(request)
-        if response := check_permission(payload, data['key']):
+        if response := check_permission(payload, guild_id, key):
             return response
 
-        guild_id = int(payload.get('guild_id', data.get('guild_id')))
         if not guild_id:
             raise Exception('Guild id is none')
 
         gdb = GuildDateBases(guild_id)
-        await gdb.set(data['key'], data['value'])
+        await gdb.set(key, data)

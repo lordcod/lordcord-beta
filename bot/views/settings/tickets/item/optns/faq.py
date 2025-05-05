@@ -91,7 +91,7 @@ class TicketFAQModal(nextcord.ui.Modal):
                                                     ephemeral=True)
             return
 
-        if self.faq_item:
+        if self.faq_item is not None:
             faq_item_payload = self.faq_item.copy()
         else:
             faq_item_payload = {}
