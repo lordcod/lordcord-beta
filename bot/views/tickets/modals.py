@@ -47,4 +47,5 @@ class TicketsModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         items = {inp.label: inp.value for inp in self.children}
+        print(items)
         await self.ticket.create_after_modals(interaction, items)

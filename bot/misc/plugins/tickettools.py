@@ -372,6 +372,7 @@ class ModuleTicket:
         # TODO: change to modals and not categories_data
         elif not interaction.response._responded:
             await interaction.response.defer()
+        print(modals)
         self.input_answer = modals
         await self.create()
 

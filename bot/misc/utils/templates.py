@@ -149,6 +149,6 @@ def lord_format(string: Any, forms: dict) -> str:
 
 if __name__ == "__main__":
     exp = LordTemplate()
-    content = "Категория запроса: { ticket.category.name?&upper?&lower?&quote | okey } ℹ️"
-    res = exp.render(content, {'ticket.category.nam': 'test "" cat'})
+    content = "Категория запроса: { ticket.category.0 } ℹ️"
+    res = exp.render(content, {'ticket.category.0': 'test "" cat'})
     print(res)
